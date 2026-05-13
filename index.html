@@ -104,15 +104,16 @@ button {
 
 .bid-row {
   display:grid;
-  grid-template-columns: 120px 110px 170px;
-  justify-content:center;
-  column-gap:8px;
+  grid-template-columns: minmax(0, 32%) minmax(0, 28%) minmax(0, 40%);
+  column-gap:3px;
   border-bottom:1px solid #eee;
-  padding:3px 0;
-  font-size:12px;
-  line-height:1.1;
+  padding:4px 2px;
+  font-size:11px;
+  line-height:1.2;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
 }
-
 .bid-id {
   text-align:left;
 }
