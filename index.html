@@ -677,15 +677,9 @@ bidAmount: bidAmount,
   })
   .then(r => r.json())
   .then(d => {
-
-    if (d.success) {
-      alert("Bid accepted.");
-      loadAuction();
-    } else {
-      alert(d.message || "Bid could not be submitted.");
-    }
-
-})
+    alert(d.message);
+    if (d.success) loadAuction();
+  })
   .catch(err => {
     alert("Could not submit bid. Check your connection and try again.");
     console.log(err);
