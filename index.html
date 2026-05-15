@@ -545,152 +545,174 @@ function playSound() {
 }
 
 function sendBid() {
+  if (!auction) {
+    alert("Auction is still loading. Please wait a moment and try again.");
+    return;
+  }
+
   const firstName = document.getElementById("firstName").value.trim();
   const surnameInitial = document.getElementById("surnameInitial").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const transferMethod = document.getElementById("transferMethod").value.trim();
-const rawBid = document.getElementById("bidAmount").value;
-const cleanedBid = cleanBidValue(rawBid);
-const bidAmount = Number(cleanedBid);
+  const bidInput = document.getElementById("bidAmount");
+  const rawBid = bidInput.value.trim();
+  const cleanedBid = cleanBidValue(rawBid);
+  const bidAmount = Number(cleanedBid);
+  const agree = document.getElementById("agree").checked;
+  const submitButton = document.querySelector('button[onclick="sendBid()"]');
 
+  const highestBid = Number(document.getElementById("high").innerText.replace(/[^0-9]/g, "")) || 0;
+  const minimum = Number(document.getElementById("min").innerText.replace(/[^0-9]/g, "")) || Number(auction.minimumIncrease || 500);
+  const startBid = Number(document.getElementById("start").innerText.replace(/[^0-9]/g, "")) || Number(auction.startingBid || 0);
+  const minRequired = highestBid ? highestBid + minimum : startBid;
 
-const agree = document.getElementById("agree").checked;
+  function clearBidBox() {
+    bidInput.value = "";
+    bidInput.placeholder = "Enter YOUR BID amount e.g. " + minRequired.toLocaleString();
+  }
 
-  if (!firstName || !surnameInitial || !phone || !transferMethod || !bidAmount) {
+  if (!firstName || !surnameInitial || !phone || !transferMethod || !rawBid) {
     alert("Please complete all fields.");
     return;
   }
 
-if (!Number.isInteger(bidAmount) || bidAmount % Number(auction.minimumIncrease || 500) !== 0) {
-  alert("Bid must be in J$" + (auction.minimumIncrease || 500).toLocaleString() + " increments (e.g. 18,500; 19,000).");
-  return;
-}
+  if (!/^[A-Za-z]{2,20}$/.test(firstName)) {
+    alert("Enter a valid first name using letters only.");
+    return;
+  }
 
-// Name validation (letters only)
-if (!/^[A-Za-z]+$/.test(firstName)) {
-  alert("Enter a valid first name (letters only).");
-  return;
-}
-const badWords = [
-  "fuck",
-  "fcuk",
-  "rass",
-  "rassclot",
-  "rass clot",
-  "bomboclaat",
-  "bombaclaat",
-  "bombaclay",
-  "bumboclaat",
-  "bumbaclaat",
-  "bloodclaat",
-  "bloodclot",
-  "pussy",
-  "pussyclaat",
-  "Suck yuh mada",
-  "bitch",
-  "shit",
-  "asshole",
-  "Batty Bwoy",
-  "Batty Gyal",
-  "Fassyhole",
-  "Rasshole",
-  "Kakaclaat",
-  "Kaka",
-  "Wutliss",
-  "bwoy",
-  "bwoii",
-  "gyal",
-];
+  const badWords = [
+    "fuck", "fcuk", "rass", "rassclot", "rass clot", "bomboclaat",
+    "bombaclaat", "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat",
+    "bloodclot", "pussy", "pussyclaat", "Suck yuh mada", "bitch",
+    "shit", "asshole", "Batty Bwoy", "Batty Gyal", "Fassyhole",
+    "Rasshole", "Kakaclaat", "Kaka", "Wutliss", "bwoy", "bwoii", "gyal"
+  ];
 
-const cleanFirstName = firstName.toLowerCase().replace(/[^a-z]/g, "");
+  const cleanFirstName = firstName.toLowerCase().replace(/[^a-z]/g, "");
 
-if (badWords.some(word => cleanFirstName.includes(word.replace(/[^a-z]/g, "")))) {
-  alert("Please enter your real first name.");
-  return;
-}
-// Surname initial must be ONE letter
-if (!/^[A-Za-z]$/.test(surnameInitial)) {
-  alert("Enter a valid surname initial (one letter).");
-  return;
-}
+  if (badWords.some(word => cleanFirstName.includes(word.toLowerCase().replace(/[^a-z]/g, "")))) {
+    alert("Please enter your real first name.");
+    return;
+  }
 
-// Phone must be 10 digits (ignore spaces)
-const cleanPhone = phone.replace(/\s+/g, "");
-if (!/^\d{10}$/.test(cleanPhone)) {
-  alert("Enter a valid 10-digit phone number.");
-  return;
-}
+  if (!/^[A-Za-z]$/.test(surnameInitial)) {
+    alert("Enter a valid surname initial using one letter only.");
+    return;
+  }
 
-// Transfer method must not be nonsense
-if (transferMethod.length < 3) {
-  alert("Enter a valid bank or transfer method.");
-  return;
-}
+  const cleanPhone = phone.replace(/\D/g, "");
 
-// Bid must be a number
-if (isNaN(bidAmount) || Number(bidAmount) <= 0) {
-  alert("Enter a valid bid amount.");
-  return;
-}
+  if (!/^(876|658)\d{7}$/.test(cleanPhone)) {
+    alert("Enter a valid 10-digit Jamaica phone number starting with 876 or 658.");
+    return;
+  }
 
-// Must agree
-if (!agree) {
-  alert("You must agree to the auction rules.");
-  return;
-}
+  if (!agree) {
+    alert("You must agree to the auction rules.");
+    return;
+  }
 
-const bidValue = bidAmount;
+  if (!/^\d+$/.test(cleanedBid)) {
+    clearBidBox();
+    alert("Please enter the bid using numbers only. Example: " + minRequired.toLocaleString());
+    return;
+  }
 
-const rawInput = document.getElementById("bidAmount").value.trim();
+  if (!Number.isInteger(bidAmount) || bidAmount <= 0) {
+    clearBidBox();
+    alert("Enter a valid bid amount.");
+    return;
+  }
 
-if (!/^\d+$/.test(rawInput)) {
-  alert("Please enter the bid using numbers only. Do not use spaces, commas, letters, J$, or decimal points. Example: 26000");
-  return;
-}
+  if (bidAmount < minRequired) {
+    clearBidBox();
+    alert("Bid too low. Your bid must be at least J$" + minRequired.toLocaleString() + ".");
+    return;
+  }
 
-const highestBid = Number(document.getElementById("high").innerText.replace(/[^0-9]/g, "")) || 0;
-const minimum = Number(document.getElementById("min").innerText.replace(/[^0-9]/g, "")) || 0;
-const startBid = Number(document.getElementById("start").innerText.replace(/[^0-9]/g, ""));
+  if ((bidAmount - minRequired) % minimum !== 0) {
+    clearBidBox();
+    alert("Bid must increase in J$" + minimum.toLocaleString() + " steps from the minimum required bid.");
+    return;
+  }
 
-const minRequired = highestBid ? highestBid + minimum : startBid;
-const diff = bidValue - minRequired;
+  let confirmMessage =
+    "You are about to place a bid of J$" + bidAmount.toLocaleString() +
+    "\n\nMinimum required bid: J$" + minRequired.toLocaleString();
 
-if (!confirm(
-  "You are about to place a bid of J$" + bidValue.toLocaleString() +
-  "\n\nMinimum required bid: J$" + minRequired.toLocaleString() +
-  (diff > 0 ? "\nYou are bidding J$" + diff.toLocaleString() + " more than required." : "") +
-  "\n\nDo you want to proceed?"
-)) {
-  return;
-}
+  if (bidAmount > minRequired) {
+    confirmMessage +=
+      "\n\nYou are bidding J$" + (bidAmount - minRequired).toLocaleString() +
+      " more than required.";
+  }
 
-fetch(WEB_APP_URL, {
+  confirmMessage += "\n\nDo you want to proceed?";
+
+  if (!confirm(confirmMessage)) {
+    return;
+  }
+
+  if (auctionRefreshTimer) {
+    clearInterval(auctionRefreshTimer);
+    auctionRefreshTimer = null;
+  }
+
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.innerText = "Submitting Bid...";
+  }
+
+  fetch(WEB_APP_URL, {
     method: "POST",
     body: JSON.stringify({
       firstName: firstName,
-surnameInitial: surnameInitial,
-phone: phone,
-transferMethod: transferMethod,
-paymentTiming: "Within stated deadline",
-bidAmount: bidAmount,
+      surnameInitial: surnameInitial.toUpperCase(),
+      phone: cleanPhone,
+      transferMethod: transferMethod,
+      paymentTiming: "Within stated deadline",
+      bidAmount: bidAmount,
       acceptedRules: agree
     })
   })
   .then(r => r.json())
   .then(d => {
-    alert(d.message);
-    if (d.success) loadAuction();
+    clearBidBox();
+
+    if (d.success) {
+      alert(d.message || "Bid accepted.");
+      loadAuction();
+    } else {
+      alert(d.message || "Bid could not be submitted.");
+    }
   })
   .catch(err => {
+    console.log("Bid submission error:", err);
     alert("Could not submit bid. Check your connection and try again.");
-    console.log(err);
+  })
+  .finally(() => {
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.innerText = "Submit Bid";
+    }
+
+    if (!auctionRefreshTimer) {
+      startAuctionRefresh();
+    }
   });
 }
 
 loadAuction();
 setInterval(updateCountdown, 1000);
-setInterval(loadAuction, 15000);
+let auctionRefreshTimer = null;
+
+function startAuctionRefresh() {
+  auctionRefreshTimer = setInterval(loadAuction, 15000);
+}
+
+startAuctionRefresh();
 </script>
 
 </body>
 </html>
+
