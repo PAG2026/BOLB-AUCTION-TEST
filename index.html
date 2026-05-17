@@ -7,23 +7,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
+html, body {
+  max-width:100%;
+  overflow-x:hidden;
+}
+
 body {
   font-family: Arial, sans-serif; 
   background:#fff8ec;
   margin:0;
   padding:10px;
   color:#111;
+  width:100%;
+  box-sizing:border-box;
 }
-
 .card {
   max-width:520px;
+  width:100%;
   margin:auto;
   background:white;
   border-radius:18px;
   padding:12px;
   box-shadow:0 8px 25px rgba(0,0,0,0.1);
+  box-sizing:border-box;
+  overflow-x:hidden;
 }
-
 .header {
   text-align:center;
   background:#111;
@@ -78,12 +86,13 @@ body {
 
 input, textarea, select {
   width:100%;
-  padding:6px;
+  max-width:100%;
+  padding:10px;
   margin:2px 0 6px;
   border-radius:10px;
   border:1px solid #ccc;
   box-sizing:border-box;
-  font-size:15px;
+  font-size:16px;
 }
 
 textarea {
@@ -210,9 +219,11 @@ p {
   font-size: 16px;
 }
 
-input, button {
+input, textarea, select, button {
   padding: 10px;
-  font-size: 14px;
+  font-size: 16px;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 @media (max-width: 600px) {
@@ -339,11 +350,14 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </div>
  
 </div>
-<label style="display:flex; justify-content:space-between; align-items:center; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:14px; background:white;">
-  <span style="font-weight:bold;">I agree to the auction rules, payment deadline, and delivery terms.</span>
-  <input type="checkbox" id="agree" style="width:20px; height:20px; margin-left:10px;">
+<label style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
+  <span style="font-weight:bold; flex:1 1 220px; min-width:0;">
+    I agree to the auction rules, payment deadline, and delivery terms.
+  </span>
+
+  <input type="checkbox" id="agree" style="width:22px; height:22px; margin:0; flex-shrink:0;">
 </label>
-<select id="transferMethod" style="white-space:normal; height:auto; padding-top:10px; padding-bottom:10px; font-size:14px; font-weight:bold;">
+<select id="transferMethod" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding-top:10px; padding-bottom:10px; font-size:16px; font-weight:bold;">
 <option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
 Select the Bank for your Bank to Bank Transfer when you win
 </option>  <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
