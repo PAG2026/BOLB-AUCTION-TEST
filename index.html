@@ -277,6 +277,8 @@ input, textarea, select, button {
   line-height:1.4;
   white-space:pre-line;
   margin-bottom:14px;
+  max-height:60vh;
+  overflow-y:auto;
 }
 
 .bolb-modal-buttons {
@@ -295,7 +297,12 @@ input, textarea, select, button {
 
 <body>
 
-<div class="card">
+<div id="loadingScreen" style="max-width:520px; margin:40px auto; background:white; border-radius:18px; padding:18px; text-align:center; font-family:Arial, sans-serif; box-shadow:0 8px 25px rgba(0,0,0,0.1);">
+  <b>Loading Boss of Luxury Brands Auction...</b><br><br>
+  Please wait while the latest auction details are loaded.
+</div>
+
+<div class="card" id="auctionCard" style="display:none;">
 
   <div class="header">
     <img id="bannerImage" src="https://i.postimg.cc/65q01fW7/BOLB-Banner.png" alt="Boss of Luxury Brands Banner">
@@ -375,7 +382,7 @@ input, textarea, select, button {
   <input id="firstName" placeholder="First Name">
   <input id="surnameInitial" placeholder="Surname Initial">
   <input id="phone" placeholder="Phone number e.g. 8761234567">
-<div class="rules">
+<div class="rules" id="auctionRulesBox">
   <b style="display:block; margin-bottom:2px;">Auction Rules</b>
 Bidder identities are private and shown only as Bidder IDs.<br>
 <b>Delivery cost is separate and is NOT included in any bid.</b><br>
@@ -398,6 +405,11 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </div>
  
 </div>
+
+<button id="showRulesButton" type="button" style="display:none; background:#111; color:#FFD700; margin-top:6px; margin-bottom:6px;">
+  Show Auction Rules
+</button>
+
 <label style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
   <span style="font-weight:bold; flex:1 1 220px; min-width:0;">
     I agree to the auction rules, payment deadline, and delivery terms.
@@ -422,9 +434,17 @@ Select the Bank for your Bank to Bank Transfer when you win
 
  <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
 
-<h3 id="bidsTitle" style="font-size:16px; margin-bottom:6px; text-align:center; width:100%;">Live Bids</h3>
+<h3 id="bidsTitle" style="font-size:16px; margin-bottom:6px; text-align:center; width:100%;">Current Highest Five (5) Bids</h3>
 
 <div id="bids"></div>
+
+<div style="text-align:center; margin-top:6px;">
+  <button id="viewAllBidsButton"
+    type="button"
+    style="background:#222; color:#FFD700; font-size:13px; padding:6px 10px;">
+    View All Bids
+  </button>
+</div>
 
 <input id="bidAmount" type="text" inputmode="numeric" placeholder="Enter bid amount e.g. 23,500">
 
@@ -436,6 +456,8 @@ Select the Bank for your Bank to Bank Transfer when you win
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1sQs4Ec7H5KTYlUaDwlQ-lY6xp5HmsRAxpvyFmmbfCTucrACT5q4-m4qVjU3LuGIpaA/exec";
 
 let auction = null;
+let allAuctionBids = [];
+let initialLoadComplete = false;
 
 function money(v) {
   return "J$" + Number(v || 0).toLocaleString();
@@ -482,26 +504,35 @@ document.getElementById("deliveryDisplay").innerText =
 
      const img = document.getElementById("productImage");
 
-img.style.display = "block";
-img.style.opacity = "0.3";
+if (!initialLoadComplete) {
+  img.style.display = "block";
+  img.style.opacity = "0.3";
 
-img.onload = () => {
-  img.style.opacity = "1";
-};
+  img.onload = () => {
+    img.style.opacity = "1";
+  };
 
-img.src = auction.productPhotoLink || "";
+  img.src = auction.productPhotoLink || "";
+}
 
       if (auction.introSoundLink) {
         document.getElementById("introSound").src = auction.introSoundLink;
         document.getElementById("soundButton").style.display = "block";
       }
 
-      showBids(d.bids || []);
-      updateCountdown();
+      allAuctionBids = d.bids || [];
+showBids(allAuctionBids);
+updateCountdown();
+
+document.getElementById("loadingScreen").style.display = "none";
+document.getElementById("auctionCard").style.display = "block";
+initialLoadComplete = true;
     })
     .catch(err => {
   console.log(err);
   console.log("Auction refresh error:", err);
+document.getElementById("loadingScreen").innerHTML = "<b>Unable to load auction details.</b><br><br>Please check your connection and refresh the page.";
+document.getElementById("auctionCard").style.display = "none";
 });
 }
 
@@ -514,7 +545,7 @@ function showBids(bids) {
     return;
   }
 
-  bids.forEach(bid => {
+  bids.slice(0, 5).forEach(bid => {
     const row = document.createElement("div");
     row.className = "bid-row";
     const bidDate = new Date(bid.timestamp);
@@ -606,7 +637,65 @@ function playSound() {
   document.getElementById("introSound").play();
 }
 
-async function sendBid() {
+function numberToWords(num) {
+
+  const ones = [
+    "", "One", "Two", "Three", "Four", "Five",
+    "Six", "Seven", "Eight", "Nine", "Ten",
+    "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+    "Sixteen", "Seventeen", "Eighteen", "Nineteen"
+  ];
+
+  const tens = [
+    "", "", "Twenty", "Thirty", "Forty",
+    "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+  ];
+
+  function convertHundreds(n) {
+
+    let result = "";
+
+    if (n > 99) {
+      result += ones[Math.floor(n / 100)] + " Hundred ";
+      n %= 100;
+    }
+
+    if (n > 19) {
+      result += tens[Math.floor(n / 10)] + " ";
+      n %= 10;
+    }
+
+    if (n > 0) {
+      result += ones[n] + " ";
+    }
+
+    return result.trim();
+  }
+
+  if (num === 0) {
+    return "Zero";
+  }
+
+  let words = "";
+
+  if (num >= 1000000) {
+    words += convertHundreds(Math.floor(num / 1000000)) + " Million ";
+    num %= 1000000;
+  }
+
+  if (num >= 1000) {
+    words += convertHundreds(Math.floor(num / 1000)) + " Thousand ";
+    num %= 1000;
+  }
+
+  if (num > 0) {
+    words += convertHundreds(num);
+  }
+
+  return words.trim();
+
+}
+ async function sendBid() {
   if (!auction) {
     await showBolbAlert("Auction is still loading. Please wait a moment and try again.");
     return;
@@ -639,7 +728,7 @@ async function sendBid() {
   }
 
   if (!/^[A-Za-z]{2,20}$/.test(firstName)) {
-    await showBolbAlert("Enter a valid first name using letters only.");
+    await showBolbAlert("Enter a valid first name with no spaces using letters only.");
     return;
   }
 
@@ -706,23 +795,39 @@ async function sendBid() {
     return;
   }
 
-  let confirmMessage =
-    "You are about to place a bid of J$" + bidAmount.toLocaleString() +
-    "\n\nMinimum required bid: J$" + minRequired.toLocaleString();
-
   if (bidAmount > minRequired) {
-    confirmMessage +=
-      "\n\nYou are bidding J$" + (bidAmount - minRequired).toLocaleString() +
-      " more than required.";
+
+  if (bidAmount >= (minRequired * 3)) {
+    clearBidBox();
+
+    await showBolbAlert(
+      "J$" + bidAmount.toLocaleString() +
+      "\n\nTHIS APPEARS TO BE A MISTAKE, SO PLEASE ENTER THE REAL BID YOU WISH TO MAKE.",
+      "THIS IS A VERY LARGE BID AS YOU ENTERED",
+      "CANCEL AND CORRECT BID"
+    );
+
+    return;
   }
 
-  confirmMessage += "\n\nDo you want to proceed?";
+  const extraAmount = bidAmount - minRequired;
 
-  const confirmed = await showBolbConfirm(confirmMessage, "Confirm Your Bid");
+  let confirmMessage =
+    "You are about to place a bid of J$" + bidAmount.toLocaleString() +
+    "\n\nMinimum required bid: J$" + minRequired.toLocaleString() +
+    "\n\nYou are bidding J$" + extraAmount.toLocaleString() +
+    " more than required." +
+    "\n\nDo you want to proceed?";
+
+  const confirmed = await showBolbConfirm(
+    confirmMessage,
+    "Confirm Your Bid"
+  );
 
   if (!confirmed) {
     return;
   }
+}
 
   if (auctionRefreshTimer) {
     clearInterval(auctionRefreshTimer);
@@ -777,7 +882,8 @@ async function sendBid() {
 loadAuction();
 setInterval(updateCountdown, 1000);
 let auctionRefreshTimer = null;
-function showBolbAlert(message, title = "Boss of Luxury Brands") {
+
+function showBolbAlert(message, title = "Boss of Luxury Brands", buttonText = "OK") {
   return new Promise(resolve => {
 
     const backdrop = document.getElementById("bolbModalBackdrop");
@@ -789,7 +895,7 @@ function showBolbAlert(message, title = "Boss of Luxury Brands") {
     messageBox.innerText = message;
 
     buttonsBox.innerHTML = `
-      <button id="bolbModalOk">OK</button>
+      <button id="bolbModalOk">${buttonText}</button>
     `;
 
     backdrop.style.display = "flex";
@@ -832,6 +938,59 @@ function showBolbConfirm(message, title = "Confirm Bid") {
 
   });
 }
+
+const agreeCheckbox = document.getElementById("agree");
+const auctionRulesBox = document.getElementById("auctionRulesBox");
+const showRulesButton = document.getElementById("showRulesButton");
+
+agreeCheckbox.addEventListener("change", () => {
+  if (agreeCheckbox.checked) {
+    auctionRulesBox.style.display = "none";
+    showRulesButton.style.display = "block";
+  } else {
+    auctionRulesBox.style.display = "block";
+    showRulesButton.style.display = "none";
+  }
+});
+
+showRulesButton.addEventListener("click", () => {
+  auctionRulesBox.style.display = "block";
+  showRulesButton.style.display = "none";
+  agreeCheckbox.checked = false;
+});
+
+function showAllBidsPopup() {
+  if (!allAuctionBids.length) {
+    showBolbAlert("No bids have been placed yet.", "All Bids");
+    return;
+  }
+
+  const lines = allAuctionBids.map(bid => {
+    const bidDate = new Date(bid.timestamp);
+
+    const bidTime =
+      bidDate.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short'
+      }) +
+      " " +
+      bidDate.toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+    return bid.bidderId + "    " + money(bid.bidAmount) + "    " + bidTime;
+  });
+
+  showBolbAlert(
+    lines.join("\n"),
+    "All Bids",
+    "Close"
+  );
+}
+
+document.getElementById("viewAllBidsButton").addEventListener("click", showAllBidsPopup);
 
 function startAuctionRefresh() {
   auctionRefreshTimer = setInterval(loadAuction, 15000);
