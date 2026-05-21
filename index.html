@@ -240,56 +240,6 @@ input, textarea, select, button {
   font-weight: bold;
 }
 
-.bolb-modal-backdrop {
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.55);
-  z-index:9999;
-  align-items:center;
-  justify-content:center;
-  padding:16px;
-  box-sizing:border-box;
-}
-
-.bolb-modal {
-  width:100%;
-  max-width:420px;
-  background:#fff8ec;
-  color:#111;
-  border:2px solid #D4AF37;
-  border-radius:16px;
-  padding:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.35);
-  text-align:center;
-  box-sizing:border-box;
-}
-
-.bolb-modal-title {
-  font-weight:bold;
-  font-size:18px;
-  color:#111;
-  margin-bottom:10px;
-}
-
-.bolb-modal-message {
-  font-size:16px;
-  line-height:1.4;
-  white-space:pre-line;
-  margin-bottom:14px;
-  max-height:60vh;
-  overflow-y:auto;
-}
-
-.bolb-modal-buttons {
-  display:flex;
-  gap:10px;
-  justify-content:center;
-}
-
-.bolb-modal-buttons button {
-  margin-top:0;
-}
 /* 🔧 END OF NEW CODE */
 
 </style>
@@ -297,12 +247,7 @@ input, textarea, select, button {
 
 <body>
 
-<div id="loadingScreen" style="max-width:520px; margin:40px auto; background:white; border-radius:18px; padding:18px; text-align:center; font-family:Arial, sans-serif; box-shadow:0 8px 25px rgba(0,0,0,0.1);">
-  <b>Loading Boss of Luxury Brands Auction...</b><br><br>
-  Please wait while the latest auction details are loaded.
-</div>
-
-<div class="card" id="auctionCard" style="display:none;">
+<div class="card">
 
   <div class="header">
     <img id="bannerImage" src="https://i.postimg.cc/65q01fW7/BOLB-Banner.png" alt="Boss of Luxury Brands Banner">
@@ -382,7 +327,7 @@ input, textarea, select, button {
   <input id="firstName" placeholder="First Name">
   <input id="surnameInitial" placeholder="Surname Initial">
   <input id="phone" placeholder="Phone number e.g. 8761234567">
-<div class="rules" id="auctionRulesBox">
+<div class="rules">
   <b style="display:block; margin-bottom:2px;">Auction Rules</b>
 Bidder identities are private and shown only as Bidder IDs.<br>
 <b>Delivery cost is separate and is NOT included in any bid.</b><br>
@@ -405,11 +350,6 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </div>
  
 </div>
-
-<button id="showRulesButton" type="button" style="display:none; background:#111; color:#FFD700; margin-top:6px; margin-bottom:6px;">
-  Show Auction Rules
-</button>
-
 <label style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
   <span style="font-weight:bold; flex:1 1 220px; min-width:0;">
     I agree to the auction rules, payment deadline, and delivery terms.
@@ -434,17 +374,9 @@ Select the Bank for your Bank to Bank Transfer when you win
 
  <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
 
-<h3 id="bidsTitle" style="font-size:16px; margin-bottom:6px; text-align:center; width:100%;">Current Highest Five (5) Bids</h3>
+<h3 id="bidsTitle" style="font-size:16px; margin-bottom:6px; text-align:center; width:100%;">Live Bids</h3>
 
 <div id="bids"></div>
-
-<div style="text-align:center; margin-top:6px;">
-  <button id="viewAllBidsButton"
-    type="button"
-    style="background:#222; color:#FFD700; font-size:13px; padding:6px 10px;">
-    View All Bids
-  </button>
-</div>
 
 <input id="bidAmount" type="text" inputmode="numeric" placeholder="Enter bid amount e.g. 23,500">
 
@@ -456,8 +388,6 @@ Select the Bank for your Bank to Bank Transfer when you win
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1sQs4Ec7H5KTYlUaDwlQ-lY6xp5HmsRAxpvyFmmbfCTucrACT5q4-m4qVjU3LuGIpaA/exec";
 
 let auction = null;
-let allAuctionBids = [];
-let initialLoadComplete = false;
 
 function money(v) {
   return "J$" + Number(v || 0).toLocaleString();
@@ -504,35 +434,26 @@ document.getElementById("deliveryDisplay").innerText =
 
      const img = document.getElementById("productImage");
 
-if (!initialLoadComplete) {
-  img.style.display = "block";
-  img.style.opacity = "0.3";
+img.style.display = "block";
+img.style.opacity = "0.3";
 
-  img.onload = () => {
-    img.style.opacity = "1";
-  };
+img.onload = () => {
+  img.style.opacity = "1";
+};
 
-  img.src = auction.productPhotoLink || "";
-}
+img.src = auction.productPhotoLink || "";
 
       if (auction.introSoundLink) {
         document.getElementById("introSound").src = auction.introSoundLink;
         document.getElementById("soundButton").style.display = "block";
       }
 
-      allAuctionBids = d.bids || [];
-showBids(allAuctionBids);
-updateCountdown();
-
-document.getElementById("loadingScreen").style.display = "none";
-document.getElementById("auctionCard").style.display = "block";
-initialLoadComplete = true;
+      showBids(d.bids || []);
+      updateCountdown();
     })
     .catch(err => {
   console.log(err);
   console.log("Auction refresh error:", err);
-document.getElementById("loadingScreen").innerHTML = "<b>Unable to load auction details.</b><br><br>Please check your connection and refresh the page.";
-document.getElementById("auctionCard").style.display = "none";
 });
 }
 
@@ -545,7 +466,7 @@ function showBids(bids) {
     return;
   }
 
-  bids.slice(0, 5).forEach(bid => {
+  bids.forEach(bid => {
     const row = document.createElement("div");
     row.className = "bid-row";
     const bidDate = new Date(bid.timestamp);
@@ -637,67 +558,9 @@ function playSound() {
   document.getElementById("introSound").play();
 }
 
-function numberToWords(num) {
-
-  const ones = [
-    "", "One", "Two", "Three", "Four", "Five",
-    "Six", "Seven", "Eight", "Nine", "Ten",
-    "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
-    "Sixteen", "Seventeen", "Eighteen", "Nineteen"
-  ];
-
-  const tens = [
-    "", "", "Twenty", "Thirty", "Forty",
-    "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
-  ];
-
-  function convertHundreds(n) {
-
-    let result = "";
-
-    if (n > 99) {
-      result += ones[Math.floor(n / 100)] + " Hundred ";
-      n %= 100;
-    }
-
-    if (n > 19) {
-      result += tens[Math.floor(n / 10)] + " ";
-      n %= 10;
-    }
-
-    if (n > 0) {
-      result += ones[n] + " ";
-    }
-
-    return result.trim();
-  }
-
-  if (num === 0) {
-    return "Zero";
-  }
-
-  let words = "";
-
-  if (num >= 1000000) {
-    words += convertHundreds(Math.floor(num / 1000000)) + " Million ";
-    num %= 1000000;
-  }
-
-  if (num >= 1000) {
-    words += convertHundreds(Math.floor(num / 1000)) + " Thousand ";
-    num %= 1000;
-  }
-
-  if (num > 0) {
-    words += convertHundreds(num);
-  }
-
-  return words.trim();
-
-}
- async function sendBid() {
+function sendBid() {
   if (!auction) {
-    await showBolbAlert("Auction is still loading. Please wait a moment and try again.");
+    alert("Auction is still loading. Please wait a moment and try again.");
     return;
   }
 
@@ -723,12 +586,12 @@ function numberToWords(num) {
   }
 
   if (!firstName || !surnameInitial || !phone || !transferMethod || !rawBid) {
-    await showBolbAlert("Please complete all fields.");
+    alert("Please complete all fields.");
     return;
   }
 
   if (!/^[A-Za-z]{2,20}$/.test(firstName)) {
-    await showBolbAlert("Enter a valid first name with no spaces using letters only.");
+    alert("Enter a valid first name using letters only.");
     return;
   }
 
@@ -743,91 +606,66 @@ function numberToWords(num) {
   const cleanFirstName = firstName.toLowerCase().replace(/[^a-z]/g, "");
 
   if (badWords.some(word => cleanFirstName.includes(word.toLowerCase().replace(/[^a-z]/g, "")))) {
-    await showBolbAlert("Please enter your real first name.");
+    alert("Please enter your real first name.");
     return;
   }
 
   if (!/^[A-Za-z]$/.test(surnameInitial)) {
-    await showBolbAlert("Enter a valid surname initial using one letter only.");
+    alert("Enter a valid surname initial using one letter only.");
     return;
   }
 
   const cleanPhone = phone.replace(/\D/g, "");
 
   if (!/^(876|658)\d{7}$/.test(cleanPhone)) {
-    await showBolbAlert("Enter a valid 10-digit Jamaica phone number starting with 876 or 658.");
+    alert("Enter a valid 10-digit Jamaica phone number starting with 876 or 658.");
     return;
   }
 
   if (!agree) {
-    await showBolbAlert("You must agree to the auction rules.");
+    alert("You must agree to the auction rules.");
     return;
   }
 
   if (!/^\d+$/.test(cleanedBid)) {
     clearBidBox();
-    await showBolbAlert("Please enter the bid using numbers only.\n\nExample: " + minRequired.toLocaleString());
+    alert("Please enter the bid using numbers only. Example: " + minRequired.toLocaleString());
     return;
   }
 
   if (!Number.isInteger(bidAmount) || bidAmount <= 0) {
     clearBidBox();
-    await showBolbAlert("Enter a valid bid amount.");
+    alert("Enter a valid bid amount.");
     return;
   }
 
   if (bidAmount < minRequired) {
     clearBidBox();
-    await showBolbAlert("Bid too low.\n\nYour bid must be at least J$" + minRequired.toLocaleString() + ".");
+    alert("Bid too low. Your bid must be at least J$" + minRequired.toLocaleString() + ".");
     return;
   }
 
   if ((bidAmount - minRequired) % minimum !== 0) {
     clearBidBox();
-    await showBolbAlert(
-      "Your bid must go up in J$" + minimum.toLocaleString() + " amounts.\n\n" +
-      "Example:\n" +
-      "If the next required bid is J$" + minRequired.toLocaleString() + ", you may bid J$" +
-      minRequired.toLocaleString() + ", J$" +
-      (minRequired + minimum).toLocaleString() + ", J$" +
-      (minRequired + minimum + minimum).toLocaleString() + ", etc."
-    );
+    alert("Bid must increase in J$" + minimum.toLocaleString() + " steps from the minimum required bid.");
     return;
   }
-
-  if (bidAmount > minRequired) {
-
-  if (bidAmount >= (minRequired * 3)) {
-    clearBidBox();
-
-    await showBolbAlert(
-      "J$" + bidAmount.toLocaleString() +
-      "\n\nTHIS APPEARS TO BE A MISTAKE, SO PLEASE ENTER THE REAL BID YOU WISH TO MAKE.",
-      "THIS IS A VERY LARGE BID AS YOU ENTERED",
-      "CANCEL AND CORRECT BID"
-    );
-
-    return;
-  }
-
-  const extraAmount = bidAmount - minRequired;
 
   let confirmMessage =
     "You are about to place a bid of J$" + bidAmount.toLocaleString() +
-    "\n\nMinimum required bid: J$" + minRequired.toLocaleString() +
-    "\n\nYou are bidding J$" + extraAmount.toLocaleString() +
-    " more than required." +
-    "\n\nDo you want to proceed?";
+    "\n\nMinimum required bid: J$" + minRequired.toLocaleString();
 
-  const confirmed = await showBolbConfirm(
-    confirmMessage,
-    "Confirm Your Bid"
-  );
+  if (bidAmount > minRequired) {
+    confirmMessage +=
+      "\n\nYou are bidding J$" + (bidAmount - minRequired).toLocaleString() +
+      " more than required.";
+  }
 
-  if (!confirmed) {
+  confirmMessage += "\n\nDo you want to proceed?";
+
+  if (!confirm(confirmMessage)) {
     return;
   }
-}
 
   if (auctionRefreshTimer) {
     clearInterval(auctionRefreshTimer);
@@ -839,35 +677,34 @@ function numberToWords(num) {
     submitButton.innerText = "Submitting Bid...";
   }
 
-  try {
-    const r = await fetch(WEB_APP_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        firstName: firstName,
-        surnameInitial: surnameInitial.toUpperCase(),
-        phone: cleanPhone,
-        transferMethod: transferMethod,
-        paymentTiming: "Within stated deadline",
-        bidAmount: bidAmount,
-        acceptedRules: agree
-      })
-    });
-
-    const d = await r.json();
-
+  fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify({
+      firstName: firstName,
+      surnameInitial: surnameInitial.toUpperCase(),
+      phone: cleanPhone,
+      transferMethod: transferMethod,
+      paymentTiming: "Within stated deadline",
+      bidAmount: bidAmount,
+      acceptedRules: agree
+    })
+  })
+  .then(r => r.json())
+  .then(d => {
     clearBidBox();
 
     if (d.success) {
-      await showBolbAlert(d.message || "Bid accepted.");
+      alert(d.message || "Bid accepted.");
       loadAuction();
     } else {
-      await showBolbAlert(d.message || "Bid could not be submitted.");
+      alert(d.message || "Bid could not be submitted.");
     }
-
-  } catch (err) {
+  })
+  .catch(err => {
     console.log("Bid submission error:", err);
-    await showBolbAlert("Could not submit bid. Check your connection and try again.");
-  } finally {
+    alert("Could not submit bid. Check your connection and try again.");
+  })
+  .finally(() => {
     if (submitButton) {
       submitButton.disabled = false;
       submitButton.innerText = "Submit Bid";
@@ -876,121 +713,12 @@ function numberToWords(num) {
     if (!auctionRefreshTimer) {
       startAuctionRefresh();
     }
-  }
+  });
 }
 
 loadAuction();
 setInterval(updateCountdown, 1000);
 let auctionRefreshTimer = null;
-
-function showBolbAlert(message, title = "Boss of Luxury Brands", buttonText = "OK") {
-  return new Promise(resolve => {
-
-    const backdrop = document.getElementById("bolbModalBackdrop");
-    const titleBox = document.getElementById("bolbModalTitle");
-    const messageBox = document.getElementById("bolbModalMessage");
-    const buttonsBox = document.getElementById("bolbModalButtons");
-
-    titleBox.innerText = title;
-    messageBox.innerText = message;
-
-    buttonsBox.innerHTML = `
-      <button id="bolbModalOk">${buttonText}</button>
-    `;
-
-    backdrop.style.display = "flex";
-
-    document.getElementById("bolbModalOk").onclick = () => {
-      backdrop.style.display = "none";
-      resolve(true);
-    };
-
-  });
-}
-
-function showBolbConfirm(message, title = "Confirm Bid") {
-  return new Promise(resolve => {
-
-    const backdrop = document.getElementById("bolbModalBackdrop");
-    const titleBox = document.getElementById("bolbModalTitle");
-    const messageBox = document.getElementById("bolbModalMessage");
-    const buttonsBox = document.getElementById("bolbModalButtons");
-
-    titleBox.innerText = title;
-    messageBox.innerText = message;
-
-    buttonsBox.innerHTML = `
-      <button id="bolbModalCancel">Cancel</button>
-      <button id="bolbModalProceed">Proceed</button>
-    `;
-
-    backdrop.style.display = "flex";
-
-    document.getElementById("bolbModalCancel").onclick = () => {
-      backdrop.style.display = "none";
-      resolve(false);
-    };
-
-    document.getElementById("bolbModalProceed").onclick = () => {
-      backdrop.style.display = "none";
-      resolve(true);
-    };
-
-  });
-}
-
-const agreeCheckbox = document.getElementById("agree");
-const auctionRulesBox = document.getElementById("auctionRulesBox");
-const showRulesButton = document.getElementById("showRulesButton");
-
-agreeCheckbox.addEventListener("change", () => {
-  if (agreeCheckbox.checked) {
-    auctionRulesBox.style.display = "none";
-    showRulesButton.style.display = "block";
-  } else {
-    auctionRulesBox.style.display = "block";
-    showRulesButton.style.display = "none";
-  }
-});
-
-showRulesButton.addEventListener("click", () => {
-  auctionRulesBox.style.display = "block";
-  showRulesButton.style.display = "none";
-  agreeCheckbox.checked = false;
-});
-
-function showAllBidsPopup() {
-  if (!allAuctionBids.length) {
-    showBolbAlert("No bids have been placed yet.", "All Bids");
-    return;
-  }
-
-  const lines = allAuctionBids.map(bid => {
-    const bidDate = new Date(bid.timestamp);
-
-    const bidTime =
-      bidDate.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short'
-      }) +
-      " " +
-      bidDate.toLocaleTimeString([], {
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-
-    return bid.bidderId + "    " + money(bid.bidAmount) + "    " + bidTime;
-  });
-
-  showBolbAlert(
-    lines.join("\n"),
-    "All Bids",
-    "Close"
-  );
-}
-
-document.getElementById("viewAllBidsButton").addEventListener("click", showAllBidsPopup);
 
 function startAuctionRefresh() {
   auctionRefreshTimer = setInterval(loadAuction, 15000);
@@ -999,21 +727,6 @@ function startAuctionRefresh() {
 startAuctionRefresh();
 </script>
 
-<div id="bolbModalBackdrop" class="bolb-modal-backdrop">
-  <div class="bolb-modal">
-    
-    <div id="bolbModalTitle" class="bolb-modal-title">
-      Boss of Luxury Brands
-    </div>
-
-    <div id="bolbModalMessage" class="bolb-modal-message"></div>
-
-    <div id="bolbModalButtons" class="bolb-modal-buttons">
-      <button id="bolbModalOk">OK</button>
-    </div>
-
-  </div>
-</div>
 </body>
 </html>
 
