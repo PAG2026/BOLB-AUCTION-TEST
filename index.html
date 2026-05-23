@@ -1,305 +1,1093 @@
-const AUCTION_SETUP_SHEET = "Auction_Setup";
-const BIDS_SHEET = "Bids";
-const BLOCKED_SHEET = "Blocked";
 
-function doGet() {
-  const auction = getCurrentAuction();
-  const bids = getValidBidsForAuction(auction.id);
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Boss of Luxury Brands Auction</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  return responseData({
-    auction: auction,
-    bids: bids,
-    highestBid: bids.length ? bids[0].bidAmount : auction.startingBid
-  });
+<style>
+html, body {
+  max-width:100%;
+  overflow-x:hidden;
 }
 
-function doPost(e) {
-  const auction = getCurrentAuction();
+body {
+  font-family: Arial, sans-serif; 
+  background:#fff8ec;
+  margin:0;
+  padding:10px;
+  color:#111;
+  width:100%;
+  box-sizing:border-box;
+}
+.card {
+  max-width:520px;
+  width:100%;
+  margin:auto;
+  background:white;
+  border-radius:18px;
+  padding:12px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.1);
+  box-sizing:border-box;
+  overflow-x:hidden;
+}
+.header {
+  text-align:center;
+  background:#111;
+  color:white;
+  padding:0;
+  border-radius:15px;
+  overflow:hidden;
+}
 
-  if (auction.status !== "OPEN") {
-    return response(false, "Auction is not open.");
-  }
+#bannerImage {
+    width: 100%;
+    height: auto;
+    max-height: 90px;
+    object-fit: contain;
+    margin-top: 14px;
+    margin-bottom: 4px;
+}
 
-  const now = new Date();
-  const closing = new Date(auction.closingTime);
+.header h2 {
+  margin: -14px 0 6px 0;
+  color: #FFD700;
+  text-align: center;
+  font-weight: bold;
+}
 
-  if (now > closing) {
-    return response(false, "Auction closed. No further bids accepted.");
-  }
+#productImage {
+    width: 100%;
+    max-width: 150px;
+    height: auto;
+    display: block;
+    margin: 6px auto 6px auto;
+}
 
-  let data;
-  try {
-    data = JSON.parse(e.postData.contents);
-  } catch (err) {
-      return response(false, "Invalid request format.");
-  }
+.price-box {
+  background:#fff8ec;
+  border:1px solid #e2c46f;
+  padding:10px;
+  border-radius:12px;
+  margin:8px 0;
+}
+.row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:6px 0;
+}
+.highest {
+  color:#c9a227;
+  font-size:18px;
+  font-weight:bold;
+}
 
-  const firstName = cleanText(data.firstName);
-  const surnameInitial = cleanText(data.surnameInitial).toUpperCase();
-  const phone = cleanPhone(data.phone);
-  const transferMethod = cleanText(data.transferMethod);
-  const paymentTiming = cleanText(data.paymentTiming);
-  const bidAmount = Number(data.bidAmount);
-  const acceptedRules = data.acceptedRules === true;
+input, textarea, select {
+  width:100%;
+  max-width:100%;
+  padding:10px;
+  margin:2px 0 6px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+  font-size:16px;
+}
 
-  if (!acceptedRules) {
-    return response(false, "You must accept the auction rules before bidding.");
-  }
+textarea {
+  min-height:52px;
+}
 
-  if (!isValidName(firstName)) {
-    return response(false, "Please enter a valid first name.");
-  }
+button {
+  width:100%;
+  background:#25D366;
+  color:white;
+  border:none;
+  padding:13px;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:bold;
+  margin-top:8px;
+}
 
-  if (!isValidInitial(surnameInitial)) {
-    return response(false, "Please enter one surname initial only.");
-  }
+.bid-row {
+  display:grid;
+  grid-template-columns: minmax(0, 32%) minmax(0, 28%) minmax(0, 40%);
+  column-gap:3px;
+  border-bottom:1px solid #eee;
+  padding:4px 2px;
+  font-size:11px;
+  line-height:1.2;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.bid-id {
+  text-align:left;
+}
 
-  if (!isValidJamaicaPhone(phone)) {
-    return response(false, "Please enter a valid Jamaica phone number starting with 876 or 658.");
-  }
+.bid-amount {
+  text-align:right;
+  font-weight:bold;
+}
 
-  if (isBlocked(phone)) {
-    return response(false, "This phone number is blocked from bidding.");
-  }
+.bid-time {
+  text-align:right;
+}
 
-  if (transferMethod.length < 2) {
-    return response(false, "Please enter the bank or transfer agency you will use.");
-  }
+.rules, .info-box {
+  background:#f5f5f5;
+  padding:8px;
+  border-radius:10px;
+  font-size:13px;
+  margin-top:4px;
+  line-height:1.35;}
 
-  if (paymentTiming.length < 5) {
-    return response(false, "Please state when you can complete payment if you win.");
-  }
+.countdown {
+  text-align:center;
+  color:#d62828;
+  font-weight:bold;
+  font-size:18px;
+  margin:6px 0;
+}
+.small {
+  font-size:13px;
+  color:#555;
+}
 
-  if (!bidAmount || bidAmount < auction.startingBid) {
-    return response(false, "Bid is below the starting bid.");
-  }
+.compact-title {
+  margin-bottom:4px;
+}
+
+.hidden-if-empty:empty {
+  display:none;
+}
+
+label {
+   font-size:13px;
+  display:block;
+  margin:6px 0;
+}
+
+/* 🔧 MOBILE OPTIMIZATION STARTS HERE */
+
+#bannerImage {
+  width: 100%;
+  height: auto;
+  max-height: 90px;
+  object-fit: contain;
+  margin-bottom: 4px
+}
+
+#productImage {
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+  display: block;
+  margin: 6px auto 6px auto;
+}
+
+h1 {
+  font-size: 22px;
+  margin: 2px 0 8px 0;
+  color: #D4AF37;
+  text-align: center;
+font-weight: bold;
+}
+
+h2 {
+  font-size: 20px;
+  margin: 6px 0;
+}
+
+h3 {
+  margin: 6px 0 6px 0;
+}
+
+p {
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+.info-box {
+  padding: 10px;
+  margin: 10px 0;
+}
+
+#countdown {
+  font-size: 16px;
+}
+
+input, textarea, select, button {
+  padding: 10px;
+  font-size: 16px;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  h1 { font-size: 20px; }
+  h2 { font-size: 18px; }
+  #productImage { max-width: 180px; }
+}
+
+.productDescription {
+  font-size: 15px;
+  text-align: center;
+  margin: 6px 0 12px 0;
+  line-height: 1.35;
+  font-weight: bold;
+}
+
+.bolb-modal-backdrop {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  box-sizing:border-box;
+}
+
+.bolb-modal {
+  width:100%;
+  max-width:420px;
+  background:white;
+  color:#111;
+  border:2px solid #D4AF37;
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  text-align:center;
+  box-sizing:border-box;
+}
+
+.bolb-modal-title {
+  font-weight:bold;
+  font-size:18px;
+  color:#111;
+  margin-bottom:10px;
+}
+
+.bolb-modal-message {
+  font-size:16px;
+  line-height:1.4;
+  white-space:pre-line;
+  margin-bottom:14px;
+  max-height:60vh;
+  overflow-y:auto;
+}
+
+.bolb-modal-buttons {
+  display:flex;
+  gap:10px;
+  justify-content:center;
+}
+
+.bolb-modal-buttons button {
+  margin-top:0;
+}
+/* 🔧 END OF NEW CODE */
+
+</style>
+</head>
+
+<body>
+
+<div id="loadingScreen" style="max-width:520px; margin:40px auto; background:white; border-radius:18px; padding:18px; text-align:center; font-family:Arial, sans-serif; box-shadow:0 8px 25px rgba(0,0,0,0.1);">
+  <b>Loading Boss of Luxury Brands Auction...</b><br><br>
+  Please wait while the latest auction details are loaded.
+</div>
+
+<div class="card" id="auctionCard" style="display:none;">
+
+  <div class="header">
+    <img id="bannerImage" src="https://i.postimg.cc/65q01fW7/BOLB-Banner.png" alt="Boss of Luxury Brands Banner">
+    <h2>Private Luxury Auction</h2>
+  </div>
+
+<img id="productImage" style="max-width:220px; margin:10px auto; display:block;">
+
+  <div id="introMessage" style="display:none;"></div>
+  <button id="soundButton" style="display:none;" onclick="playSound()">▶ Play Auction Intro</button>
+  <audio id="introSound"></audio>
+
+
+  <p id="itemDescription" class="productDescription"></p>
+
+  <div class="price-box" id="priceBox">
+    <div class="row"><span>Highest Bid</span><b class="highest" id="high">
+</b></div>
+    <div class="row"><span>Starting Bid</span><b id="start"></b></div>
+    <div class="row"><span>Minimum Increase</span><b id="min"></b></div>
+    <div class="row"><span>Closes</span><b id="close"></b></div>
+  </div>
+<div id="promo" style="display:none;"></div>
+<div id="deadlineHidden" style="display:none;"></div>
+<div id="deliveryHidden" style="display:none;"></div>
+<div class="countdown" id="countdown"></div>
+
+<div id="closedPanel" style="display:none; background:#111; color:white; border-radius:14px; padding:14px; margin:10px 0; text-align:center; border:2px solid #D4AF37;">
+  <div style="font-size:18px; font-weight:bold; color:#FFD700;">
+    🎆🎉✨ THIS BOSS OF LUXURY BRANDS AUCTION HAS CLOSED ✨🎉🎆
+  </div>
+
+  <br>
+
+  <div style="font-weight:bold;">🏆 THE WINNING BID IS</div>
+  <div id="winnerLine"></div>
+
+  <br>
+
+  <div style="font-weight:bold;">🥈 THE RUNNER-UP BID IS</div>
+  <div id="runnerUpLine"></div>
+
+  <br>
+
+  <div>The Winner is now being contacted.</div>
+
+  <br>
+
+  <div>If payment for the winning bid is not completed in the required time, as set out in the Auction Rules, the Runner-up Bidder may be contacted.</div>
+
+  <br>
+
+  <div>✨ Big up to everybody who joined the Luxury Auction.</div>
+
+  <br>
+
+  <div style="font-weight:bold; color:#FFD700;">Better luck in the next Boss of Luxury Brands Auction! </div>
+
+  <div id="winnerPrivateMessage" style="display:none; margin-top:14px; background:white; color:#111; border-radius:12px; padding:12px;">
+    <b>🎉 CONGRATULATIONS — YOU WON! 🎉</b><br><br>
+    The Boss of Luxury Brands will endeavour to contact you at the telephone number that you entered when you bid.<br><br>
+    If you do not receive that call within 20 minutes, please contact The Boss of Luxury Brands by WhatsApp.<br><br>
+    <a id="winnerWhatsAppButton" href="#" target="_blank" style="display:block; background:#25D366; color:white; text-decoration:none; padding:12px; border-radius:10px; font-weight:bold;">
+      💬 WhatsApp The Boss of Luxury Brands
+    </a>
+  </div>
+
+  <div id="runnerUpPrivateMessage" style="display:none; margin-top:14px; background:white; color:#111; border-radius:12px; padding:12px;">
+    <b>🥈 YOU ARE THE RUNNER-UP BIDDER</b><br><br>
+    Please stay available.<br><br>
+    If the Winner does not complete payment in accordance with the Auction Rules, you may be contacted.
+  </div>
+</div>
   
-const bids = getValidBidsForAuction(auction.id);
-  const minimumRequiredBid = bids.length
-  ? bids[0].bidAmount + auction.minimumIncrease
-  : auction.startingBid;
+<h3 id="bidFormTitle">Place Your Bid</h3>
 
-if (bidAmount < minimumRequiredBid) {
-  return response(
-    false,
-    "Bid too low. Your bid must be at least J$" +
-      minimumRequiredBid.toLocaleString() +
-      "."
-  );
+<input id="phone" placeholder="Phone number e.g. 8761234567">
+<input id="firstName" placeholder="First Name">
+<input id="surnameInitial" placeholder="Surname Initial">
+
+<div class="rules" id="auctionRulesBox">
+  <b style="display:block; margin-bottom:2px;">Auction Rules</b>
+Bidder identities are private and shown only as Bidder IDs.<br>
+<b>Delivery cost is separate and is NOT included in any bid.</b><br>
+All valid bids are time-stamped and displayed.<br>
+Highest valid bid at closing wins. Closing time will always be between 10:00 am and 2.00 pm.<br>
+When an auction closes, the Winner will be contacted at the telephone number provided with the winning bid and the delivery address, delivery cost and the total amount to be paid <i>(bid amount plus delivery cost)</i> will be agreed and the Bank Transfer information confirmed. The Winner will then have <span id="deadlineDisplay">30 minutes</span> to pay by <b>direct Bank-to-Same Bank Transfer ONLY</b><br>
+<b>(e.g. NCB your account to NCB Boss of Luxury Brands account, Scotia Bank your account to Scotia Bank Boss of Luxury Brands account, etc.)</b><br><br>
+
+<i>Payments cannot be made on delivery by credit card or by cash.</i><br><br>
+
+If the Winner cannot be personally contacted within 30 minutes of the auction close or does not make the Bank-to-Bank Transfer in the agreed amount within 30 minutes of being contacted, the item may be offered to the next highest bidder.<br><br>
+
+False bids, fake details or failure to pay may result in being blocked from future auctions.<br>
+
+<span id="deliveryDisplay" style="display:none;"></span>
+
+<div style="text-align:center; font-weight:bold;">
+  <span style="color:red;">NEED HELP?</span> Call/WhatsApp<br>
+  The Boss of Luxury Brands at 876-366-5650
+</div>
+ 
+</div>
+
+<button id="showRulesButton" type="button" style="display:none; background:#111; color:#FFD700; margin-top:6px; margin-bottom:6px;">
+  Show Auction Rules
+</button>
+
+<label style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
+  <span style="font-weight:bold; flex:1 1 220px; min-width:0;">
+    I agree to the auction rules, payment deadline, and delivery terms.
+  </span>
+
+  <input type="checkbox" id="agree" style="width:22px; height:22px; margin:0; flex-shrink:0;">
+</label>
+<select id="transferMethod" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding-top:10px; padding-bottom:10px; font-size:16px; font-weight:bold;">
+<option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
+Select the Bank for your Bank to Bank Transfer when you win
+</option>  <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
+  <option value="(FGB) First Global Bank">(FGB) First Global Bank</option>
+  <option value="(JN) Jamaica National">(JN) Jamaica National</option>
+  <option value="(JMMB) Jamaica Money Market Brokers">(JMMB) Jamaica Money Market Brokers</option>
+  <option value="(NCB) National Commercial Bank">(NCB) National Commercial Bank</option>
+  <option value="Sagicor Bank">Sagicor Bank</option>
+  <option value="(BNS) Scotiabank">(BNS) Scotiabank</option>
+  <option value="(VMBS) Victoria Mutual">(VMBS) Victoria Mutual</option>
+</select>
+
+  
+
+ <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
+
+<h3 id="bidsTitle" style="font-size:16px; margin-bottom:6px; text-align:center; width:100%;">Current Highest Five (5) Bids</h3>
+
+<div id="bids"></div>
+
+<div style="text-align:center; margin-top:6px;">
+  <button id="viewAllBidsButton"
+    type="button"
+    style="background:#222; color:#FFD700; font-size:13px; padding:6px 10px;">
+    View All Bids
+  </button>
+</div>
+
+<input id="bidAmount" type="text" inputmode="numeric" placeholder="Enter bid amount e.g. 23,500">
+
+<button onclick="sendBid()">Submit Bid</button>
+
+</div>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1sQs4Ec7H5KTYlUaDwlQ-lY6xp5HmsRAxpvyFmmbfCTucrACT5q4-m4qVjU3LuGIpaA/exec";
+
+let auction = null;
+let allAuctionBids = [];
+let initialLoadComplete = false;
+
+function money(v) {
+  return "J$" + Number(v || 0).toLocaleString();
 }
 
-const identityIssue = getPriorBidIdentityIssue(
-  auction.id,
-  phone,
-  firstName,
-  surnameInitial,
-  transferMethod
-);
-
-if (identityIssue && data.confirmIdentityChange !== true) {
-  return response(
-    false,
-    "This phone number has already been used for this auction with different bidder details.\n\nPlease check that your name, surname initial, and bank selection are correct before bidding again.",
-    {
-      requiresIdentityConfirmation: true,
-      identityIssue: identityIssue
-    }
-  );
+function cleanBidValue(value) {
+  return String(value || "").replace(/J\$/gi, "").replace(/,/g, "").replace(/\s+/g, "").trim();
 }
 
-  const bidderId = createBidderId(auction.id, phone);
+function formatJMD(value) {
+  return "J$" + Number(value || 0).toLocaleString();
+}
+function loadAuction() {
+  
+fetch(WEB_APP_URL)
+    .then(r => r.json())
+    .then(d => {
+      auction = d.auction || {};
 
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(BIDS_SHEET);
+document.getElementById("itemDescription").innerText = auction.itemDescription || auction.productName || "";
+      document.getElementById("start").innerText = money(auction.startingBid);
+      document.getElementById("min").innerText = money(auction.minimumIncrease);
+const hasExistingBids = Array.isArray(d.bids) && d.bids.length > 0;
+const nextBid = hasExistingBids
+  ? Number(d.highestBid || 0) + Number(auction.minimumIncrease || 0)
+  : Number(auction.startingBid || 0);
+const bidInput = document.getElementById("bidAmount");
+bidInput.min = nextBid;
+bidInput.step = Number(auction.minimumIncrease || 500);
+bidInput.placeholder = "Enter YOUR BID amount e.g. " + nextBid.toLocaleString();
+      const hasBids = Array.isArray(d.bids) && d.bids.length > 0;
 
-  const identityWarningFlag =
-  identityIssue && data.confirmIdentityChange === true
-    ? identityIssue.warningFlag
-    : "NORMAL";
-
-sheet.appendRow([
-  new Date(),
-  auction.id,
-  auction.productName,
-  firstName,
-  surnameInitial,
-  phone,
-  transferMethod,
-  paymentTiming,
-  bidAmount,
-  bidderId,
-  "VALID",
-  identityWarningFlag
-]);
-
-  return response(true, "Bid accepted.", {
-    bidderId: bidderId,
-    bidAmount: bidAmount
+document.getElementById("high").innerText =
+  hasBids ? money(d.highestBid) : "No bids yet";
+      const closeDate = new Date(auction.closingTime);
+document.getElementById("close").innerText =
+  closeDate.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  }) +
+  " " +
+  closeDate.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit'
   });
+      document.getElementById("promo").innerText = auction.whatsAppPromoMessage || "";
+    document.getElementById("deadlineDisplay").innerText =
+  auction.paymentDeadlineMinutes ? auction.paymentDeadlineMinutes + " minutes" : "—";
+
+document.getElementById("deliveryDisplay").innerText =
+  auction.deliveryTerms || "—";
+      document.getElementById("introMessage").innerText = auction.introMessage || "";
+
+     const img = document.getElementById("productImage");
+
+if (!initialLoadComplete) {
+  img.style.display = "block";
+  img.style.opacity = "0.3";
+
+  img.onload = () => {
+    img.style.opacity = "1";
+  };
+
+  img.src = auction.productPhotoLink || "";
 }
 
-function getCurrentAuction() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(AUCTION_SETUP_SHEET);
-  const row = sheet.getRange(2, 1, 1, 15).getValues()[0];
-
- return {
-  id: cleanText(row[0]),
-  productName: cleanText(row[1]),
-  shortDescription: cleanText(row[2]),
-  fullDescription: cleanText(row[1]),
-  productPhotoLink: cleanText(row[3]),
-  bannerImageLink: cleanText(row[4]),
-  introSoundLink: convertGoogleDriveLink(cleanText(row[5])),
-  introMessage: cleanText(row[6]),
-  startingBid: Number(row[7]),
-  minimumIncrease: Number(row[8]),
-  closingTime: row[9],
-  paymentDeadlineMinutes: Number(row[10]),
-  deliveryTerms: cleanText(row[11]),
-  status: cleanText(row[12]).toUpperCase()
-};
-}
-
-function getValidBidsForAuction(productId) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(BIDS_SHEET);
-  const rows = sheet.getDataRange().getValues();
-  rows.shift();
-
-  let bids = [];
-
-  rows.forEach(row => {
-    if (row[1] === productId && row[10] === "VALID") {
-      bids.push({
-        timestamp: row[0],
-        bidderId: row[9],
-        bidAmount: Number(row[8])
-      });
-    }
-  });
-
-  bids.sort((a, b) => b.bidAmount - a.bidAmount);
-
-  return bids;
-}
-
-function isBlocked(phone) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(BLOCKED_SHEET);
-  const rows = sheet.getDataRange().getValues();
-  rows.shift();
-
-  return rows.some(row => cleanPhone(row[0]) === phone);
-}
-
-function createBidderId(productId, phone) {
-  const raw = productId + "-" + phone;
-  const digest = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, raw);
-  const code = Math.abs(digest[0] * 256 + digest[1]).toString().slice(0, 3);
-  return "Bidder " + code;
-}
-
-function cleanText(value) {
-  return String(value || "").trim();
-}
-
-function cleanPhone(value) {
-  return String(value || "").replace(/\D/g, "");
-}
-
-function isValidName(name) {
-  return /^[A-Za-z]{2,20}$/.test(name);
-}
-
-function isValidInitial(initial) {
-  return /^[A-Z]$/.test(initial);
-}
-
-function isValidJamaicaPhone(phone) {
-  return /^(876|658)\d{7}$/.test(phone);
-}
-function convertGoogleDriveLink(link) {
-if (!link) return "";
-
-  const match = link.match(/\/d\/([^/]+)/);
-
-  if (match && match[1]) {
-    return "https://drive.google.com/thumbnail?id=" + match[1] + "&sz=w1000";
-  }
-
-  return link;
-}
-
-function getPriorBidIdentityIssue(productId, phone, firstName, surnameInitial, transferMethod) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(BIDS_SHEET);
-  const rows = sheet.getDataRange().getValues();
-  rows.shift();
-
-  const newFirstName = cleanText(firstName);
-  const newInitial = cleanText(surnameInitial).toUpperCase();
-  const newTransferMethod = cleanText(transferMethod);
-
-  for (let i = rows.length - 1; i >= 0; i--) {
-    const row = rows[i];
-
-    if (row[1] === productId && cleanPhone(row[5]) === phone && row[10] === "VALID") {
-      const previousFirstName = cleanText(row[3]);
-      const previousInitial = cleanText(row[4]).toUpperCase();
-      const previousTransferMethod = cleanText(row[6]);
-
-      const firstNameChanged =
-        previousFirstName.toLowerCase() !== newFirstName.toLowerCase();
-
-      const initialChanged =
-        previousInitial !== newInitial;
-
-      const bankChanged =
-        previousTransferMethod.toLowerCase() !== newTransferMethod.toLowerCase();
-
-      if (firstNameChanged || initialChanged || bankChanged) {
-        return {
-          firstNameChanged: firstNameChanged,
-          initialChanged: initialChanged,
-          bankChanged: bankChanged,
-
-          previousFirstName: previousFirstName,
-          previousInitial: previousInitial,
-          previousTransferMethod: previousTransferMethod,
-
-          newFirstName: newFirstName,
-          newInitial: newInitial,
-          newTransferMethod: newTransferMethod,
-
-          warningFlag: firstNameChanged && initialChanged && bankChanged
-            ? "FIRST NAME, INITIAL AND BANK CHANGED"
-            : [
-                firstNameChanged ? "FIRST NAME CHANGED" : "",
-                initialChanged ? "INITIAL CHANGED" : "",
-                bankChanged ? "BANK CHANGED" : ""
-              ].filter(Boolean).join(" + ")
-        };
+      if (auction.introSoundLink) {
+        document.getElementById("introSound").src = auction.introSoundLink;
+        document.getElementById("soundButton").style.display = "block";
       }
 
-      return null;
+      allAuctionBids = d.bids || [];
+showBids(allAuctionBids);
+updateCountdown();
+
+document.getElementById("loadingScreen").style.display = "none";
+document.getElementById("auctionCard").style.display = "block";
+initialLoadComplete = true;
+    })
+    .catch(err => {
+  console.log(err);
+  console.log("Auction refresh error:", err);
+document.getElementById("loadingScreen").innerHTML = "<b>Unable to load auction details.</b><br><br>Please check your connection and refresh the page.";
+document.getElementById("auctionCard").style.display = "none";
+});
+}
+
+function showBids(bids) {
+  const div = document.getElementById("bids");
+  div.innerHTML = "";
+
+  if (!bids.length) {
+    div.innerHTML = "<p class='small'>No bids yet.</p>";
+    return;
+  }
+
+  bids.slice(0, 5).forEach(bid => {
+    const row = document.createElement("div");
+    row.className = "bid-row";
+    const bidDate = new Date(bid.timestamp);
+
+const bidTime =
+  bidDate.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short'
+  }) +
+  " " +
+  bidDate.toLocaleTimeString([], {
+  hour: 'numeric',
+  minute: '2-digit',
+  second: '2-digit'
+})
+
+row.innerHTML =
+  "<span>" + bid.bidderId + "</span>" +
+  "<b>" + money(bid.bidAmount) + "</b>" +
+  "<span>" + bidTime + "</span>";
+    div.appendChild(row);
+  });
+}
+
+function updateCountdown() {
+  if (!auction || !auction.closingTime) return;
+
+  const close = new Date(auction.closingTime);
+  const now = new Date();
+  const diff = close - now;
+
+  if (diff <= 0 || auction.status !== "OPEN") {
+
+  document.getElementById("countdown").style.display = "none";
+
+  document.getElementById("closedPanel").style.display = "block";
+document.getElementById("priceBox").style.display = "none";
+  document.getElementById("bidsTitle").innerText = "Bidding History";
+  document.querySelector(".rules").style.display = "none";
+document.getElementById("showRulesButton").style.display = "none";
+  document.getElementById("bidFormTitle").style.display = "none";
+document.getElementById("firstName").style.display = "none";
+document.getElementById("surnameInitial").style.display = "none";
+document.getElementById("phone").style.display = "none";
+document.getElementById("agree").parentElement.style.display = "none";
+document.getElementById("transferMethod").style.display = "none";
+document.getElementById("bidAmount").style.display = "none";
+document.querySelector('button[onclick="sendBid()"]').style.display = "none";
+document.getElementById("liveCountdownBottom").style.display = "none";  const bids = Array.from(document.querySelectorAll(".bid-row"));
+
+  if (bids.length > 0) {
+
+    const winnerBidder = bids[0].children[0].innerText;
+    const winnerAmount = bids[0].children[1].innerText;
+
+    document.getElementById("winnerLine").innerHTML =
+      "<b>" + winnerBidder + "</b><br>" + winnerAmount;
+
+    if (bids.length > 1) {
+
+      const runnerBidder = bids[1].children[0].innerText;
+      const runnerAmount = bids[1].children[1].innerText;
+
+      document.getElementById("runnerUpLine").innerHTML =
+        "<b>" + runnerBidder + "</b><br>" + runnerAmount;
     }
   }
 
-  return null;
+  return;
 }
 
-function response(success, message, extra) {
-  const output = Object.assign(
-    {
-      success: success,
-      message: message
-    },
-    extra || {}
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  let text = "";
+
+  if (days > 0) {
+    text = `Time left: ${days}d ${hours}h ${minutes}m`;
+  } else {
+    text = `Time left: ${hours}h ${minutes}m ${seconds}s`;
+  }
+
+  document.getElementById("countdown").innerText = text;
+  document.getElementById("liveCountdownBottom").innerText =
+  text.replace("Time left:", "Time left to bid:");
+}
+function playSound() {
+  document.getElementById("introSound").play();
+}
+
+function numberToWords(num) {
+
+  const ones = [
+    "", "One", "Two", "Three", "Four", "Five",
+    "Six", "Seven", "Eight", "Nine", "Ten",
+    "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+    "Sixteen", "Seventeen", "Eighteen", "Nineteen"
+  ];
+
+  const tens = [
+    "", "", "Twenty", "Thirty", "Forty",
+    "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+  ];
+
+  function convertHundreds(n) {
+
+    let result = "";
+
+    if (n > 99) {
+      result += ones[Math.floor(n / 100)] + " Hundred ";
+      n %= 100;
+    }
+
+    if (n > 19) {
+      result += tens[Math.floor(n / 10)] + " ";
+      n %= 10;
+    }
+
+    if (n > 0) {
+      result += ones[n] + " ";
+    }
+
+    return result.trim();
+  }
+
+  if (num === 0) {
+    return "Zero";
+  }
+
+  let words = "";
+
+  if (num >= 1000000) {
+    words += convertHundreds(Math.floor(num / 1000000)) + " Million ";
+    num %= 1000000;
+  }
+
+  if (num >= 1000) {
+    words += convertHundreds(Math.floor(num / 1000)) + " Thousand ";
+    num %= 1000;
+  }
+
+  if (num > 0) {
+    words += convertHundreds(num);
+  }
+
+  return words.trim();
+
+}
+ async function sendBid() {
+  if (!auction) {
+    await showBolbAlert("Auction is still loading. Please wait a moment and try again.");
+    return;
+  }
+
+  const firstName = document.getElementById("firstName").value.trim();
+  const surnameInitial = document.getElementById("surnameInitial").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const transferMethod = document.getElementById("transferMethod").value.trim();
+  const bidInput = document.getElementById("bidAmount");
+  const rawBid = bidInput.value.trim();
+  const cleanedBid = cleanBidValue(rawBid);
+  const bidAmount = Number(cleanedBid);
+  const agree = document.getElementById("agree").checked;
+  const submitButton = document.querySelector('button[onclick="sendBid()"]');
+
+  const highestBid = Number(document.getElementById("high").innerText.replace(/[^0-9]/g, "")) || 0;
+  const minimum = Number(document.getElementById("min").innerText.replace(/[^0-9]/g, "")) || Number(auction.minimumIncrease || 500);
+  const startBid = Number(document.getElementById("start").innerText.replace(/[^0-9]/g, "")) || Number(auction.startingBid || 0);
+  const minRequired = highestBid ? highestBid + minimum : startBid;
+
+  function clearBidBox() {
+    bidInput.value = "";
+    bidInput.placeholder = "Enter YOUR BID amount e.g. " + minRequired.toLocaleString();
+  }
+
+  if (!firstName || !surnameInitial || !phone || !transferMethod || !rawBid) {
+    await showBolbAlert("Please complete all fields.");
+    return;
+  }
+
+  if (!/^[A-Za-z]{2,20}$/.test(firstName)) {
+    await showBolbAlert("Enter a valid first name with no spaces using letters only.");
+    return;
+  }
+
+  const badWords = [
+    "fuck", "fcuk", "rass", "rassclot", "rass clot", "bomboclaat",
+    "bombaclaat", "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat",
+    "bloodclot", "pussy", "pussyclaat", "Suck yuh mada", "bitch",
+    "shit", "asshole", "Batty Bwoy", "Batty Gyal", "Fassyhole",
+    "Rasshole", "Kakaclaat", "Kaka", "Wutliss", "bwoy", "bwoii", "gyal"
+  ];
+
+  const cleanFirstName = firstName.toLowerCase().replace(/[^a-z]/g, "");
+
+  if (badWords.some(word => cleanFirstName.includes(word.toLowerCase().replace(/[^a-z]/g, "")))) {
+    await showBolbAlert("Please enter your real first name.");
+    return;
+  }
+
+  if (!/^[A-Za-z]$/.test(surnameInitial)) {
+    await showBolbAlert("Enter a valid surname initial using one letter only.");
+    return;
+  }
+
+  const cleanPhone = phone.replace(/\D/g, "");
+
+  if (!/^(876|658)\d{7}$/.test(cleanPhone)) {
+    await showBolbAlert("Enter a valid 10-digit Jamaica phone number starting with 876 or 658.");
+    return;
+  }
+
+  if (!agree) {
+    await showBolbAlert("You must agree to the auction rules.");
+    return;
+  }
+
+  if (!/^\d+$/.test(cleanedBid)) {
+    clearBidBox();
+    await showBolbAlert("Please enter the bid using numbers only.\n\nExample: " + minRequired.toLocaleString());
+    return;
+  }
+
+  if (!Number.isInteger(bidAmount) || bidAmount <= 0) {
+    clearBidBox();
+    await showBolbAlert("Enter a valid bid amount.");
+    return;
+  }
+
+  if (bidAmount < minRequired) {
+    clearBidBox();
+    await showBolbAlert("Bid too low.\n\nYour bid must be at least J$" + minRequired.toLocaleString() + ".");
+    return;
+  }
+
+  if ((bidAmount - minRequired) % minimum !== 0) {
+    clearBidBox();
+    await showBolbAlert(
+      "Your bid must go up in J$" + minimum.toLocaleString() + " amounts.\n\n" +
+      "Example:\n" +
+      "If the next required bid is J$" + minRequired.toLocaleString() + ", you may bid J$" +
+      minRequired.toLocaleString() + ", J$" +
+      (minRequired + minimum).toLocaleString() + ", J$" +
+      (minRequired + minimum + minimum).toLocaleString() + ", etc."
+    );
+    return;
+  }
+
+  if (bidAmount > minRequired) {
+
+  if (bidAmount >= (minRequired * 3)) {
+    clearBidBox();
+
+    await showBolbAlert(
+      "J$" + bidAmount.toLocaleString() +
+      "\n\nTHIS APPEARS TO BE A MISTAKE, SO PLEASE ENTER THE REAL BID YOU WISH TO MAKE.",
+      "YOU ENTERED A VERY LARGE BID",
+      "CANCEL AND CORRECT BID"
+    );
+
+    return;
+  }
+
+  const extraAmount = bidAmount - minRequired;
+
+  let confirmMessage =
+    "You are about to place a bid of J$" + bidAmount.toLocaleString() +
+    "\n\nMinimum required bid: J$" + minRequired.toLocaleString() +
+    "\n\nYou are bidding J$" + extraAmount.toLocaleString() +
+    " more than required." +
+    "\n\nDo you want to proceed?";
+
+  const confirmed = await showBolbConfirm(
+    confirmMessage,
+    "Confirm Your Bid"
   );
 
-  return ContentService
-    .createTextOutput(JSON.stringify(output))
-    .setMimeType(ContentService.MimeType.JSON);
+  if (!confirmed) {
+    return;
+  }
 }
 
-function responseData(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
+  if (auctionRefreshTimer) {
+    clearInterval(auctionRefreshTimer);
+    auctionRefreshTimer = null;
+  }
+
+  if (submitButton) {
+  submitButton.disabled = true;
+  submitButton.innerText = "Checking Bid...";
 }
+
+  try {
+  const bidPayload = {
+    firstName: firstName,
+    surnameInitial: surnameInitial.toUpperCase(),
+    phone: cleanPhone,
+    transferMethod: transferMethod,
+    paymentTiming: "Within stated deadline",
+    bidAmount: bidAmount,
+    acceptedRules: agree
+  };
+
+  let r = await fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify(bidPayload)
+  });
+
+  let d = await r.json();
+
+  if (!d.success && d.requiresIdentityConfirmation) {
+
+  const issue = d.identityIssue || {};
+
+  let changedFields = [];
+
+  if (issue.firstNameChanged) changedFields.push("First name");
+  if (issue.initialChanged) changedFields.push("Surname initial");
+  if (issue.bankChanged) changedFields.push("Bank selected for Bank-to-Bank Transfer");
+
+  let changedDetails =
+    "One or more of the details you entered are different from the details previously accepted for this telephone number.\n\n" +
+    "Different details detected:\n" +
+    changedFields.map(field => "- " + field).join("\n");
+
+  let newDetails =
+    "\n\nYou have now entered:\n\n" +
+    "First name: " + (issue.newFirstName || "-") + "\n" +
+    "Surname initial: " + (issue.newInitial || "-") + "\n" +
+    "Bank: " + (issue.newTransferMethod || "-");
+
+  let warningText =
+    "\n\nIf you proceed, this bid will be registered as having been made by the same Bidder ID already assigned to this telephone number." +
+
+    "\n\nThe Boss of Luxury Brands may contact this telephone number immediately or shortly after bidding to verify the changed details before accepting payment, confirming delivery, or finalizing the auction result." +
+
+    "\n\nThe Boss of Luxury Brands will also be alerted immediately that different bidder details were entered for this telephone number.";
+
+  if (submitButton) {
+    submitButton.innerText = "Confirm Details...";
+  }
+
+  const confirmedIdentity = await showBolbConfirm(
+    "This telephone number has already been used for this auction.\n\n" +
+    changedDetails +
+    newDetails +
+    warningText,
+    "Confirm Changed Bidder Details"
+  );
+
+  if (!confirmedIdentity) {
+    return;
+  }
+
+ bidPayload.confirmIdentityChange = true;
+
+  if (submitButton) {
+    submitButton.innerText = "Submitting Bid...";
+  } 
+
+  r = await fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify(bidPayload)
+  });
+
+  d = await r.json();
+}
+
+    
+  clearBidBox();
+
+  if (d.success) {
+    await showBolbAlert(d.message || "Bid accepted.");
+    loadAuction();
+  } else {
+    await showBolbAlert(d.message || "Bid could not be submitted.");
+  }
+
+  } catch (err) {
+    console.log("Bid submission error:", err);
+    await showBolbAlert("Your bid could not be completed at this moment.\n\nPlease wait a few seconds and try again.\n\nDo not repeatedly tap the Submit Bid button.");
+  } finally {
+    if (submitButton) {
+  submitButton.disabled = false;
+  submitButton.innerText = "Submit Bid";
+}
+
+
+    if (!auctionRefreshTimer) {
+      startAuctionRefresh();
+    }
+  }
+}
+
+loadAuction();
+setInterval(updateCountdown, 1000);
+let auctionRefreshTimer = null;
+
+function showBolbAlert(message, title = "Boss of Luxury Brands", buttonText = "OK") {
+  return new Promise(resolve => {
+
+    const backdrop = document.getElementById("bolbModalBackdrop");
+    const titleBox = document.getElementById("bolbModalTitle");
+    const messageBox = document.getElementById("bolbModalMessage");
+    const buttonsBox = document.getElementById("bolbModalButtons");
+
+    titleBox.innerText = title;
+    messageBox.innerText = message;
+
+    buttonsBox.innerHTML = `
+      <button id="bolbModalOk">${buttonText}</button>
+    `;
+
+    backdrop.style.display = "flex";
+
+    document.getElementById("bolbModalOk").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(true);
+    };
+
+  });
+}
+
+function showBolbConfirm(message, title = "Confirm Bid") {
+  return new Promise(resolve => {
+
+    const backdrop = document.getElementById("bolbModalBackdrop");
+    const titleBox = document.getElementById("bolbModalTitle");
+    const messageBox = document.getElementById("bolbModalMessage");
+    const buttonsBox = document.getElementById("bolbModalButtons");
+
+    titleBox.innerText = title;
+    messageBox.innerText = message;
+
+    buttonsBox.innerHTML = `
+      <button id="bolbModalCancel">Cancel</button>
+      <button id="bolbModalProceed">Proceed</button>
+    `;
+
+    backdrop.style.display = "flex";
+
+    document.getElementById("bolbModalCancel").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(false);
+    };
+
+    document.getElementById("bolbModalProceed").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(true);
+    };
+
+  });
+}
+
+const agreeCheckbox = document.getElementById("agree");
+const auctionRulesBox = document.getElementById("auctionRulesBox");
+const showRulesButton = document.getElementById("showRulesButton");
+
+agreeCheckbox.addEventListener("change", () => {
+  if (agreeCheckbox.checked) {
+    auctionRulesBox.style.display = "none";
+    showRulesButton.style.display = "block";
+  } else {
+    auctionRulesBox.style.display = "block";
+    showRulesButton.style.display = "none";
+  }
+});
+
+showRulesButton.addEventListener("click", () => {
+  auctionRulesBox.style.display = "block";
+  showRulesButton.style.display = "none";
+  agreeCheckbox.checked = false;
+});
+
+function showAllBidsPopup() {
+  if (!allAuctionBids.length) {
+    showBolbAlert("No bids have been placed yet.", "All Bids");
+    return;
+  }
+
+  const lines = allAuctionBids.map(bid => {
+    const bidDate = new Date(bid.timestamp);
+
+    const bidTime =
+      bidDate.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short'
+      }) +
+      " " +
+      bidDate.toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+    return bid.bidderId + "    " + money(bid.bidAmount) + "    " + bidTime;
+  });
+
+  showBolbAlert(
+    lines.join("\n"),
+    "All Bids",
+    "Close"
+  );
+}
+
+document.getElementById("viewAllBidsButton").addEventListener("click", showAllBidsPopup);
+
+function startAuctionRefresh() {
+  auctionRefreshTimer = setInterval(loadAuction, 15000);
+}
+
+startAuctionRefresh();
+</script>
+
+<div id="bolbModalBackdrop" class="bolb-modal-backdrop">
+  <div class="bolb-modal">
+    
+    <div id="bolbModalTitle" class="bolb-modal-title">
+      Boss of Luxury Brands
+    </div>
+
+    <div id="bolbModalMessage" class="bolb-modal-message"></div>
+
+    <div id="bolbModalButtons" class="bolb-modal-buttons">
+      <button id="bolbModalOk">OK</button>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
+
