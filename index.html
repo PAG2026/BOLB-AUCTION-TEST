@@ -5,7 +5,6 @@
 <meta charset="UTF-8">
 <title>Boss of Luxury Brands Auction</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
 html, body {
   max-width:100%;
@@ -269,7 +268,7 @@ input, textarea, select, button {
   font-weight:bold;
   font-size:18px;
   color:#111;
-  margin-bottom:10px;
+  margin-bottom:1px;
 }
 
 .bolb-modal-message {
@@ -290,6 +289,70 @@ input, textarea, select, button {
 .bolb-modal-buttons button {
   margin-top:0;
 }
+
+.bolb-modal-buttons button {
+  margin-top:0;
+}
+
+.bolb-modal.all-bids-modal {
+  max-width:420px;
+  padding:6px 10px 8px;
+}
+
+.bolb-modal.all-bids-modal .bolb-modal-title {
+  margin:0 0 2px 0;
+  padding:0;
+  line-height:1.1;
+}
+
+.bolb-modal.all-bids-modal .bolb-modal-message {
+  margin:0;
+  padding:0;
+  max-height:none;
+  overflow:visible;
+  line-height:1;
+  white-space:normal;
+}
+
+.bolb-modal.all-bids-modal .all-bids-table-wrap {
+  max-height:calc(100vh - 105px);
+  overflow-y:auto;
+  margin:0;
+  padding:0;
+  background:white;
+}
+
+.bolb-modal.all-bids-modal .all-bids-table {
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+  font-size:11px;
+  line-height:1.05;
+  margin:0;
+  padding:0;
+}
+
+.bolb-modal.all-bids-modal .all-bids-table th,
+.bolb-modal.all-bids-modal .all-bids-table td {
+  text-align:left;
+  padding:2px 2px;
+  border-bottom:1px solid #ddd;
+  white-space:nowrap;
+}
+
+.bolb-modal.all-bids-modal .all-bids-table th {
+  font-weight:bold;
+}
+
+.bolb-modal.all-bids-modal .bidder-col { width:28%; }
+.bolb-modal.all-bids-modal .amount-col { width:27%; }
+.bolb-modal.all-bids-modal .date-col { width:20%; }
+.bolb-modal.all-bids-modal .time-col { width:25%; }
+
+.bolb-modal.all-bids-modal .bolb-modal-buttons {
+  margin-top:6px;
+}
+
 /* 🔧 END OF NEW CODE */
 
 </style>
@@ -962,6 +1025,7 @@ function showBolbAlert(message, title = "Boss of Luxury Brands", buttonText = "O
   return new Promise(resolve => {
 
     const backdrop = document.getElementById("bolbModalBackdrop");
+    const modal = backdrop.querySelector(".bolb-modal");
     const titleBox = document.getElementById("bolbModalTitle");
     const messageBox = document.getElementById("bolbModalMessage");
     const buttonsBox = document.getElementById("bolbModalButtons");
@@ -976,9 +1040,9 @@ function showBolbAlert(message, title = "Boss of Luxury Brands", buttonText = "O
     backdrop.style.display = "flex";
 
     document.getElementById("bolbModalOk").onclick = () => {
-      backdrop.style.display = "none";
-      resolve(true);
-    };
+    backdrop.style.display = "none";
+    modal.classList.remove("all-bids-modal");
+  };
 
   });
 }
@@ -1035,34 +1099,72 @@ showRulesButton.addEventListener("click", () => {
 });
 
 function showAllBidsPopup() {
+
   if (!allAuctionBids.length) {
-    showBolbAlert("No bids have been placed yet.", "All Bids");
+    showBolbAlert("No bids have been placed yet.", "All Bids", "Close");
     return;
   }
 
-  const lines = allAuctionBids.map(bid => {
+  const rows = allAuctionBids.map(bid => {
+
     const bidDate = new Date(bid.timestamp);
 
-    const bidTime =
-      bidDate.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short'
-      }) +
-      " " +
-      bidDate.toLocaleTimeString([], {
-        hour: 'numeric',
-        minute: '2-digit',
-        second: '2-digit'
-      });
+    const bidDay = bidDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short'
+    });
 
-    return bid.bidderId + "    " + money(bid.bidAmount) + "    " + bidTime;
-  });
+    const bidTime = bidDate.toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit'
+    });
 
-  showBolbAlert(
-    lines.join("\n"),
-    "All Bids",
-    "Close"
-  );
+    return `<tr><td>${bid.bidderId}</td><td>${money(bid.bidAmount)}</td><td>${bidDay}</td><td>${bidTime}</td></tr>`;
+
+  }).join("");
+
+  const backdrop = document.getElementById("bolbModalBackdrop");
+  const modal = backdrop.querySelector(".bolb-modal");
+  const titleBox = document.getElementById("bolbModalTitle");
+  const messageBox = document.getElementById("bolbModalMessage");
+  const buttonsBox = document.getElementById("bolbModalButtons");
+
+  modal.classList.add("all-bids-modal");
+
+  titleBox.innerText = "All Bids";
+
+  messageBox.innerHTML =
+    `<div class="all-bids-table-wrap">
+      <table class="all-bids-table">
+        <colgroup>
+          <col class="bidder-col">
+          <col class="amount-col">
+          <col class="date-col">
+          <col class="time-col">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Bidder</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+
+  buttonsBox.innerHTML =
+    `<button id="bolbModalOk">Close</button>`;
+
+  backdrop.style.display = "flex";
+
+  document.getElementById("bolbModalOk").onclick = () => {
+    backdrop.style.display = "none";
+    modal.classList.remove("all-bids-modal");
+  };
+
 }
 
 document.getElementById("viewAllBidsButton").addEventListener("click", showAllBidsPopup);
