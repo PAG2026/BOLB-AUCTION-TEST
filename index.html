@@ -58,7 +58,7 @@ body {
 
 #productImage {
     width: 100%;
-    max-width: 150px;
+    max-width: 130px;
     height: auto;
     display: block;
     margin: 6px auto 6px auto;
@@ -67,21 +67,25 @@ body {
 .price-box {
   background:#fff8ec;
   border:1px solid #e2c46f;
-  padding:10px;
+  padding:5px 10px;
   border-radius:12px;
-  margin:8px 0;
+  margin:4px 0;
+  font-size:14px;
+  line-height:1.15;
 }
 .row {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin:6px 0;
+  margin:1px 0;
 }
 .highest {
   color:#c9a227;
-  font-size:18px;
-  font-weight:bold;
+  font-size:14px;
+  font-weight:600;
 }
+
+
 
 input, textarea, select {
   width:100%;
@@ -92,6 +96,21 @@ input, textarea, select {
   border:1px solid #ccc;
   box-sizing:border-box;
   font-size:16px;
+}
+
+select {
+  color:#666;
+  appearance:auto;
+}
+
+.field-hint {
+  display:none;
+  font-size:16px;
+  margin-top:8px;
+  margin-bottom:7px;
+  padding-left:4px;
+  color:#0057b8;
+  text-align:left;
 }
 
 textarea {
@@ -276,7 +295,7 @@ input, textarea, select, button {
   line-height:1.4;
   white-space:pre-line;
   margin-bottom:14px;
-  max-height:60vh;
+  max-height:70vh;
   overflow-y:auto;
 }
 
@@ -323,12 +342,13 @@ input, textarea, select, button {
 }
 
 .bolb-modal.all-bids-modal .all-bids-table {
-  width:100%;
+  width:auto;
+  max-width:100%;
   border-collapse:collapse;
-  table-layout:fixed;
+  table-layout:auto;
   font-size:11px;
   line-height:1.05;
-  margin:0;
+  margin:0 auto;
   padding:0;
 }
 
@@ -344,11 +364,10 @@ input, textarea, select, button {
   font-weight:bold;
 }
 
-.bolb-modal.all-bids-modal .bidder-col { width:28%; }
-.bolb-modal.all-bids-modal .amount-col { width:27%; }
-.bolb-modal.all-bids-modal .date-col { width:20%; }
-.bolb-modal.all-bids-modal .time-col { width:25%; }
-
+.bolb-modal.all-bids-modal .bidder-col { width:74px; }
+.bolb-modal.all-bids-modal .amount-col { width:78px; }
+.bolb-modal.all-bids-modal .date-col { width:62px; }
+.bolb-modal.all-bids-modal .time-col { width:82px; }
 .bolb-modal.all-bids-modal .bolb-modal-buttons {
   margin-top:6px;
 }
@@ -374,6 +393,9 @@ input, textarea, select, button {
 
 <img id="productImage" style="max-width:220px; margin:10px auto; display:block;">
 
+<button id="morePicturesButton" type="button" style="display:none; background:#111; color:#FFD700; font-size:13px; padding:6px 10px; margin:4px auto 8px auto;">
+  View More Pictures
+</button>
   <div id="introMessage" style="display:none;"></div>
   <button id="soundButton" style="display:none;" onclick="playSound()">▶ Play Auction Intro</button>
   <audio id="introSound"></audio>
@@ -382,8 +404,7 @@ input, textarea, select, button {
   <p id="itemDescription" class="productDescription"></p>
 
   <div class="price-box" id="priceBox">
-    <div class="row"><span>Highest Bid</span><b class="highest" id="high">
-</b></div>
+    <div class="row" id="highestBidRow" style="display:none;"><span>Current Highest Bid</span><b class="highest" id="high"></b></div>
     <div class="row"><span>Starting Bid</span><b id="start"></b></div>
     <div class="row"><span>Minimum Increase</span><b id="min"></b></div>
     <div class="row"><span>Closes</span><b id="close"></b></div>
@@ -443,12 +464,18 @@ input, textarea, select, button {
 <h3 id="bidFormTitle">Place Your Bid</h3>
 
 <input id="phone" placeholder="Phone number e.g. 8761234567">
+<div id="phoneHint" class="field-hint"></div>
+
 <input id="firstName" placeholder="First Name">
+<div id="firstNameHint" class="field-hint"></div>
+
 <input id="surnameInitial" placeholder="Surname Initial">
+<div id="surnameInitialHint" class="field-hint"></div>
 
 <div class="rules" id="auctionRulesBox">
-  <b style="display:block; margin-bottom:2px;">Auction Rules</b>
+  <b style="display:block; margin-bottom:2px;">AUCTION RULES</b>
 Bidder identities are private and shown only as Bidder IDs.<br>
+Only Jamaica telephone numbers beginning with 876 or 658 may be used for bidding.<br>
 <b>Delivery cost is separate and is NOT included in any bid.</b><br>
 All valid bids are time-stamped and displayed.<br>
 Highest valid bid at closing wins. Closing time will always be between 10:00 am and 2.00 pm.<br>
@@ -481,7 +508,7 @@ False bids, fake details or failure to pay may result in being blocked from futu
 
   <input type="checkbox" id="agree" style="width:22px; height:22px; margin:0; flex-shrink:0;">
 </label>
-<select id="transferMethod" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding-top:10px; padding-bottom:10px; font-size:16px; font-weight:bold;">
+<select id="transferMethod">
 <option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
 Select the Bank for your Bank to Bank Transfer when you win
 </option>  <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
@@ -493,7 +520,16 @@ Select the Bank for your Bank to Bank Transfer when you win
   <option value="(BNS) Scotiabank">(BNS) Scotiabank</option>
   <option value="(VMBS) Victoria Mutual">(VMBS) Victoria Mutual</option>
 </select>
-
+<div id="bankHint"
+     style="display:block;
+            font-size:13px;
+            color:#0066cc;
+            margin-top:4px;
+            margin-bottom:7px;
+            padding-left:16px;
+            text-align:left;">
+  Please select your bank for your bank transfer if you win - before you bid.
+</div>
   
 
  <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
@@ -511,6 +547,7 @@ Select the Bank for your Bank to Bank Transfer when you win
 </div>
 
 <input id="bidAmount" type="text" inputmode="numeric" placeholder="Enter bid amount e.g. 23,500">
+<div id="bidAmountHint" class="field-hint"></div>
 
 <button onclick="sendBid()">Submit Bid</button>
 
@@ -525,6 +562,19 @@ let initialLoadComplete = false;
 
 function money(v) {
   return "J$" + Number(v || 0).toLocaleString();
+}
+
+function showFieldHint(id, message) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  if (message) {
+    el.innerText = message;
+    el.style.display = "block";
+  } else {
+    el.innerText = "";
+    el.style.display = "none";
+  }
 }
 
 function cleanBidValue(value) {
@@ -554,8 +604,10 @@ bidInput.step = Number(auction.minimumIncrease || 500);
 bidInput.placeholder = "Enter YOUR BID amount e.g. " + nextBid.toLocaleString();
       const hasBids = Array.isArray(d.bids) && d.bids.length > 0;
 
+document.getElementById("highestBidRow").style.display = hasBids ? "flex" : "none";
+
 document.getElementById("high").innerText =
-  hasBids ? money(d.highestBid) : "No bids yet";
+  hasBids ? money(d.highestBid) : "";
       const closeDate = new Date(auction.closingTime);
 document.getElementById("close").innerText =
   closeDate.toLocaleDateString('en-GB', {
@@ -593,6 +645,14 @@ if (!initialLoadComplete) {
         document.getElementById("introSound").src = auction.introSoundLink;
         document.getElementById("soundButton").style.display = "block";
       }
+
+const morePicturesButton = document.getElementById("morePicturesButton");
+
+if (Array.isArray(auction.extraPictureLinks) && auction.extraPictureLinks.length > 0) {
+  morePicturesButton.style.display = "block";
+} else {
+  morePicturesButton.style.display = "none";
+}
 
       allAuctionBids = d.bids || [];
 showBids(allAuctionBids);
@@ -797,10 +857,46 @@ function numberToWords(num) {
     bidInput.placeholder = "Enter YOUR BID amount e.g. " + minRequired.toLocaleString();
   }
 
-  if (!firstName || !surnameInitial || !phone || !transferMethod || !rawBid) {
-    await showBolbAlert("Please complete all fields.");
-    return;
-  }
+showFieldHint("firstNameHint", "");
+showFieldHint("surnameInitialHint", "");
+showFieldHint("phoneHint", "");
+showFieldHint("bidAmountHint", "");
+
+let hasError = false;
+
+if (!firstName) {
+  showFieldHint("firstNameHint", "Enter first name");
+  hasError = true;
+}
+
+if (!surnameInitial) {
+  showFieldHint("surnameInitialHint", "Enter surname initial");
+  hasError = true;
+}
+
+if (!phone) {
+  showFieldHint("phoneHint", "Enter Jamaica phone number");
+  hasError = true;
+}
+
+if (!rawBid) {
+  showFieldHint("bidAmountHint", "Enter bid amount");
+  hasError = true;
+}
+
+if (!transferMethod) {
+  await showBolbAlert("Please select your bank or transfer method.");
+  return;
+}
+
+if (hasError) {
+  return;
+}
+
+showFieldHint("firstNameHint", "");
+showFieldHint("surnameInitialHint", "");
+showFieldHint("phoneHint", "");
+showFieldHint("bidAmountHint", "");
 
   if (!/^[A-Za-z]{2,20}$/.test(firstName)) {
     await showBolbAlert("Enter a valid first name with no spaces using letters only.");
@@ -1168,6 +1264,122 @@ function showAllBidsPopup() {
 }
 
 document.getElementById("viewAllBidsButton").addEventListener("click", showAllBidsPopup);
+
+function showMorePicturesPopup() {
+
+  if (!auction || !Array.isArray(auction.extraPictureLinks) || auction.extraPictureLinks.length === 0) {
+    return;
+  }
+
+  const imageHtml = auction.extraPictureLinks.map(link => {
+    return `<img src="${link}" style="width:100%; max-width:360px; height:auto; display:block; margin:8px auto; border-radius:12px;">`;
+  }).join("");
+
+  const backdrop = document.getElementById("bolbModalBackdrop");
+  const titleBox = document.getElementById("bolbModalTitle");
+  const messageBox = document.getElementById("bolbModalMessage");
+  const buttonsBox = document.getElementById("bolbModalButtons");
+
+  titleBox.innerText = "More Pictures";
+
+  messageBox.innerHTML =
+  `<div>
+    ${imageHtml}
+  </div>`;
+
+  buttonsBox.innerHTML =
+    `<button id="bolbModalOk">Close</button>`;
+
+  backdrop.style.display = "flex";
+
+  document.getElementById("bolbModalOk").onclick = () => {
+    backdrop.style.display = "none";
+  };
+
+}
+
+document.getElementById("morePicturesButton").addEventListener("click", showMorePicturesPopup);
+
+function setupLiveFieldValidation() {
+  const phoneInput = document.getElementById("phone");
+  const firstNameInput = document.getElementById("firstName");
+  const surnameInitialInput = document.getElementById("surnameInitial");
+  const bidAmountInput = document.getElementById("bidAmount");
+
+  phoneInput.addEventListener("input", () => {
+    const cleanPhoneValue = phoneInput.value.replace(/\D/g, "");
+
+    if (!cleanPhoneValue) {
+      showFieldHint("phoneHint", "");
+    } else if (cleanPhoneValue.length === 1 && cleanPhoneValue !== "8" && cleanPhoneValue !== "6") {
+      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    } else if (cleanPhoneValue.length === 2 && cleanPhoneValue !== "87" && cleanPhoneValue !== "65") {
+      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    } else if (cleanPhoneValue.length >= 3 && !/^(876|658)/.test(cleanPhoneValue)) {
+      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    } else if (cleanPhoneValue.length > 10) {
+      showFieldHint("phoneHint", "Use 10 digits only");
+    } else {
+      showFieldHint("phoneHint", "");
+    }
+  });
+
+  firstNameInput.addEventListener("input", () => {
+    const value = firstNameInput.value.trim();
+    const cleanValue = value.toLowerCase().replace(/[^a-z]/g, "");
+
+    const obviousBadWords = [
+      "fuck", "shit", "bitch", "pussy", "asshole",
+      "rassclot", "bomboclaat", "bloodclaat", "pussyclaat"
+    ];
+
+    if (!value) {
+      showFieldHint("firstNameHint", "");
+    } else if (!/^[A-Za-z]+$/.test(value)) {
+      showFieldHint("firstNameHint", "Use letters only, no spaces");
+    } else if (obviousBadWords.some(word => cleanValue.includes(word))) {
+      showFieldHint("firstNameHint", "Please enter your real first name");
+    } else {
+      showFieldHint("firstNameHint", "");
+    }
+  });
+
+  surnameInitialInput.addEventListener("input", () => {
+    const value = surnameInitialInput.value.trim();
+
+    if (!value) {
+      showFieldHint("surnameInitialHint", "");
+    } else if (!/^[A-Za-z]$/.test(value)) {
+      showFieldHint("surnameInitialHint", "Use one letter only");
+    } else {
+      showFieldHint("surnameInitialHint", "");
+    }
+  });
+
+  bidAmountInput.addEventListener("input", () => {
+    const originalValue = bidAmountInput.value;
+    const digitsOnly = originalValue.replace(/\D/g, "");
+    const attemptedNonNumeric = /[^0-9,]/.test(originalValue);
+
+    if (!digitsOnly) {
+      bidAmountInput.value = "";
+
+      if (attemptedNonNumeric) {
+        showFieldHint("bidAmountHint", "Numbers only — commas are added automatically");
+      } else {
+        showFieldHint("bidAmountHint", "");
+      }
+
+      return;
+    }
+
+    bidAmountInput.value = Number(digitsOnly).toLocaleString();
+
+    showFieldHint("bidAmountHint", "Numbers only — commas are added automatically");
+  });
+}
+
+setupLiveFieldValidation();
 
 function startAuctionRefresh() {
   auctionRefreshTimer = setInterval(loadAuction, 15000);
