@@ -854,6 +854,7 @@ showFieldHint("firstNameHint", "");
 showFieldHint("surnameInitialHint", "");
 showFieldHint("phoneHint", "");
 showFieldHint("bidAmountHint", "");
+showFieldHint("transferMethodHint", "");
 
 let hasError = false;
 
@@ -878,8 +879,8 @@ if (!rawBid) {
 }
 
 if (!transferMethod) {
-  await showBolbAlert("Please select your bank or transfer method.");
-  return;
+  showFieldHint("transferMethodHint", "Please select your bank for Bank-to-Bank Transfer");
+  hasError = true;
 }
 
 if (hasError) {
