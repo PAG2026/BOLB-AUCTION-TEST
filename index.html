@@ -1345,11 +1345,21 @@ if (!cleanPhoneValue) {
 
   firstNameInput.addEventListener("input", () => {
     const value = firstNameInput.value.trim();
+    const cleanValue = value.toLowerCase().replace(/[^a-z]/g, "");
+    const badNameWords = [
+      "fuck", "fcuk", "rass", "rassclot", "rass clot", "bomboclaat",
+      "bombaclaat", "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat",
+      "bloodclot", "pussy", "pussyclaat", "suckyuhmada", "bitch",
+      "shit", "asshole", "battybwoy", "battygyal", "fassyhole",
+      "rasshole", "kakaclaat", "kaka", "wutliss", "bwoy", "bwoii", "gyal"
+    ];
 
     if (!value) {
       showFieldHint("firstNameHint", "");
     } else if (!/^[A-Za-z]+$/.test(value)) {
       showFieldHint("firstNameHint", "Use letters only, no spaces");
+    } else if (badNameWords.some(word => cleanValue.includes(word.toLowerCase().replace(/[^a-z]/g, "")))) {
+      showFieldHint("firstNameHint", "Please enter your real first name");
     } else {
       showFieldHint("firstNameHint", "");
     }
