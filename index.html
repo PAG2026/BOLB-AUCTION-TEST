@@ -58,7 +58,7 @@ body {
 
 #productImage {
     width: 100%;
-    max-width: 130px;
+    max-width: 150px;
     height: auto;
     display: block;
     margin: 6px auto 6px auto;
@@ -67,25 +67,21 @@ body {
 .price-box {
   background:#fff8ec;
   border:1px solid #e2c46f;
-  padding:5px 10px;
+  padding:8px 10px;
   border-radius:12px;
-  margin:4px 0;
-  font-size:14px;
-  line-height:1.15;
+  margin:6px 0;
 }
 .row {
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin:1px 0;
+  margin:3px 0;
 }
 .highest {
   color:#c9a227;
-  font-size:14px;
-  font-weight:600;
+  font-size:16px;
+  font-weight:bold;
 }
-
-
 
 input, textarea, select {
   width:100%;
@@ -98,18 +94,14 @@ input, textarea, select {
   font-size:16px;
 }
 
-select {
-  color:#666;
-  appearance:auto;
-}
-
 .field-hint {
   display:none;
-  font-size:16px;
-  margin-top:8px;
-  margin-bottom:7px;
+  font-size:14px;
+  font-weight:normal;
+  margin-top:-2px;
+  margin-bottom:8px;
   padding-left:4px;
-  color:#0057b8;
+  color:#0066cc;
   text-align:left;
 }
 
@@ -125,7 +117,7 @@ button {
   padding:13px;
   border-radius:12px;
   font-size:16px;
-  font-weight:bold;
+  font-weight:normal;
   margin-top:8px;
 }
 
@@ -167,7 +159,7 @@ button {
   color:#d62828;
   font-weight:bold;
   font-size:18px;
-  margin:6px 0;
+  margin:3px 0;
 }
 .small {
   font-size:13px;
@@ -221,6 +213,8 @@ h2 {
 
 h3 {
   margin: 6px 0 6px 0;
+  font-size:15px;
+  font-weight:normal;
 }
 
 p {
@@ -233,8 +227,12 @@ p {
   margin: 10px 0;
 }
 
-#countdown {
+#topCountdown {
   font-size: 16px;
+}
+
+#liveCountdownBottom {
+  font-size: 14px;
 }
 
 input, textarea, select, button {
@@ -404,7 +402,8 @@ input, textarea, select, button {
   <p id="itemDescription" class="productDescription"></p>
 
   <div class="price-box" id="priceBox">
-    <div class="row" id="highestBidRow" style="display:none;"><span>Current Highest Bid</span><b class="highest" id="high"></b></div>
+   <div class="row" id="highestBidRow"><span>Highest Bid</span><b class="highest" id="high">
+</b></div>
     <div class="row"><span>Starting Bid</span><b id="start"></b></div>
     <div class="row"><span>Minimum Increase</span><b id="min"></b></div>
     <div class="row"><span>Closes</span><b id="close"></b></div>
@@ -412,7 +411,7 @@ input, textarea, select, button {
 <div id="promo" style="display:none;"></div>
 <div id="deadlineHidden" style="display:none;"></div>
 <div id="deliveryHidden" style="display:none;"></div>
-<div class="countdown" id="countdown"></div>
+<div class="countdown" id="topCountdown"></div>
 
 <div id="closedPanel" style="display:none; background:#111; color:white; border-radius:14px; padding:14px; margin:10px 0; text-align:center; border:2px solid #D4AF37;">
   <div style="font-size:18px; font-weight:bold; color:#FFD700;">
@@ -473,9 +472,8 @@ input, textarea, select, button {
 <div id="surnameInitialHint" class="field-hint"></div>
 
 <div class="rules" id="auctionRulesBox">
-  <b style="display:block; margin-bottom:2px;">AUCTION RULES</b>
+  <b style="display:block; margin-bottom:2px;">Auction Rules</b>
 Bidder identities are private and shown only as Bidder IDs.<br>
-Only Jamaica telephone numbers beginning with 876 or 658 may be used for bidding.<br>
 <b>Delivery cost is separate and is NOT included in any bid.</b><br>
 All valid bids are time-stamped and displayed.<br>
 Highest valid bid at closing wins. Closing time will always be between 10:00 am and 2.00 pm.<br>
@@ -502,15 +500,14 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </button>
 
 <label style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
-  <span style="font-weight:bold; flex:1 1 220px; min-width:0;">
+  <span style="font-weight:normal; font-size:14px; flex:1 1 220px; min-width:0;">
     I agree to the auction rules, payment deadline, and delivery terms.
   </span>
 
   <input type="checkbox" id="agree" style="width:22px; height:22px; margin:0; flex-shrink:0;">
 </label>
-<select id="transferMethod">
-<option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
-Select the Bank for your Bank to Bank Transfer when you win
+<select id="transferMethod" onchange="showFieldHint('transferMethodHint', '');" oninput="showFieldHint('transferMethodHint', '');" onblur="showFieldHint('transferMethodHint', '');" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding:10px; font-size:14px; font-weight:normal;"><option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
+Select the Bank for your Bank to Bank Transfer (for when you win !)
 </option>  <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
   <option value="(FGB) First Global Bank">(FGB) First Global Bank</option>
   <option value="(JN) Jamaica National">(JN) Jamaica National</option>
@@ -520,21 +517,12 @@ Select the Bank for your Bank to Bank Transfer when you win
   <option value="(BNS) Scotiabank">(BNS) Scotiabank</option>
   <option value="(VMBS) Victoria Mutual">(VMBS) Victoria Mutual</option>
 </select>
-<div id="bankHint"
-     style="display:block;
-            font-size:13px;
-            color:#0066cc;
-            margin-top:4px;
-            margin-bottom:7px;
-            padding-left:16px;
-            text-align:left;">
-  Please select your bank for your bank transfer if you win - before you bid.
-</div>
+<div id="transferMethodHint" class="field-hint"></div>
   
 
  <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
 
-<h3 id="bidsTitle" style="font-size:16px; margin-bottom:6px; text-align:center; width:100%;">Current Highest Five (5) Bids</h3>
+<h3 id="bidsTitle" style="font-size:16px; font-weight:bold; margin-bottom:6px; text-align:center; width:100%;">Current Highest Three (3) Bids</h3>
 
 <div id="bids"></div>
 
@@ -604,10 +592,13 @@ bidInput.step = Number(auction.minimumIncrease || 500);
 bidInput.placeholder = "Enter YOUR BID amount e.g. " + nextBid.toLocaleString();
       const hasBids = Array.isArray(d.bids) && d.bids.length > 0;
 
-document.getElementById("highestBidRow").style.display = hasBids ? "flex" : "none";
-
-document.getElementById("high").innerText =
-  hasBids ? money(d.highestBid) : "";
+if (hasBids) {
+  document.getElementById("highestBidRow").style.display = "flex";
+  document.getElementById("high").innerText = money(d.highestBid);
+} else {
+  document.getElementById("highestBidRow").style.display = "none";
+  document.getElementById("high").innerText = "";
+}
       const closeDate = new Date(auction.closingTime);
 document.getElementById("close").innerText =
   closeDate.toLocaleDateString('en-GB', {
@@ -679,7 +670,7 @@ function showBids(bids) {
     return;
   }
 
-  bids.slice(0, 5).forEach(bid => {
+  bids.slice(0, 3).forEach(bid => {
     const row = document.createElement("div");
     row.className = "bid-row";
     const bidDate = new Date(bid.timestamp);
@@ -713,7 +704,7 @@ function updateCountdown() {
 
   if (diff <= 0 || auction.status !== "OPEN") {
 
-  document.getElementById("countdown").style.display = "none";
+  document.getElementById("topCountdown").style.display = "none";
 
   document.getElementById("closedPanel").style.display = "block";
 document.getElementById("priceBox").style.display = "none";
@@ -759,12 +750,12 @@ document.getElementById("liveCountdownBottom").style.display = "none";  const bi
   let text = "";
 
   if (days > 0) {
-    text = `Time left: ${days}d ${hours}h ${minutes}m`;
+    text = `Time left to Bid: ${days}d ${hours}h ${minutes}m`;
   } else {
     text = `Time left: ${hours}h ${minutes}m ${seconds}s`;
   }
 
-  document.getElementById("countdown").innerText = text;
+  document.getElementById("topCountdown").innerText = text;
   document.getElementById("liveCountdownBottom").innerText =
   text.replace("Time left:", "Time left to bid:");
 }
@@ -861,6 +852,7 @@ showFieldHint("firstNameHint", "");
 showFieldHint("surnameInitialHint", "");
 showFieldHint("phoneHint", "");
 showFieldHint("bidAmountHint", "");
+showFieldHint("transferMethodHint", "");
 
 let hasError = false;
 
@@ -885,7 +877,10 @@ if (!rawBid) {
 }
 
 if (!transferMethod) {
-  await showBolbAlert("Please select your bank or transfer method.");
+  showFieldHint(
+    "transferMethodHint",
+    "Please select your bank for Bank-to-Bank Transfer"
+  );
   return;
 }
 
@@ -897,7 +892,7 @@ showFieldHint("firstNameHint", "");
 showFieldHint("surnameInitialHint", "");
 showFieldHint("phoneHint", "");
 showFieldHint("bidAmountHint", "");
-
+showFieldHint("transferMethodHint", "");
   if (!/^[A-Za-z]{2,20}$/.test(firstName)) {
     await showBolbAlert("Enter a valid first name with no spaces using letters only.");
     return;
@@ -1135,10 +1130,11 @@ function showBolbAlert(message, title = "Boss of Luxury Brands", buttonText = "O
 
     backdrop.style.display = "flex";
 
-    document.getElementById("bolbModalOk").onclick = () => {
-    backdrop.style.display = "none";
-    modal.classList.remove("all-bids-modal");
-  };
+document.getElementById("bolbModalOk").onclick = () => {
+  backdrop.style.display = "none";
+  modal.classList.remove("all-bids-modal");
+  resolve();
+};
 
   });
 }
@@ -1180,9 +1176,11 @@ const showRulesButton = document.getElementById("showRulesButton");
 
 agreeCheckbox.addEventListener("change", () => {
   if (agreeCheckbox.checked) {
+document.getElementById("topCountdown").style.display = "none";
     auctionRulesBox.style.display = "none";
     showRulesButton.style.display = "block";
   } else {
+document.getElementById("topCountdown").style.display = "block";
     auctionRulesBox.style.display = "block";
     showRulesButton.style.display = "none";
   }
@@ -1192,6 +1190,7 @@ showRulesButton.addEventListener("click", () => {
   auctionRulesBox.style.display = "block";
   showRulesButton.style.display = "none";
   agreeCheckbox.checked = false;
+document.getElementById("topCountdown").style.display = "block";
 });
 
 function showAllBidsPopup() {
@@ -1305,40 +1304,43 @@ function setupLiveFieldValidation() {
   const firstNameInput = document.getElementById("firstName");
   const surnameInitialInput = document.getElementById("surnameInitial");
   const bidAmountInput = document.getElementById("bidAmount");
+  const transferMethodInput = document.getElementById("transferMethod");
 
   phoneInput.addEventListener("input", () => {
     const cleanPhoneValue = phoneInput.value.replace(/\D/g, "");
 
-    if (!cleanPhoneValue) {
-      showFieldHint("phoneHint", "");
-    } else if (cleanPhoneValue.length === 1 && cleanPhoneValue !== "8" && cleanPhoneValue !== "6") {
-      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    } else if (cleanPhoneValue.length === 2 && cleanPhoneValue !== "87" && cleanPhoneValue !== "65") {
-      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    } else if (cleanPhoneValue.length >= 3 && !/^(876|658)/.test(cleanPhoneValue)) {
-      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    } else if (cleanPhoneValue.length > 10) {
-      showFieldHint("phoneHint", "Use 10 digits only");
-    } else {
-      showFieldHint("phoneHint", "");
-    }
-  });
+if (!cleanPhoneValue) {
+  showFieldHint("phoneHint", "");
+
+} else if (!/^(8|6)/.test(cleanPhoneValue)) {
+  showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+
+} else if (
+  cleanPhoneValue.length >= 2 &&
+  !/^87|65/.test(cleanPhoneValue)
+) {
+  showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+
+} else if (
+  cleanPhoneValue.length >= 3 &&
+  !/^(876|658)/.test(cleanPhoneValue)
+) {
+  showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+
+} else if (cleanPhoneValue.length > 10) {
+  showFieldHint("phoneHint", "Use 10 digits only");
+
+} else {
+  showFieldHint("phoneHint", "");
+}  });
 
   firstNameInput.addEventListener("input", () => {
     const value = firstNameInput.value.trim();
-    const cleanValue = value.toLowerCase().replace(/[^a-z]/g, "");
-
-    const obviousBadWords = [
-      "fuck", "shit", "bitch", "pussy", "asshole",
-      "rassclot", "bomboclaat", "bloodclaat", "pussyclaat"
-    ];
 
     if (!value) {
       showFieldHint("firstNameHint", "");
     } else if (!/^[A-Za-z]+$/.test(value)) {
       showFieldHint("firstNameHint", "Use letters only, no spaces");
-    } else if (obviousBadWords.some(word => cleanValue.includes(word))) {
-      showFieldHint("firstNameHint", "Please enter your real first name");
     } else {
       showFieldHint("firstNameHint", "");
     }
@@ -1357,25 +1359,21 @@ function setupLiveFieldValidation() {
   });
 
   bidAmountInput.addEventListener("input", () => {
-    const originalValue = bidAmountInput.value;
-    const digitsOnly = originalValue.replace(/\D/g, "");
-    const attemptedNonNumeric = /[^0-9,]/.test(originalValue);
+    const cleanedBid = cleanBidValue(bidAmountInput.value);
 
-    if (!digitsOnly) {
-      bidAmountInput.value = "";
-
-      if (attemptedNonNumeric) {
-        showFieldHint("bidAmountHint", "Numbers only — commas are added automatically");
-      } else {
-        showFieldHint("bidAmountHint", "");
-      }
-
-      return;
+    if (!cleanedBid) {
+      showFieldHint("bidAmountHint", "");
+    } else if (!/^\d+$/.test(cleanedBid)) {
+      showFieldHint("bidAmountHint", "Use numbers only");
+    } else {
+      showFieldHint("bidAmountHint", "");
     }
+  });
 
-    bidAmountInput.value = Number(digitsOnly).toLocaleString();
-
-    showFieldHint("bidAmountHint", "Numbers only — commas are added automatically");
+  transferMethodInput.addEventListener("change", () => {
+    if (transferMethodInput.value.trim()) {
+      showFieldHint("transferMethodHint", "");
+    }
   });
 }
 
