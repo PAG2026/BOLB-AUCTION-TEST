@@ -506,7 +506,7 @@ False bids, fake details or failure to pay may result in being blocked from futu
 
   <input type="checkbox" id="agree" style="width:22px; height:22px; margin:0; flex-shrink:0;">
 </label>
-<select id="transferMethod" onchange="showFieldHint('transferMethodHint', '');" oninput="showFieldHint('transferMethodHint', '');" onblur="showFieldHint('transferMethodHint', '');" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding:10px; font-size:14px; font-weight:normal;"><option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
+<select id="transferMethod" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding:10px; font-size:14px; font-weight:normal;"><option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
 Select the Bank for your Bank to Bank Transfer (for when you win !)
 </option>  <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
   <option value="(FGB) First Global Bank">(FGB) First Global Bank</option>
@@ -517,7 +517,9 @@ Select the Bank for your Bank to Bank Transfer (for when you win !)
   <option value="(BNS) Scotiabank">(BNS) Scotiabank</option>
   <option value="(VMBS) Victoria Mutual">(VMBS) Victoria Mutual</option>
 </select>
+
 <div id="transferMethodHint" class="field-hint"></div>
+
   
 
  <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
@@ -852,7 +854,6 @@ showFieldHint("firstNameHint", "");
 showFieldHint("surnameInitialHint", "");
 showFieldHint("phoneHint", "");
 showFieldHint("bidAmountHint", "");
-showFieldHint("transferMethodHint", "");
 
 let hasError = false;
 
@@ -877,10 +878,7 @@ if (!rawBid) {
 }
 
 if (!transferMethod) {
-  showFieldHint(
-    "transferMethodHint",
-    "Please select your bank for Bank-to-Bank Transfer"
-  );
+  await showBolbAlert("Please select your bank or transfer method.");
   return;
 }
 
@@ -892,7 +890,7 @@ showFieldHint("firstNameHint", "");
 showFieldHint("surnameInitialHint", "");
 showFieldHint("phoneHint", "");
 showFieldHint("bidAmountHint", "");
-showFieldHint("transferMethodHint", "");
+
   if (!/^[A-Za-z]{2,20}$/.test(firstName)) {
     await showBolbAlert("Enter a valid first name with no spaces using letters only.");
     return;
@@ -1304,7 +1302,6 @@ function setupLiveFieldValidation() {
   const firstNameInput = document.getElementById("firstName");
   const surnameInitialInput = document.getElementById("surnameInitial");
   const bidAmountInput = document.getElementById("bidAmount");
-  const transferMethodInput = document.getElementById("transferMethod");
 
   phoneInput.addEventListener("input", () => {
     const cleanPhoneValue = phoneInput.value.replace(/\D/g, "");
@@ -1367,12 +1364,6 @@ if (!cleanPhoneValue) {
       showFieldHint("bidAmountHint", "Use numbers only");
     } else {
       showFieldHint("bidAmountHint", "");
-    }
-  });
-
-  transferMethodInput.addEventListener("change", () => {
-    if (transferMethodInput.value.trim()) {
-      showFieldHint("transferMethodHint", "");
     }
   });
 }
