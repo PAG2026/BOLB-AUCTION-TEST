@@ -1339,6 +1339,9 @@ if (!cleanPhoneValue) {
 } else if (cleanPhoneValue.length > 10) {
   showFieldHint("phoneHint", "Use 10 digits only");
 
+} else if (cleanPhoneValue.length < 10) {
+  showFieldHint("phoneHint", "Enter full 10-digit Jamaica phone number");
+
 } else {
   showFieldHint("phoneHint", "");
 }  });
@@ -1389,7 +1392,7 @@ if (!cleanPhoneValue) {
     }
   });
 }
-
+F
 setupLiveFieldValidation();
 
 function startAuctionRefresh() {
