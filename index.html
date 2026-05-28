@@ -591,7 +591,9 @@ const nextBid = hasExistingBids
 const bidInput = document.getElementById("bidAmount");
 bidInput.min = nextBid;
 bidInput.step = Number(auction.minimumIncrease || 500);
-bidInput.placeholder = "Enter YOUR BID amount e.g. " + nextBid.toLocaleString();
+if (typeof updateBidEntryState === "function") {
+  updateBidEntryState();
+}
       const hasBids = Array.isArray(d.bids) && d.bids.length > 0;
 
 if (hasBids) {
@@ -897,9 +899,8 @@ showFieldHint("bidAmountHint", "");
     return;
   }
 
-  console.log("BOLB BAD WORD TEST ACTIVE"); 
   const badWords = [
-     "fuck", "fcuk", "rass", "rassclot", "rass clot", "bomboclaat",
+    "fuck", "fcuk", "rass", "rassclot", "rass clot", "bomboclaat",
     "bombaclaat", "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat",
     "bloodclot", "pussy", "pussyclaat", "sucku", "suckyuhmada", "suckumudda", "suckymudda", "suckuhmudda", "suckyuhmudda", "bitch",
     "shit", "asshole", "Batty Bwoy", "Batty Gyal", "Fassyhole",
@@ -1337,13 +1338,42 @@ function setupLiveFieldValidation() {
 
   function updateBidEntryState() {
     const ready = isReadyForBidEntry();
+
+    const missingItems = [];
+
+    if (!/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim())) {
+      missingItems.push("Enter your first name");
+    }
+
+    if (!/^[A-Za-z]$/.test(surnameInitialInput.value.trim())) {
+      missingItems.push("Enter your surname initial");
+    }
+
+    if (!/^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, ""))) {
+      missingItems.push("Enter your Jamaica phone number");
+    }
+
+    if (!agreeInput.checked) {
+      missingItems.push("Agree to the auction rules");
+    }
+
+    if (!transferMethodInput.value.trim()) {
+      missingItems.push("Select your bank for Bank-to-Bank Transfer");
+    }
+
     bidAmountInput.disabled = !ready;
     submitBidButton.disabled = !ready;
+
     if (ready) {
-      bidAmountInput.placeholder = bidAmountInput.placeholder.replace("Complete the required fields above first", "Enter YOUR BID amount");
+      bidAmountInput.placeholder = bidAmountInput.placeholder.replace("All bidder details above must be  completed before a bid can be entered", "ENTER YOUR BID");
     } else {
       bidAmountInput.value = "";
-      bidAmountInput.placeholder = "Complete the required fields above first";
+
+      if (missingItems.length === 1) {
+        bidAmountInput.placeholder = missingItems[0] + " before a bid can be entered";
+      } else {
+        bidAmountInput.placeholder = "All bidder details above must be  completed before a bid can be entered";
+      }
     }
   }
 
@@ -1424,7 +1454,6 @@ startAuctionRefresh();
     <div id="bolbModalTitle" class="bolb-modal-title">
       Boss of Luxury Brands
     </div>
-
     <div id="bolbModalMessage" class="bolb-modal-message"></div>
 
     <div id="bolbModalButtons" class="bolb-modal-buttons">
