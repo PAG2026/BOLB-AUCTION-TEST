@@ -94,6 +94,21 @@ input, textarea, select {
   font-size:16px;
 }
 
+.bid-entry-status {
+  display:none;
+  width:100%;
+  max-width:100%;
+  padding:8px 10px;
+  margin:2px 0 6px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+  font-size:14px;
+  font-weight:bold;
+  line-height:1.25;
+  white-space:normal;
+}
+
 .field-hint {
   display:none;
   font-size:14px;
@@ -536,7 +551,8 @@ Select the Bank for your Bank to Bank Transfer (for when you win !)
   </button>
 </div>
 
-<input id="bidAmount" type="text" inputmode="numeric" placeholder="Complete the required fields above first" disabled>
+<div id="bidEntryStatus" class="bid-entry-status"></div>
+<input id="bidAmount" type="text" inputmode="numeric" placeholder="ENTER YOUR BID" disabled>
 <div id="bidAmountHint" class="field-hint"></div>
 
 <button id="submitBidButton" onclick="sendBid()" disabled>Submit Bid</button>
@@ -849,7 +865,7 @@ function numberToWords(num) {
 
   function clearBidBox() {
     bidInput.value = "";
-    bidInput.placeholder = "Enter YOUR BID amount e.g. " + minRequired.toLocaleString();
+    bidInput.placeholder = "ENTER YOUR BID e.g. J$" + minRequired.toLocaleString();
   }
 
 showFieldHint("firstNameHint", "");
@@ -1338,6 +1354,7 @@ function setupLiveFieldValidation() {
 
   function updateBidEntryState() {
     const ready = isReadyForBidEntry();
+    const bidEntryStatus = document.getElementById("bidEntryStatus");
 
     const missingItems = [];
 
@@ -1365,14 +1382,27 @@ function setupLiveFieldValidation() {
     submitBidButton.disabled = !ready;
 
     if (ready) {
-      bidAmountInput.placeholder = bidAmountInput.placeholder.replace("All bidder details above must be  completed before a bid can be entered", "ENTER YOUR BID");
+      const nextRequiredBid = Number(bidAmountInput.min || 0);
+
+      bidEntryStatus.style.display = "none";
+      bidAmountInput.style.display = "block";
+      submitBidButton.style.display = "block";
+
+      bidAmountInput.placeholder = nextRequiredBid
+        ? "ENTER YOUR BID e.g. J$" + nextRequiredBid.toLocaleString()
+        : "ENTER YOUR BID";
     } else {
       bidAmountInput.value = "";
+      bidAmountInput.style.display = "none";
+      submitBidButton.style.display = "none";
+      bidEntryStatus.style.display = "block";
 
       if (missingItems.length === 1) {
-        bidAmountInput.placeholder = missingItems[0] + " before a bid can be entered";
+        bidEntryStatus.innerText = missingItems[0] + " before a bid can be entered";
+        bidEntryStatus.style.color = "#0066cc";
       } else {
-        bidAmountInput.placeholder = "All bidder details above must be  completed before a bid can be entered";
+        bidEntryStatus.innerText = "All bidder details above must be completed before a bid can be entered";
+        bidEntryStatus.style.color = "#cc0000";
       }
     }
   }
