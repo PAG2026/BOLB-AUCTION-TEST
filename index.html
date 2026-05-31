@@ -246,9 +246,8 @@ h2 {
 h3 {
   margin: 6px 0 6px 0;
   font-size:15px;
-  font-weight:normal;
+  font-weight:bold;
 }
-
 p {
   font-size: 14px;
   margin: 6px 0;
@@ -264,7 +263,7 @@ p {
 }
 
 #liveCountdownBottom {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 input, textarea, select, button {
@@ -492,17 +491,6 @@ input, textarea, select, button {
   </div>
 </div>
   
-<h3 id="bidFormTitle">Place Your Bid</h3>
-
-<input id="phone" placeholder="Phone number e.g. 8761234567">
-<div id="phoneHint" class="field-hint"></div>
-
-<input id="firstName" placeholder="First Name">
-<div id="firstNameHint" class="field-hint"></div>
-
-<input id="surnameInitial" placeholder="Surname Initial">
-<div id="surnameInitialHint" class="field-hint"></div>
-
 <div class="rules" id="auctionRulesBox">
   <b style="display:block; margin-bottom:2px;">Auction Rules</b>
 Bidder identities are private and shown only as Bidder IDs.<br>
@@ -524,23 +512,39 @@ False bids, fake details or failure to pay may result in being blocked from futu
   <span style="color:red;">NEED HELP?</span> Call/WhatsApp<br>
   The Boss of Luxury Brands at 876-366-5650
 </div>
- 
 </div>
 
 <button id="showRulesButton" type="button" style="display:none; background:#111; color:#FFD700; margin-top:6px; margin-bottom:6px;">
-  Show Auction Rules
+  View Auction Rules
 </button>
 
 <label style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
   <span style="font-weight:normal; font-size:14px; flex:1 1 220px; min-width:0;">
     I agree to the auction rules, payment deadline, and delivery terms.
   </span>
-
   <input type="checkbox" id="agree" style="width:22px; height:22px; margin:0; flex-shrink:0;">
 </label>
-<select id="transferMethod" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding:10px; font-size:14px; font-weight:normal;"><option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
-Select the Bank for your Bank to Bank Transfer (for when you win !)
-</option>  <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
+
+<div id="bidderDetailsSection" style="display:none;">
+<h3 id="bidFormTitle">Thank you for agreeing to the Auction Rules. Please now complete your bidder details below.</h3>
+<label class="form-label" for="phone">Telephone Number <span id="phoneTick" class="completion-tick">✓</span></label>
+<input id="phone" placeholder="Phone number e.g. 8761234567">
+<div id="phoneHint" class="field-hint"></div>
+
+<label class="form-label" for="firstName">First Name <span id="firstNameTick" class="completion-tick">✓</span></label>
+<input id="firstName" placeholder="First Name">
+<div id="firstNameHint" class="field-hint"></div>
+
+<label class="form-label" for="surnameInitial">Surname Initial <span id="surnameInitialTick" class="completion-tick">✓</span></label>
+<input id="surnameInitial" placeholder="Surname Initial">
+<div id="surnameInitialHint" class="field-hint"></div>
+
+<label class="form-label" for="transferMethod">Select Bank <span id="transferMethodTick" class="completion-tick">✓</span></label>
+<select id="transferMethod" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding:10px; font-size:16px; font-weight:normal; color:#666;">
+  <option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
+    Select Your Bank (to pay when you win!)
+  </option>
+  <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
   <option value="(FGB) First Global Bank">(FGB) First Global Bank</option>
   <option value="(JN) Jamaica National">(JN) Jamaica National</option>
   <option value="(JMMB) Jamaica Money Market Brokers">(JMMB) Jamaica Money Market Brokers</option>
@@ -549,11 +553,9 @@ Select the Bank for your Bank to Bank Transfer (for when you win !)
   <option value="(BNS) Scotiabank">(BNS) Scotiabank</option>
   <option value="(VMBS) Victoria Mutual">(VMBS) Victoria Mutual</option>
 </select>
-
 <div id="transferMethodHint" class="field-hint"></div>
-
-  
-
+</div>
+<div id="biddingSection" style="display:none;">
  <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
 
 <h3 id="bidsTitle" style="font-size:16px; font-weight:bold; margin-bottom:6px; text-align:center; width:100%;">Current Highest Three (3) Bids</h3>
@@ -573,7 +575,7 @@ Select the Bank for your Bank to Bank Transfer (for when you win !)
 <div id="bidAmountHint" class="field-hint"></div>
 
 <button id="submitBidButton" onclick="sendBid()" disabled>Submit Bid</button>
-
+</div>
 </div>
 
 <script>
@@ -802,7 +804,7 @@ document.getElementById("bidAmountHint").style.display = "none";
 
   document.getElementById("topCountdown").innerText = text;
   document.getElementById("liveCountdownBottom").innerText =
-  text.replace("Time left:", "Time left to bid:");
+  text.replace("Time left:", "Reminder – the Auction closes in:");
 }
 function playSound() {
   document.getElementById("introSound").play();
@@ -1219,21 +1221,31 @@ const showRulesButton = document.getElementById("showRulesButton");
 
 agreeCheckbox.addEventListener("change", () => {
   if (agreeCheckbox.checked) {
-document.getElementById("topCountdown").style.display = "none";
     auctionRulesBox.style.display = "none";
+    showRulesButton.innerText = "View Auction Rules";
     showRulesButton.style.display = "block";
+document.getElementById("bidderDetailsSection").style.display = "block";
+document.getElementById("biddingSection").style.display = "block";
   } else {
-document.getElementById("topCountdown").style.display = "block";
     auctionRulesBox.style.display = "block";
+    showRulesButton.innerText = "View Auction Rules";
     showRulesButton.style.display = "none";
+document.getElementById("bidderDetailsSection").style.display = "none";
+document.getElementById("biddingSection").style.display = "none";
   }
 });
 
 showRulesButton.addEventListener("click", () => {
-  auctionRulesBox.style.display = "block";
-  showRulesButton.style.display = "none";
-  agreeCheckbox.checked = false;
-document.getElementById("topCountdown").style.display = "block";
+  if (auctionRulesBox.style.display === "none") {
+    auctionRulesBox.style.display = "block";
+    showRulesButton.innerText = "Hide Auction Rules";
+  } else {
+    auctionRulesBox.style.display = "none";
+    showRulesButton.innerText = "View Auction Rules";
+  }
+
+  showRulesButton.style.display = "block";
+  updateBidEntryState();
 });
 
 function showAllBidsPopup() {
@@ -1381,7 +1393,15 @@ function setupLiveFieldValidation() {
     const ready = isReadyForBidEntry();
     const bidEntryStatus = document.getElementById("bidEntryStatus");
 
+    function setCompletionTick(id, valid) {
+      const tick = document.getElementById(id);
+      if (tick) tick.style.display = valid ? "inline" : "none";
+    }
     const missingItems = [];
+
+    if (!/^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, ""))) {
+      missingItems.push("Enter your Jamaica phone number");
+    }
 
     if (!/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim())) {
       missingItems.push("Enter your first name");
@@ -1391,10 +1411,6 @@ function setupLiveFieldValidation() {
       missingItems.push("Enter your surname initial");
     }
 
-    if (!/^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, ""))) {
-      missingItems.push("Enter your Jamaica phone number");
-    }
-
     if (!agreeInput.checked) {
       missingItems.push("Agree to the auction rules");
     }
@@ -1402,6 +1418,11 @@ function setupLiveFieldValidation() {
     if (!transferMethodInput.value.trim()) {
       missingItems.push("Select your bank for Bank-to-Bank Transfer");
     }
+
+    setCompletionTick("phoneTick", /^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, "")));
+    setCompletionTick("firstNameTick", /^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim()));
+    setCompletionTick("surnameInitialTick", /^[A-Za-z]$/.test(surnameInitialInput.value.trim()));
+    setCompletionTick("transferMethodTick", !!transferMethodInput.value.trim());
 
     bidAmountInput.disabled = !ready;
     submitBidButton.disabled = !ready;
@@ -1420,7 +1441,7 @@ function setupLiveFieldValidation() {
       bidAmountInput.value = "";
       bidAmountInput.style.display = "none";
       submitBidButton.style.display = "none";
-      bidEntryStatus.style.display = "block";
+      bidEntryStatus.style.display = "none";
 
       if (missingItems.length === 1) {
         bidEntryStatus.innerText = missingItems[0] + " before a bid can be entered";
@@ -1432,12 +1453,10 @@ function setupLiveFieldValidation() {
     }
   }
 
-  showFieldHint("transferMethodHint", "Please select your bank for Bank-to-Bank Transfer");
 
   transferMethodInput.addEventListener("change", () => {
-    showFieldHint("transferMethodHint", transferMethodInput.value.trim() ? "" : "Please select your bank for Bank-to-Bank Transfer");
-    updateBidEntryState();
-  });
+  updateBidEntryState();
+});
 
   phoneInput.addEventListener("input", () => {
     const cleanPhoneValue = phoneInput.value.replace(/\D/g, "");
