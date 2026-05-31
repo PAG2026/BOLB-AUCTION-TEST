@@ -739,7 +739,15 @@ document.getElementById("agree").parentElement.style.display = "none";
 document.getElementById("transferMethod").style.display = "none";
 document.getElementById("bidAmount").style.display = "none";
 document.querySelector('button[onclick="sendBid()"]').style.display = "none";
-document.getElementById("liveCountdownBottom").style.display = "none";  const bids = Array.from(document.querySelectorAll(".bid-row"));
+document.getElementById("liveCountdownBottom").style.display = "none";
+document.getElementById("bidEntryStatus").style.display = "none";
+document.getElementById("phoneHint").style.display = "none";
+document.getElementById("firstNameHint").style.display = "none";
+document.getElementById("surnameInitialHint").style.display = "none";
+document.getElementById("transferMethodHint").style.display = "none";
+document.getElementById("bidAmountHint").style.display = "none";
+
+  const bids = Array.from(document.querySelectorAll(".bid-row"));
 
   if (bids.length > 0) {
 
