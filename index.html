@@ -98,15 +98,18 @@ input, textarea, select {
   display:none;
   width:100%;
   max-width:100%;
-  padding:8px 10px;
-  margin:2px 0 6px;
+  padding:10px 12px;
+  margin:8px 0 8px;
   border-radius:10px;
-  border:1px solid #ccc;
+  border:2px solid #cc0000;
+  background:#fff8f8;
   box-sizing:border-box;
-  font-size:14px;
+  font-size:16px;
   font-weight:bold;
   line-height:1.25;
   white-space:normal;
+  color:#cc0000;
+  text-align:center;
 }
 
 .field-hint {
@@ -131,10 +134,33 @@ input, textarea, select {
 }
 
 .completion-tick {
-  color:#0a9f3d;
-  font-size:18px;
-  font-weight:bold;
   display:none;
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  width:28px;
+  height:28px;
+  border:2px solid #0a9f3d;
+  border-radius:6px;
+  background:white;
+  color:#0a9f3d;
+  font-size:28px;
+  font-weight:bold;
+  line-height:1;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+}
+
+.input-with-tick {
+  position:relative;
+}
+
+.input-with-tick input,
+.input-with-tick select {
+  padding-right:48px;
+  background:white;
 }
 
 textarea {
@@ -519,41 +545,56 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </button>
 
 <label style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
-  <span style="font-weight:normal; font-size:14px; flex:1 1 220px; min-width:0;">
-    I agree to the auction rules, payment deadline, and delivery terms.
-  </span>
-  <input type="checkbox" id="agree" style="width:22px; height:22px; margin:0; flex-shrink:0;">
+  <span id="agreeText" style="font-weight:BOLD; font-size:14px; flex:1 1 220px; min-width:0;">
+    Please agree to the auction rules, payment deadline, and delivery terms.
+</span>
+<input type="checkbox" id="agree" style="position:absolute; opacity:0; pointer-events:none;">
+<span id="agreeVisualTick" style="width:28px; height:28px; border:2px solid #0a9f3d; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#0a9f3d; font-size:28px; font-weight:bold; line-height:1; flex-shrink:0;"></span>
 </label>
 
 <div id="bidderDetailsSection" style="display:none;">
 <h3 id="bidFormTitle">Thank you for agreeing to the Auction Rules. Please now complete your bidder details below.</h3>
-<label class="form-label" for="phone">Telephone Number <span id="phoneTick" class="completion-tick">✓</span></label>
-<input id="phone" placeholder="Phone number e.g. 8761234567">
+<label class="form-label" for="phone">Telephone Number</label>
+<div class="input-with-tick">
+  <input id="phone" placeholder="Phone number e.g. 8761234567">
+  <span id="phoneTick" class="completion-tick">✓</span>
+</div>
 <div id="phoneHint" class="field-hint"></div>
+<div id="highestBidderStatus" style="display:none; margin:6px 0 8px; padding:10px 12px; border:2px solid #0a9f3d; border-radius:10px; background:#f4fff7; color:#0a6b2b; font-size:15px; font-weight:bold; text-align:center; line-height:1.3;"></div>
 
-<label class="form-label" for="firstName">First Name <span id="firstNameTick" class="completion-tick">✓</span></label>
-<input id="firstName" placeholder="First Name">
+<label class="form-label" for="firstName">First Name</label>
+<div class="input-with-tick">
+  <input id="firstName" placeholder="First Name">
+  <span id="firstNameTick" class="completion-tick">✓</span>
+</div>
 <div id="firstNameHint" class="field-hint"></div>
 
-<label class="form-label" for="surnameInitial">Surname Initial <span id="surnameInitialTick" class="completion-tick">✓</span></label>
-<input id="surnameInitial" placeholder="Surname Initial">
+<label class="form-label" for="surnameInitial">Surname Initial</label>
+<div class="input-with-tick">
+  <input id="surnameInitial" placeholder="Surname Initial">
+  <span id="surnameInitialTick" class="completion-tick">✓</span>
+</div>
 <div id="surnameInitialHint" class="field-hint"></div>
 
-<label class="form-label" for="transferMethod">Select Bank <span id="transferMethodTick" class="completion-tick">✓</span></label>
-<select id="transferMethod" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding:10px; font-size:16px; font-weight:normal; color:#666;">
-  <option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
-    Select Your Bank (to pay when you win!)
-  </option>
-  <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
-  <option value="(FGB) First Global Bank">(FGB) First Global Bank</option>
-  <option value="(JN) Jamaica National">(JN) Jamaica National</option>
-  <option value="(JMMB) Jamaica Money Market Brokers">(JMMB) Jamaica Money Market Brokers</option>
-  <option value="(NCB) National Commercial Bank">(NCB) National Commercial Bank</option>
-  <option value="Sagicor Bank">Sagicor Bank</option>
-  <option value="(BNS) Scotiabank">(BNS) Scotiabank</option>
-  <option value="(VMBS) Victoria Mutual">(VMBS) Victoria Mutual</option>
-</select>
+<label class="form-label" for="transferMethod">Select Bank</label>
+<div class="input-with-tick">
+  <select id="transferMethod" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding:10px 48px 10px 10px; font-size:16px; font-weight:normal; color:#666; background:white;">
+    <option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
+      Select Your Bank (to pay when you win!)
+    </option>
+    <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
+    <option value="(FGB) First Global Bank">(FGB) First Global Bank</option>
+    <option value="(JN) Jamaica National">(JN) Jamaica National</option>
+    <option value="(JMMB) Jamaica Money Market Brokers">(JMMB) Jamaica Money Market Brokers</option>
+    <option value="(NCB) National Commercial Bank">(NCB) National Commercial Bank</option>
+    <option value="Sagicor Bank">Sagicor Bank</option>
+    <option value="(BNS) Scotiabank">(BNS) Scotiabank</option>
+    <option value="(VMBS) Victoria Mutual">(VMBS) Victoria Mutual</option>
+  </select>
+  <span id="transferMethodTick" class="completion-tick">✓</span>
+</div>
 <div id="transferMethodHint" class="field-hint"></div>
+<div id="bidEntryStatus" class="bid-entry-status"></div>
 </div>
 <div id="biddingSection" style="display:none;">
  <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
@@ -570,7 +611,6 @@ False bids, fake details or failure to pay may result in being blocked from futu
   </button>
 </div>
 
-<div id="bidEntryStatus" class="bid-entry-status"></div>
 <input id="bidAmount" type="text" inputmode="numeric" placeholder="ENTER YOUR BID" disabled>
 <div id="bidAmountHint" class="field-hint"></div>
 
@@ -584,9 +624,36 @@ const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1sQs4Ec7H5KTYlUaD
 let auction = null;
 let allAuctionBids = [];
 let initialLoadComplete = false;
+let currentAcceptedBidderId = "";
+let currentAcceptedFirstName = "";
+let currentAcceptedSurnameInitial = "";
+let currentAcceptedTransferMethod = "";
+let alreadyHighestBidderNoticeShown = false;
+let phoneIsCurrentHighestBidder = false;
+let highestBidderPhoneChecked = "";
+let highestBidderPopupShownForPhone = "";
 
 function money(v) {
   return "J$" + Number(v || 0).toLocaleString();
+}
+
+function currentAcceptedBidderIsHighest() {
+  const currentFirstName = document.getElementById("firstName").value.trim().toLowerCase();
+  const currentSurnameInitial = document.getElementById("surnameInitial").value.trim().toUpperCase();
+  const currentTransferMethod = document.getElementById("transferMethod").value.trim().toLowerCase();
+
+  const currentDetailsMatchAccepted =
+    currentFirstName === currentAcceptedFirstName &&
+    currentSurnameInitial === currentAcceptedSurnameInitial &&
+    currentTransferMethod === currentAcceptedTransferMethod;
+
+  return (
+    currentAcceptedBidderId &&
+    currentDetailsMatchAccepted &&
+    Array.isArray(allAuctionBids) &&
+    allAuctionBids.length > 0 &&
+    allAuctionBids[0].bidderId === currentAcceptedBidderId
+  );
 }
 
 function showFieldHint(id, message) {
@@ -609,9 +676,61 @@ function cleanBidValue(value) {
 function formatJMD(value) {
   return "J$" + Number(value || 0).toLocaleString();
 }
+
+function getValidPhoneForHighestBidCheck() {
+  const phoneInput = document.getElementById("phone");
+  if (!phoneInput) return "";
+
+  const cleanPhoneValue = phoneInput.value.replace(/\D/g, "");
+
+  return /^(876|658)\d{7}$/.test(cleanPhoneValue)
+    ? cleanPhoneValue
+    : "";
+}
+
+function updateHighestBidderStatusFromServer(data) {
+  const checkedPhone = getValidPhoneForHighestBidCheck();
+
+  if (!checkedPhone) {
+    phoneIsCurrentHighestBidder = false;
+    highestBidderPhoneChecked = "";
+    return;
+  }
+
+  const wasHighest = phoneIsCurrentHighestBidder;
+
+  phoneIsCurrentHighestBidder =
+    data && data.enteredPhoneIsHighestBidder === true;
+
+  highestBidderPhoneChecked = checkedPhone;
+
+  if (phoneIsCurrentHighestBidder && highestBidderPopupShownForPhone !== checkedPhone) {
+    highestBidderPopupShownForPhone = checkedPhone;
+
+    showBolbAlert(
+      "A bid from this telephone number is currently the highest bidder.",
+      "CURRENT HIGHEST BIDDER"
+    );
+  }
+
+  if (!phoneIsCurrentHighestBidder && wasHighest) {
+    highestBidderPopupShownForPhone = "";
+  }
+
+  if (typeof window.updateBidEntryState === "function") {
+    window.updateBidEntryState();
+  }
+}
+
 function loadAuction() {
-  
-fetch(WEB_APP_URL)
+
+const phoneForHighestCheck = getValidPhoneForHighestBidCheck();
+
+const auctionFetchUrl = phoneForHighestCheck
+  ? WEB_APP_URL + "?phone=" + encodeURIComponent(phoneForHighestCheck)
+  : WEB_APP_URL;
+
+fetch(auctionFetchUrl)
     .then(r => r.json())
     .then(d => {
       auction = d.auction || {};
@@ -685,6 +804,7 @@ if (Array.isArray(auction.extraPictureLinks) && auction.extraPictureLinks.length
 }
 
       allAuctionBids = d.bids || [];
+updateHighestBidderStatusFromServer(d);
 showBids(allAuctionBids);
 updateCountdown();
 
@@ -1131,7 +1251,28 @@ showFieldHint("bidAmountHint", "");
   clearBidBox();
 
   if (d.success) {
-    await showBolbAlert(d.message || "Bid accepted.");
+    currentAcceptedBidderId = d.bidderId || "";
+    currentAcceptedFirstName = firstName.toLowerCase();
+    currentAcceptedSurnameInitial = surnameInitial.toUpperCase();
+    currentAcceptedTransferMethod = transferMethod.toLowerCase();
+    alreadyHighestBidderNoticeShown = false;
+    highestBidderPopupShownForPhone = cleanPhone;
+
+    await showBolbAlert(
+      "Your bid has been accepted.\n\nYou are now the highest bidder.",
+      "HURRAY! YOU ARE NOW THE HIGHEST BIDDER"
+    );
+
+    loadAuction();
+  } else if (d.alreadyHighestBidder) {
+    clearBidBox();
+    alreadyHighestBidderNoticeShown = true;
+
+    await showBolbAlert(
+      d.message || "You are already the highest bidder.\n\nNo further bid is needed unless another bidder places a higher bid.",
+      "YOU ARE ALREADY THE HIGHEST BIDDER"
+    );
+
     loadAuction();
   } else {
     await showBolbAlert(d.message || "Bid could not be submitted.");
@@ -1220,19 +1361,29 @@ const auctionRulesBox = document.getElementById("auctionRulesBox");
 const showRulesButton = document.getElementById("showRulesButton");
 
 agreeCheckbox.addEventListener("change", () => {
+  const agreeText = document.getElementById("agreeText");
+  const agreeVisualTick = document.getElementById("agreeVisualTick");
+
   if (agreeCheckbox.checked) {
+    if (agreeText) agreeText.innerText = "I agree to the auction rules, payment deadline, and delivery terms.";
+    if (agreeVisualTick) agreeVisualTick.innerText = "✓";
+
     auctionRulesBox.style.display = "none";
     showRulesButton.innerText = "View Auction Rules";
     showRulesButton.style.display = "block";
-document.getElementById("bidderDetailsSection").style.display = "block";
-document.getElementById("biddingSection").style.display = "block";
+    document.getElementById("bidderDetailsSection").style.display = "block";
+    document.getElementById("biddingSection").style.display = "block";
   } else {
+    if (agreeText) agreeText.innerText = "Please agree to the auction rules, payment deadline, and delivery terms.";
+    if (agreeVisualTick) agreeVisualTick.innerText = "";
+
     auctionRulesBox.style.display = "block";
     showRulesButton.innerText = "View Auction Rules";
     showRulesButton.style.display = "none";
-document.getElementById("bidderDetailsSection").style.display = "none";
-document.getElementById("biddingSection").style.display = "none";
+    document.getElementById("bidderDetailsSection").style.display = "none";
+    document.getElementById("biddingSection").style.display = "none";
   }
+
 });
 
 showRulesButton.addEventListener("click", () => {
@@ -1245,7 +1396,6 @@ showRulesButton.addEventListener("click", () => {
   }
 
   showRulesButton.style.display = "block";
-  updateBidEntryState();
 });
 
 function showAllBidsPopup() {
@@ -1395,7 +1545,7 @@ function setupLiveFieldValidation() {
 
     function setCompletionTick(id, valid) {
       const tick = document.getElementById(id);
-      if (tick) tick.style.display = valid ? "inline" : "none";
+      if (tick) tick.style.display = valid ? "flex" : "none";
     }
     const missingItems = [];
 
@@ -1424,6 +1574,34 @@ function setupLiveFieldValidation() {
     setCompletionTick("surnameInitialTick", /^[A-Za-z]$/.test(surnameInitialInput.value.trim()));
     setCompletionTick("transferMethodTick", !!transferMethodInput.value.trim());
 
+    const cleanPhoneForStatus = phoneInput.value.replace(/\D/g, "");
+    const highestStatusActive =
+      phoneIsCurrentHighestBidder &&
+      highestBidderPhoneChecked === cleanPhoneForStatus;
+
+    const highestStatusBox = document.getElementById("highestBidderStatus");
+
+    if (highestStatusBox) {
+      if (highestStatusActive) {
+        highestStatusBox.innerHTML =
+          "✓ A bid from this telephone number is currently the highest bid.<br>No further bid is required unless another bidder places a higher bid.";
+        highestStatusBox.style.display = "block";
+      } else {
+        highestStatusBox.innerHTML = "";
+        highestStatusBox.style.display = "none";
+      }
+    }
+
+    if (highestStatusActive) {
+      bidAmountInput.value = "";
+      bidAmountInput.disabled = true;
+      submitBidButton.disabled = true;
+      bidEntryStatus.style.display = "none";
+      bidAmountInput.style.display = "none";
+      submitBidButton.style.display = "none";
+      return;
+    }
+
     bidAmountInput.disabled = !ready;
     submitBidButton.disabled = !ready;
 
@@ -1441,14 +1619,21 @@ function setupLiveFieldValidation() {
       bidAmountInput.value = "";
       bidAmountInput.style.display = "none";
       submitBidButton.style.display = "none";
-      bidEntryStatus.style.display = "none";
+      const firstNameNeedsAttention = !/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim());
+      const surnameInitialNeedsAttention = !/^[A-Za-z]$/.test(surnameInitialInput.value.trim());
+      const showNameWarning = agreeInput.checked && (firstNameNeedsAttention || surnameInitialNeedsAttention);
 
-      if (missingItems.length === 1) {
-        bidEntryStatus.innerText = missingItems[0] + " before a bid can be entered";
-        bidEntryStatus.style.color = "#0066cc";
+      bidEntryStatus.style.display = showNameWarning ? "block" : "none";
+      bidEntryStatus.style.color = "#cc0000";
+
+      if (firstNameNeedsAttention && surnameInitialNeedsAttention) {
+        bidEntryStatus.innerText = "⚠ FIVE GREEN TICKS ARE REQUIRED BEFORE YOU CAN ENTER A BID. PLEASE CHECK FIRST NAME AND SURNAME INITIAL ABOVE.";
+      } else if (firstNameNeedsAttention) {
+        bidEntryStatus.innerText = "⚠ FIVE GREEN TICKS ARE REQUIRED BEFORE YOU CAN ENTER A BID. PLEASE CHECK FIRST NAME ABOVE.";
+      } else if (surnameInitialNeedsAttention) {
+        bidEntryStatus.innerText = "⚠ FIVE GREEN TICKS ARE REQUIRED BEFORE YOU CAN ENTER A BID. PLEASE CHECK SURNAME INITIAL ABOVE.";
       } else {
-        bidEntryStatus.innerText = "All bidder details above must be completed before a bid can be entered";
-        bidEntryStatus.style.color = "#cc0000";
+        bidEntryStatus.innerText = "";
       }
     }
   }
@@ -1468,6 +1653,14 @@ function setupLiveFieldValidation() {
     else if (cleanPhoneValue.length > 10) showFieldHint("phoneHint", "Use 10 digits only");
     else if (cleanPhoneValue.length < 10) showFieldHint("phoneHint", "Enter full 10-digit Jamaica phone number");
     else showFieldHint("phoneHint", "");
+
+    if (/^(876|658)\d{7}$/.test(cleanPhoneValue)) {
+      loadAuction();
+    } else {
+      phoneIsCurrentHighestBidder = false;
+      highestBidderPhoneChecked = "";
+      highestBidderPopupShownForPhone = "";
+    }
 
     updateBidEntryState();
   });
@@ -1505,11 +1698,33 @@ function setupLiveFieldValidation() {
 
   bidAmountInput.addEventListener("input", () => {
     const cleanedBid = cleanBidValue(bidAmountInput.value);
+
+    if (cleanedBid && currentAcceptedBidderIsHighest()) {
+      bidAmountInput.value = "";
+      showFieldHint("bidAmountHint", "");
+
+      if (!alreadyHighestBidderNoticeShown) {
+        alreadyHighestBidderNoticeShown = true;
+
+        showBolbAlert(
+          "You are already the highest bidder.\n\nNo further bid is needed unless another bidder places a higher bid.",
+          "YOU ARE ALREADY THE HIGHEST BIDDER"
+        );
+      }
+
+      return;
+    }
+
+    if (!currentAcceptedBidderIsHighest()) {
+      alreadyHighestBidderNoticeShown = false;
+    }
+
     if (!cleanedBid) showFieldHint("bidAmountHint", "");
     else if (!/^\d+$/.test(cleanedBid)) showFieldHint("bidAmountHint", "Use numbers only");
     else showFieldHint("bidAmountHint", "");
   });
 
+  window.updateBidEntryState = updateBidEntryState;
   updateBidEntryState();
 }
 
