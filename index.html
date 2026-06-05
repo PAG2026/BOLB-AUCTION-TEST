@@ -560,7 +560,6 @@ False bids, fake details or failure to pay may result in being blocked from futu
   <span id="phoneTick" class="completion-tick">✓</span>
 </div>
 <div id="phoneHint" class="field-hint"></div>
-<div id="highestBidderStatus" style="display:none; margin:6px 0 8px; padding:10px 12px; border:2px solid #0a9f3d; border-radius:10px; background:#f4fff7; color:#0a6b2b; font-size:15px; font-weight:bold; text-align:center; line-height:1.3;"></div>
 
 <label class="form-label" for="firstName">First Name</label>
 <div class="input-with-tick">
@@ -619,41 +618,14 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyPjd2lIMtKk1_z_nCTUFViNtYSr1LkQu7IDCHPsMvZ9UZoBUefLf6RyPbii5zpyJPQDw/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1sQs4Ec7H5KTYlUaDwlQ-lY6xp5HmsRAxpvyFmmbfCTucrACT5q4-m4qVjU3LuGIpaA/exec";
 
 let auction = null;
 let allAuctionBids = [];
 let initialLoadComplete = false;
-let currentAcceptedBidderId = "";
-let currentAcceptedFirstName = "";
-let currentAcceptedSurnameInitial = "";
-let currentAcceptedTransferMethod = "";
-let alreadyHighestBidderNoticeShown = false;
-let phoneIsCurrentHighestBidder = false;
-let highestBidderPhoneChecked = "";
-let highestBidderPopupShownForPhone = "";
 
 function money(v) {
   return "J$" + Number(v || 0).toLocaleString();
-}
-
-function currentAcceptedBidderIsHighest() {
-  const currentFirstName = document.getElementById("firstName").value.trim().toLowerCase();
-  const currentSurnameInitial = document.getElementById("surnameInitial").value.trim().toUpperCase();
-  const currentTransferMethod = document.getElementById("transferMethod").value.trim().toLowerCase();
-
-  const currentDetailsMatchAccepted =
-    currentFirstName === currentAcceptedFirstName &&
-    currentSurnameInitial === currentAcceptedSurnameInitial &&
-    currentTransferMethod === currentAcceptedTransferMethod;
-
-  return (
-    currentAcceptedBidderId &&
-    currentDetailsMatchAccepted &&
-    Array.isArray(allAuctionBids) &&
-    allAuctionBids.length > 0 &&
-    allAuctionBids[0].bidderId === currentAcceptedBidderId
-  );
 }
 
 function showFieldHint(id, message) {
@@ -676,61 +648,9 @@ function cleanBidValue(value) {
 function formatJMD(value) {
   return "J$" + Number(value || 0).toLocaleString();
 }
-
-function getValidPhoneForHighestBidCheck() {
-  const phoneInput = document.getElementById("phone");
-  if (!phoneInput) return "";
-
-  const cleanPhoneValue = phoneInput.value.replace(/\D/g, "");
-
-  return /^(876|658)\d{7}$/.test(cleanPhoneValue)
-    ? cleanPhoneValue
-    : "";
-}
-
-function updateHighestBidderStatusFromServer(data) {
-  const checkedPhone = getValidPhoneForHighestBidCheck();
-
-  if (!checkedPhone) {
-    phoneIsCurrentHighestBidder = false;
-    highestBidderPhoneChecked = "";
-    return;
-  }
-
-  const wasHighest = phoneIsCurrentHighestBidder;
-
-  phoneIsCurrentHighestBidder =
-    data && data.enteredPhoneIsHighestBidder === true;
-
-  highestBidderPhoneChecked = checkedPhone;
-
-  if (phoneIsCurrentHighestBidder && highestBidderPopupShownForPhone !== checkedPhone) {
-    highestBidderPopupShownForPhone = checkedPhone;
-
-    showBolbAlert(
-      "A bid from this telephone number is currently the highest bidder.",
-      "CURRENT HIGHEST BIDDER"
-    );
-  }
-
-  if (!phoneIsCurrentHighestBidder && wasHighest) {
-    highestBidderPopupShownForPhone = "";
-  }
-
-  if (typeof window.updateBidEntryState === "function") {
-    window.updateBidEntryState();
-  }
-}
-
 function loadAuction() {
-
-const phoneForHighestCheck = getValidPhoneForHighestBidCheck();
-
-const auctionFetchUrl = phoneForHighestCheck
-  ? WEB_APP_URL + "?phone=" + encodeURIComponent(phoneForHighestCheck)
-  : WEB_APP_URL;
-
-fetch(auctionFetchUrl)
+  
+fetch(WEB_APP_URL)
     .then(r => r.json())
     .then(d => {
       auction = d.auction || {};
@@ -804,9 +724,12 @@ if (Array.isArray(auction.extraPictureLinks) && auction.extraPictureLinks.length
 }
 
       allAuctionBids = d.bids || [];
-updateHighestBidderStatusFromServer(d);
 showBids(allAuctionBids);
 updateCountdown();
+
+if (typeof updateBidEntryState === "function") {
+  updateBidEntryState();
+}
 
 document.getElementById("loadingScreen").style.display = "none";
 document.getElementById("auctionCard").style.display = "block";
@@ -1251,29 +1174,14 @@ showFieldHint("bidAmountHint", "");
   clearBidBox();
 
   if (d.success) {
-    currentAcceptedBidderId = d.bidderId || "";
-    currentAcceptedFirstName = firstName.toLowerCase();
-    currentAcceptedSurnameInitial = surnameInitial.toUpperCase();
-    currentAcceptedTransferMethod = transferMethod.toLowerCase();
-    alreadyHighestBidderNoticeShown = false;
-    highestBidderPopupShownForPhone = cleanPhone;
-
-    await showBolbAlert(
-      "Your bid has been accepted.\n\nYou are now the highest bidder.",
-      "HURRAY! YOU ARE NOW THE HIGHEST BIDDER"
-    );
+    
+await showBolbAlert(
+  "Your bid has been accepted.",
+  "HURRAY! YOU ARE NOW THE HIGHEST BIDDER"
+);
 
     loadAuction();
-  } else if (d.alreadyHighestBidder) {
-    clearBidBox();
-    alreadyHighestBidderNoticeShown = true;
 
-    await showBolbAlert(
-      d.message || "You are already the highest bidder.\n\nNo further bid is needed unless another bidder places a higher bid.",
-      "YOU ARE ALREADY THE HIGHEST BIDDER"
-    );
-
-    loadAuction();
   } else {
     await showBolbAlert(d.message || "Bid could not be submitted.");
   }
@@ -1574,34 +1482,6 @@ function setupLiveFieldValidation() {
     setCompletionTick("surnameInitialTick", /^[A-Za-z]$/.test(surnameInitialInput.value.trim()));
     setCompletionTick("transferMethodTick", !!transferMethodInput.value.trim());
 
-    const cleanPhoneForStatus = phoneInput.value.replace(/\D/g, "");
-    const highestStatusActive =
-      phoneIsCurrentHighestBidder &&
-      highestBidderPhoneChecked === cleanPhoneForStatus;
-
-    const highestStatusBox = document.getElementById("highestBidderStatus");
-
-    if (highestStatusBox) {
-      if (highestStatusActive) {
-        highestStatusBox.innerHTML =
-          "✓ A bid from this telephone number is currently the highest bid.<br>No further bid is required unless another bidder places a higher bid.";
-        highestStatusBox.style.display = "block";
-      } else {
-        highestStatusBox.innerHTML = "";
-        highestStatusBox.style.display = "none";
-      }
-    }
-
-    if (highestStatusActive) {
-      bidAmountInput.value = "";
-      bidAmountInput.disabled = true;
-      submitBidButton.disabled = true;
-      bidEntryStatus.style.display = "none";
-      bidAmountInput.style.display = "none";
-      submitBidButton.style.display = "none";
-      return;
-    }
-
     bidAmountInput.disabled = !ready;
     submitBidButton.disabled = !ready;
 
@@ -1609,6 +1489,9 @@ function setupLiveFieldValidation() {
       const nextRequiredBid = Number(bidAmountInput.min || 0);
 
       bidEntryStatus.style.display = "none";
+      bidEntryStatus.style.color = "#cc0000";
+      bidEntryStatus.style.borderColor = "#cc0000";
+      bidEntryStatus.style.background = "#fff8f8";
       bidAmountInput.style.display = "block";
       submitBidButton.style.display = "block";
 
@@ -1654,14 +1537,6 @@ function setupLiveFieldValidation() {
     else if (cleanPhoneValue.length < 10) showFieldHint("phoneHint", "Enter full 10-digit Jamaica phone number");
     else showFieldHint("phoneHint", "");
 
-    if (/^(876|658)\d{7}$/.test(cleanPhoneValue)) {
-      loadAuction();
-    } else {
-      phoneIsCurrentHighestBidder = false;
-      highestBidderPhoneChecked = "";
-      highestBidderPopupShownForPhone = "";
-    }
-
     updateBidEntryState();
   });
 
@@ -1699,32 +1574,11 @@ function setupLiveFieldValidation() {
   bidAmountInput.addEventListener("input", () => {
     const cleanedBid = cleanBidValue(bidAmountInput.value);
 
-    if (cleanedBid && currentAcceptedBidderIsHighest()) {
-      bidAmountInput.value = "";
-      showFieldHint("bidAmountHint", "");
-
-      if (!alreadyHighestBidderNoticeShown) {
-        alreadyHighestBidderNoticeShown = true;
-
-        showBolbAlert(
-          "You are already the highest bidder.\n\nNo further bid is needed unless another bidder places a higher bid.",
-          "YOU ARE ALREADY THE HIGHEST BIDDER"
-        );
-      }
-
-      return;
-    }
-
-    if (!currentAcceptedBidderIsHighest()) {
-      alreadyHighestBidderNoticeShown = false;
-    }
-
     if (!cleanedBid) showFieldHint("bidAmountHint", "");
     else if (!/^\d+$/.test(cleanedBid)) showFieldHint("bidAmountHint", "Use numbers only");
     else showFieldHint("bidAmountHint", "");
   });
 
-  window.updateBidEntryState = updateBidEntryState;
   updateBidEntryState();
 }
 
