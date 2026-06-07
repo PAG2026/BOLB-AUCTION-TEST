@@ -1174,11 +1174,17 @@ showFieldHint("bidAmountHint", "");
   clearBidBox();
 
   if (d.success) {
-    
-await showBolbAlert(
-  "Your bid has been accepted.",
-  "HURRAY! YOU ARE NOW THE HIGHEST BIDDER"
-);
+
+    const acceptedBidderId = d.bidderId || "your assigned Bidder ID";
+
+    const acceptedMessage = d.isFirstBidByThisPhone === true
+      ? "Your bid has been accepted.\n\nYour Bidder ID for this auction is: " + acceptedBidderId + ".\n\nPlease write down or remember this Bidder ID so that you can track your bids throughout the auction.\n\nYou are currently the Highest Bidder."
+      : "Your further bid has been accepted.\n\nYour Bidder ID remains: " + acceptedBidderId + ".\n\nYou are currently the Highest Bidder.";
+
+    await showBolbAlert(
+      acceptedMessage,
+      "BID ACCEPTED"
+    );
 
     loadAuction();
 
