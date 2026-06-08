@@ -519,7 +519,10 @@ input, textarea, select, button {
   
 <div class="rules" id="auctionRulesBox">
   <b style="display:block; margin-bottom:2px;">Auction Rules</b>
-Bidder identities are private and shown only as Bidder IDs.<br>
+Bidder identities are private and shown only as anonymous Bidder IDs.<br>
+Bidder IDs are assigned separately for each auction and will NOT be the same in any other auction.<br>
+The same Bidder ID will be used throughout this auction whenever the same telephone number is used to place additional bids.<br>
+Bidder IDs are assigned solely for bidder identification and should not be interpreted as indicating who bid first, who bid last, or the order in which bids were made.<br>
 <b>Delivery cost is separate and is NOT included in any bid.</b><br>
 All valid bids are time-stamped and displayed.<br>
 Highest valid bid at closing wins. Closing time will always be between 10:00 am and 2.00 pm.<br>
@@ -618,7 +621,7 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx1sQs4Ec7H5KTYlUaDwlQ-lY6xp5HmsRAxpvyFmmbfCTucrACT5q4-m4qVjU3LuGIpaA/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyPjd2lIMtKk1_z_nCTUFViNtYSr1LkQu7IDCHPsMvZ9UZoBUefLf6RyPbii5zpyJPQDw/exec";
 
 let auction = null;
 let allAuctionBids = [];
