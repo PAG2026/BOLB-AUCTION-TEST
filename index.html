@@ -581,7 +581,7 @@ False bids, fake details or failure to pay may result in being blocked from futu
 <label class="form-label" for="transferMethod">Select Bank</label>
 <div class="input-with-tick">
   <select id="transferMethod" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding:10px 48px 10px 10px; font-size:16px; font-weight:normal; color:#666; background:white;">
-    <option value="" style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
+    <option id="transferMethodPlaceholder" value="" disabled selected style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
       Select Your Bank (to pay when you win!)
     </option>
     <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
@@ -597,6 +597,9 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </div>
 <div id="transferMethodHint" class="field-hint"></div>
 <div id="bidEntryStatus" class="bid-entry-status"></div>
+<button id="clearDetailsButton" type="button" style="display:none; background:#222; color:#FFD700; font-size:13px; padding:8px 10px; margin-top:6px;">
+  Please clear my details but let me watch the auction
+</button>
 </div>
 <div id="biddingSection" style="display:none;">
  <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
@@ -1429,6 +1432,8 @@ function setupLiveFieldValidation() {
   const transferMethodInput = document.getElementById("transferMethod");
   const agreeInput = document.getElementById("agree");
   const submitBidButton = document.getElementById("submitBidButton");
+const clearDetailsButton = document.getElementById("clearDetailsButton");
+let watchOnlyMode = false;
 
   function isReadyForBidEntry() {
     const firstNameValue = firstNameInput.value.trim();
@@ -1467,23 +1472,23 @@ function setupLiveFieldValidation() {
     const missingItems = [];
 
     if (!/^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, ""))) {
-      missingItems.push("Enter your Jamaica phone number");
+      missingItems.push("your Jamaica phone number");
     }
 
     if (!/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim())) {
-      missingItems.push("Enter your first name");
+      missingItems.push("your first name");
     }
 
     if (!/^[A-Za-z]$/.test(surnameInitialInput.value.trim())) {
-      missingItems.push("Enter your surname initial");
+      missingItems.push("the first letter of your surname");
     }
 
     if (!agreeInput.checked) {
-      missingItems.push("Agree to the auction rules");
+      missingItems.push("agree to the auction rules");
     }
 
     if (!transferMethodInput.value.trim()) {
-      missingItems.push("Select your bank for Bank-to-Bank Transfer");
+      missingItems.push("Please select your bank for Bank-to-Bank Transfer");
     }
 
     setCompletionTick("phoneTick", /^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, "")));
@@ -1493,7 +1498,7 @@ function setupLiveFieldValidation() {
 
     bidAmountInput.disabled = !ready;
     submitBidButton.disabled = !ready;
-
+clearDetailsButton.style.display = agreeInput.checked ? "block" : "none";
     if (ready) {
       const nextRequiredBid = Number(bidAmountInput.min || 0);
 
@@ -1511,27 +1516,52 @@ function setupLiveFieldValidation() {
       bidAmountInput.value = "";
       bidAmountInput.style.display = "none";
       submitBidButton.style.display = "none";
-      const firstNameNeedsAttention = !/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim());
-      const surnameInitialNeedsAttention = !/^[A-Za-z]$/.test(surnameInitialInput.value.trim());
-      const showNameWarning = agreeInput.checked && (firstNameNeedsAttention || surnameInitialNeedsAttention);
+bidEntryStatus.style.display = agreeInput.checked && missingItems.length > 0 && !watchOnlyMode ? "block" : "none";
+bidEntryStatus.style.color = "#0066cc";
+bidEntryStatus.style.borderColor = "#0066cc";
+bidEntryStatus.style.background = "#f5fbff";
+bidEntryStatus.style.fontWeight = "normal";
 
-      bidEntryStatus.style.display = showNameWarning ? "block" : "none";
-      bidEntryStatus.style.color = "#cc0000";
-
-      if (firstNameNeedsAttention && surnameInitialNeedsAttention) {
-        bidEntryStatus.innerText = "⚠ FIVE GREEN TICKS ARE REQUIRED BEFORE YOU CAN ENTER A BID. PLEASE CHECK FIRST NAME AND SURNAME INITIAL ABOVE.";
-      } else if (firstNameNeedsAttention) {
-        bidEntryStatus.innerText = "⚠ FIVE GREEN TICKS ARE REQUIRED BEFORE YOU CAN ENTER A BID. PLEASE CHECK FIRST NAME ABOVE.";
-      } else if (surnameInitialNeedsAttention) {
-        bidEntryStatus.innerText = "⚠ FIVE GREEN TICKS ARE REQUIRED BEFORE YOU CAN ENTER A BID. PLEASE CHECK SURNAME INITIAL ABOVE.";
-      } else {
-        bidEntryStatus.innerText = "";
-      }
+if (agreeInput.checked && missingItems.length > 0) {
+bidEntryStatus.innerText =
+  "Five green ticks are required before you can submit a bid. Please enter " +
+  missingItems.join(", ").replace(", Please select your bank for Bank-to-Bank Transfer",
+    ". Please select your bank for Bank-to-Bank Transfer") +
+  ".";
+} else {
+  bidEntryStatus.innerText = "";
+}
     }
   }
 
+clearDetailsButton.addEventListener("click", () => {
+  phoneInput.value = "";
+  firstNameInput.value = "";
+  surnameInitialInput.value = "";
+  transferMethodInput.value = "";
+const placeholder = document.getElementById("transferMethodPlaceholder");
+if (placeholder) {
+  placeholder.style.display = "block";
+}
+  bidAmountInput.value = "";
 
-  transferMethodInput.addEventListener("change", () => {
+  showFieldHint("phoneHint", "");
+  showFieldHint("firstNameHint", "");
+  showFieldHint("surnameInitialHint", "");
+  showFieldHint("transferMethodHint", "");
+  showFieldHint("bidAmountHint", "");
+
+  watchOnlyMode = true;
+  updateBidEntryState();
+});
+transferMethodInput.addEventListener("change", () => {
+  const placeholder = document.getElementById("transferMethodPlaceholder");
+
+  if (placeholder && transferMethodInput.value.trim()) {
+    placeholder.style.display = "none";
+  }
+
+  watchOnlyMode = false;
   updateBidEntryState();
 });
 
