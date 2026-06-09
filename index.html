@@ -765,15 +765,16 @@ function showBids(bids) {
 
 const bidTime =
   bidDate.toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short'
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
   }) +
   " " +
   bidDate.toLocaleTimeString([], {
-  hour: 'numeric',
-  minute: '2-digit',
-  second: '2-digit'
-})
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }).replace("AM", "am").replace("PM", "pm");
 
 row.innerHTML =
   "<span>" + bid.bidderId + "</span>" +
@@ -843,17 +844,26 @@ document.getElementById("bidAmountHint").style.display = "none";
   const minutes = Math.floor((diff / (1000 * 60)) % 60);
   const seconds = Math.floor((diff / 1000) % 60);
 
-  let text = "";
+  let countdownText = "";
 
   if (days > 0) {
-    text = `Time left to Bid: ${days}d ${hours}h ${minutes}m`;
+    countdownText =
+      days + " days, " +
+      hours + " hours, " +
+      minutes + " minutes, " +
+      seconds + " seconds";
   } else {
-    text = `Time left: ${hours}h ${minutes}m ${seconds}s`;
+    countdownText =
+      hours + " hours, " +
+      minutes + " minutes, " +
+      seconds + " seconds";
   }
 
-  document.getElementById("topCountdown").innerText = text;
+  document.getElementById("topCountdown").innerText =
+    "Time left to Bid: " + countdownText;
+
   document.getElementById("liveCountdownBottom").innerText =
-  text.replace("Time left:", "Reminder – the Auction closes in:");
+    "Reminder – the Auction closes in: " + countdownText;
 }
 function playSound() {
   document.getElementById("introSound").play();
@@ -1329,18 +1339,20 @@ function showAllBidsPopup() {
 
     const bidDate = new Date(bid.timestamp);
 
-    const bidDay = bidDate.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short'
-    });
+const bidDateTime =
+  bidDate.toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  }) +
+  " " +
+  bidDate.toLocaleTimeString([], {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  }).replace("AM", "am").replace("PM", "pm");
 
-    const bidTime = bidDate.toLocaleTimeString([], {
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-
-    return `<tr><td>${bid.bidderId}</td><td>${money(bid.bidAmount)}</td><td>${bidDay}</td><td>${bidTime}</td></tr>`;
+return `<tr><td>${bid.bidderId}</td><td>${money(bid.bidAmount)}</td><td>${bidDateTime}</td></tr>`;
 
   }).join("");
 
@@ -1357,20 +1369,18 @@ function showAllBidsPopup() {
   messageBox.innerHTML =
     `<div class="all-bids-table-wrap">
       <table class="all-bids-table">
-        <colgroup>
-          <col class="bidder-col">
-          <col class="amount-col">
-          <col class="date-col">
-          <col class="time-col">
-        </colgroup>
-        <thead>
-          <tr>
-            <th>Bidder</th>
-            <th>Amount</th>
-            <th>Date</th>
-            <th>Time</th>
-          </tr>
-        </thead>
+<colgroup>
+  <col class="bidder-col">
+  <col class="amount-col">
+  <col class="time-col">
+</colgroup>
+<thead>
+  <tr>
+    <th>Bidder</th>
+    <th>Amount</th>
+    <th>Date & Time</th>
+  </tr>
+</thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
