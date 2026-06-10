@@ -1128,8 +1128,9 @@ showFieldHint("bidAmountHint", "");
 
   if (!d.success && d.requiresHighestBidderConfirmation) {
     const confirmedHighestBidder = await showBolbConfirm(
-      "A further bid is not required unless another bidder places a higher bid. Do you still wish to place this higher bid?",
-      "YOU ARE ALREADY THE HIGHEST BIDDER"
+      "<b>A further bid is NOT required</b> unless another bidder places a higher bid. Do you still wish to place this higher bid?",
+      "YOU ARE ALREADY THE HIGHEST BIDDER",
+true
     );
 
     if (!confirmedHighestBidder) {
@@ -1260,7 +1261,7 @@ function showBolbAlert(message, title = "Boss of Luxury Brands", buttonText = "O
     const buttonsBox = document.getElementById("bolbModalButtons");
 
     titleBox.innerText = title;
-    messageBox.innerText = message;
+    messageBox.innerHTML = message;
 
     buttonsBox.innerHTML = `
       <button id="bolbModalOk">${buttonText}</button>
@@ -1277,7 +1278,7 @@ document.getElementById("bolbModalOk").onclick = () => {
   });
 }
 
-function showBolbConfirm(message, title = "Confirm Bid") {
+function showBolbConfirm(message, title = "Confirm Bid", allowHtml = false) {
   return new Promise(resolve => {
 
     const backdrop = document.getElementById("bolbModalBackdrop");
@@ -1286,7 +1287,11 @@ function showBolbConfirm(message, title = "Confirm Bid") {
     const buttonsBox = document.getElementById("bolbModalButtons");
 
     titleBox.innerText = title;
-    messageBox.innerText = message;
+    if (allowHtml) {
+  messageBox.innerHTML = message;
+} else {
+  messageBox.innerText = message;
+}
 
     buttonsBox.innerHTML = `
       <button id="bolbModalCancel">Cancel</button>
