@@ -1128,7 +1128,7 @@ showFieldHint("bidAmountHint", "");
 
   if (!d.success && d.requiresHighestBidderConfirmation) {
     const confirmedHighestBidder = await showBolbConfirm(
-      "You are already the current Highest Bidder. A further bid is not required unless another bidder places a higher bid. Do you still wish to place this higher bid?",
+      "<b>A further bid is not required</b> unless another bidder places a higher bid. Do you still wish to place this higher bid?",
       "YOU ARE ALREADY THE HIGHEST BIDDER"
     );
 
