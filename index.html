@@ -823,6 +823,8 @@ document.getElementById("bidAmountHint").style.display = "none";
 
   const bids = Array.from(document.querySelectorAll(".bid-row"));
 
+  const bids = Array.from(document.querySelectorAll(".bid-row"));
+
   if (bids.length > 0) {
 
     const winnerBidder = bids[0].children[0].innerText;
@@ -831,13 +833,19 @@ document.getElementById("bidAmountHint").style.display = "none";
     document.getElementById("winnerLine").innerHTML =
       "<b>" + winnerBidder + "</b><br>" + winnerAmount;
 
-    if (bids.length > 1) {
+    const runnerUpBid = bids.find(row =>
+      row.children[0].innerText !== winnerBidder
+    );
 
-      const runnerBidder = bids[1].children[0].innerText;
-      const runnerAmount = bids[1].children[1].innerText;
+    if (runnerUpBid) {
+      const runnerBidder = runnerUpBid.children[0].innerText;
+      const runnerAmount = runnerUpBid.children[1].innerText;
 
       document.getElementById("runnerUpLine").innerHTML =
         "<b>" + runnerBidder + "</b><br>" + runnerAmount;
+    } else {
+      document.getElementById("runnerUpLine").innerHTML =
+        "No separate runner-up bidder.";
     }
   }
 
