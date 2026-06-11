@@ -821,28 +821,24 @@ document.getElementById("surnameInitialHint").style.display = "none";
 document.getElementById("transferMethodHint").style.display = "none";
 document.getElementById("bidAmountHint").style.display = "none";
 
-  const bids = Array.from(document.querySelectorAll(".bid-row"));
+  const closedBids = Array.isArray(allAuctionBids) ? allAuctionBids : [];
 
-  const bids = Array.from(document.querySelectorAll(".bid-row"));
+  if (closedBids.length > 0) {
 
-  if (bids.length > 0) {
-
-    const winnerBidder = bids[0].children[0].innerText;
-    const winnerAmount = bids[0].children[1].innerText;
+    const winningBid = closedBids[0];
+    const winnerBidder = winningBid.bidderId;
+    const winnerAmount = money(winningBid.bidAmount);
 
     document.getElementById("winnerLine").innerHTML =
       "<b>" + winnerBidder + "</b><br>" + winnerAmount;
 
-    const runnerUpBid = bids.find(row =>
-      row.children[0].innerText !== winnerBidder
+    const runnerUpBid = closedBids.find(bid =>
+      bid.bidderId !== winnerBidder
     );
 
     if (runnerUpBid) {
-      const runnerBidder = runnerUpBid.children[0].innerText;
-      const runnerAmount = runnerUpBid.children[1].innerText;
-
       document.getElementById("runnerUpLine").innerHTML =
-        "<b>" + runnerBidder + "</b><br>" + runnerAmount;
+        "<b>" + runnerUpBid.bidderId + "</b><br>" + money(runnerUpBid.bidAmount);
     } else {
       document.getElementById("runnerUpLine").innerHTML =
         "No separate runner-up bidder.";
@@ -850,7 +846,6 @@ document.getElementById("bidAmountHint").style.display = "none";
   }
 
   return;
-}
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
