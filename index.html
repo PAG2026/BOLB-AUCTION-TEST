@@ -1130,29 +1130,39 @@ showFieldHint("bidAmountHint", "");
 
   let d = await r.json();
 
-  if (!d.success && d.requiresHighestBidderConfirmation) {
-    const confirmedHighestBidder = await showBolbConfirm(
-      "<b>A further bid is NOT required</b> unless another bidder places a higher bid. Do you still wish to place this higher bid?",
-      "YOU ARE ALREADY THE HIGHEST BIDDER",
-true
-    );
+  async function handleHighestBidderConfirmationIfRequired() {
+    if (!d.success && d.requiresHighestBidderConfirmation) {
+      const confirmedHighestBidder = await showBolbConfirm(
+        "<b>A further bid is NOT required</b> unless another bidder places a higher bid. Do you still wish to place this higher bid?",
+        "YOU ARE ALREADY THE HIGHEST BIDDER",
+        true,
+        "CANCEL",
+        "PROCEED"
+      );
 
-    if (!confirmedHighestBidder) {
-      return;
+      if (!confirmedHighestBidder) {
+        return false;
+      }
+
+      bidPayload.confirmHighestBidderProceed = true;
+
+      if (submitButton) {
+        submitButton.innerText = "Submitting Bid...";
+      }
+
+      r = await fetch(WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify(bidPayload)
+      });
+
+      d = await r.json();
     }
 
-    bidPayload.confirmHighestBidderProceed = true;
+    return true;
+  }
 
-    if (submitButton) {
-      submitButton.innerText = "Submitting Bid...";
-    }
-
-    r = await fetch(WEB_APP_URL, {
-      method: "POST",
-      body: JSON.stringify(bidPayload)
-    });
-
-    d = await r.json();
+  if (!(await handleHighestBidderConfirmationIfRequired())) {
+    return;
   }
 
   if (!d.success && d.requiresIdentityConfirmation) {
@@ -1212,6 +1222,10 @@ true
 
   d = await r.json();
 }
+
+  if (!(await handleHighestBidderConfirmationIfRequired())) {
+    return;
+  }
 
     
   clearBidBox();
@@ -1282,7 +1296,7 @@ document.getElementById("bolbModalOk").onclick = () => {
   });
 }
 
-function showBolbConfirm(message, title = "Confirm Bid", allowHtml = false) {
+function showBolbConfirm(message, title = "Confirm Bid", allowHtml = false, cancelText = "Cancel", proceedText = "Proceed") {
   return new Promise(resolve => {
 
     const backdrop = document.getElementById("bolbModalBackdrop");
@@ -1298,8 +1312,8 @@ function showBolbConfirm(message, title = "Confirm Bid", allowHtml = false) {
 }
 
     buttonsBox.innerHTML = `
-      <button id="bolbModalCancel">Cancel</button>
-      <button id="bolbModalProceed">Proceed</button>
+      <button id="bolbModalCancel">${cancelText}</button>
+      <button id="bolbModalProceed">${proceedText}</button>
     `;
 
     backdrop.style.display = "flex";
