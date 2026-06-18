@@ -1016,7 +1016,7 @@ showFieldHint("bidAmountHint", "");
   ];
 
   const cleanFirstName = firstName.toLowerCase().replace(/[^a-z]/g, "");
-
+   
   if (badWords.some(word => cleanFirstName.includes(word.toLowerCase().replace(/[^a-z]/g, "")))) {
     await showBolbAlert("Please enter your real first name.");
     return;
@@ -1028,7 +1028,7 @@ showFieldHint("bidAmountHint", "");
   }
 
   if (!/^\d+$/.test(phone)) {
-    await showBolbAlert("Use digits only for your telephone number — no spaces or punctuation.");
+    await showBolbAlert("Use numbers only for your telephone number — no spaces, punctuation or special characters.");
     return;
   }
 
@@ -1645,7 +1645,7 @@ transferMethodInput.addEventListener("change", () => {
     if (!phoneValue) {
       showFieldHint("phoneHint", "");
     } else if (!/^\d+$/.test(phoneValue)) {
-      showFieldHint("phoneHint", "Use digits only — no spaces or punctuation");
+      showFieldHint("phoneHint", "Use numbers only — no spaces, punctuation or special characters.");
     } else if (!/^(8|6)/.test(phoneValue)) {
       showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
     } else if (phoneValue.length >= 2 && !/^(87|65)/.test(phoneValue)) {
@@ -1653,9 +1653,9 @@ transferMethodInput.addEventListener("change", () => {
     } else if (phoneValue.length >= 3 && !/^(876|658)/.test(phoneValue)) {
       showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
     } else if (phoneValue.length > 10) {
-      showFieldHint("phoneHint", "Use 10 digits only");
+      showFieldHint("phoneHint", "Use 10 numbers only");
     } else if (phoneValue.length < 10) {
-      showFieldHint("phoneHint", "Enter full 10-digit Jamaica phone number");
+      showFieldHint("phoneHint", "Enter all 10 numbers of your Jamaican phone number.");
     } else {
       showFieldHint("phoneHint", "");
     }
