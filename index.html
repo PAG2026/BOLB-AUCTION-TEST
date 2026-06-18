@@ -1027,13 +1027,17 @@ showFieldHint("bidAmountHint", "");
     return;
   }
 
-  const cleanPhone = phone.replace(/\D/g, "");
+  if (!/^\d+$/.test(phone)) {
+    await showBolbAlert("Use digits only for your telephone number — no spaces or punctuation.");
+    return;
+  }
 
-  if (!/^(876|658)\d{7}$/.test(cleanPhone)) {
+  if (!/^(876|658)\d{7}$/.test(phone)) {
     await showBolbAlert("Enter a valid 10-digit Jamaica phone number starting with 876 or 658.");
     return;
   }
 
+  const cleanPhone = phone;
   if (!agree) {
     await showBolbAlert("You must agree to the auction rules.");
     return;
@@ -1490,11 +1494,16 @@ function setupLiveFieldValidation() {
 const clearDetailsButton = document.getElementById("clearDetailsButton");
 let watchOnlyMode = false;
 
-  function isReadyForBidEntry() {
+  function phoneValueIsValidForEntry() {
+    return /^(876|658)\d{7}$/.test(phoneInput.value);
+  }
+
+  function firstNameContainsBadWordForEntry() {
     const firstNameValue = firstNameInput.value.trim();
     const cleanFirstNameValue = firstNameValue.toLowerCase().replace(/[^a-z]/g, "");
+
     const badNameWordsForReadiness = [
-      "fuck", "fcuk", "rass", "rassclot", "rassclot", "bomboclaat",
+      "fuck", "fcuk", "rass", "rassclot", "rass clot", "bomboclaat",
       "bombaclaat", "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat",
       "bloodclot", "pussy", "pussyclaat", "sucku", "suckyuhmada", "suckumudda", "suckymudda", "suckuhmudda", "suckyuhmudda", "bitch",
       "shit", "asshole", "battybwoy", "battygyal", "fassyhole",
@@ -1502,14 +1511,24 @@ let watchOnlyMode = false;
       "bomba", "bumba", "blood", "claat", "clot", "raas", "batty", "bugga", "chi"
     ];
 
-    const firstNameIsBad = badNameWordsForReadiness.some(word =>
+    return badNameWordsForReadiness.some(word =>
       cleanFirstNameValue.includes(word.toLowerCase().replace(/[^a-z]/g, ""))
     );
+  }
+
+  function firstNameValueIsValidForEntry() {
+    const firstNameValue = firstNameInput.value.trim();
 
     return (
-      /^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, "")) &&
       /^[A-Za-z]{2,20}$/.test(firstNameValue) &&
-      !firstNameIsBad &&
+      !firstNameContainsBadWordForEntry()
+    );
+  }
+
+  function isReadyForBidEntry() {
+    return (
+      phoneValueIsValidForEntry() &&
+      firstNameValueIsValidForEntry() &&
       /^[A-Za-z]$/.test(surnameInitialInput.value.trim()) &&
       agreeInput.checked &&
       transferMethodInput.value.trim()
@@ -1526,11 +1545,11 @@ let watchOnlyMode = false;
     }
     const missingItems = [];
 
-    if (!/^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, ""))) {
+    if (!phoneValueIsValidForEntry()) {
       missingItems.push("your Jamaica phone number");
     }
 
-    if (!/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim())) {
+    if (!firstNameValueIsValidForEntry()) {
       missingItems.push("your first name");
     }
 
@@ -1546,8 +1565,8 @@ let watchOnlyMode = false;
       missingItems.push("Please select your bank for Bank-to-Bank Transfer");
     }
 
-    setCompletionTick("phoneTick", /^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, "")));
-    setCompletionTick("firstNameTick", /^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim()));
+    setCompletionTick("phoneTick", phoneValueIsValidForEntry());
+    setCompletionTick("firstNameTick", firstNameValueIsValidForEntry());
     setCompletionTick("surnameInitialTick", /^[A-Za-z]$/.test(surnameInitialInput.value.trim()));
     setCompletionTick("transferMethodTick", !!transferMethodInput.value.trim());
 
@@ -1621,15 +1640,25 @@ transferMethodInput.addEventListener("change", () => {
 });
 
   phoneInput.addEventListener("input", () => {
-    const cleanPhoneValue = phoneInput.value.replace(/\D/g, "");
+    const phoneValue = phoneInput.value;
 
-    if (!cleanPhoneValue) showFieldHint("phoneHint", "");
-    else if (!/^(8|6)/.test(cleanPhoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    else if (cleanPhoneValue.length >= 2 && !/^87|65/.test(cleanPhoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    else if (cleanPhoneValue.length >= 3 && !/^(876|658)/.test(cleanPhoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    else if (cleanPhoneValue.length > 10) showFieldHint("phoneHint", "Use 10 digits only");
-    else if (cleanPhoneValue.length < 10) showFieldHint("phoneHint", "Enter full 10-digit Jamaica phone number");
-    else showFieldHint("phoneHint", "");
+    if (!phoneValue) {
+      showFieldHint("phoneHint", "");
+    } else if (!/^\d+$/.test(phoneValue)) {
+      showFieldHint("phoneHint", "Use digits only — no spaces or punctuation");
+    } else if (!/^(8|6)/.test(phoneValue)) {
+      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    } else if (phoneValue.length >= 2 && !/^(87|65)/.test(phoneValue)) {
+      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    } else if (phoneValue.length >= 3 && !/^(876|658)/.test(phoneValue)) {
+      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    } else if (phoneValue.length > 10) {
+      showFieldHint("phoneHint", "Use 10 digits only");
+    } else if (phoneValue.length < 10) {
+      showFieldHint("phoneHint", "Enter full 10-digit Jamaica phone number");
+    } else {
+      showFieldHint("phoneHint", "");
+    }
 
     updateBidEntryState();
   });
