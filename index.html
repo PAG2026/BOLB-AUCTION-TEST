@@ -525,7 +525,7 @@ The same Bidder ID will be used throughout this auction whenever the same teleph
 Bidder IDs are assigned solely for bidder identification and should not be interpreted as indicating who bid first, who bid last, or the order in which bids were made.<br>
 <b>Delivery cost is separate and is NOT included in any bid.</b><br>
 All valid bids are time-stamped and displayed.<br>
-Highest valid bid at final closing wins. The scheduled closing time will normally be between 10:00 am and 2:00 pm. If a valid bid is received during the final 60 seconds before the then-current closing time, the auction will automatically extend by 60 seconds. This may happen more than once until no further valid bid is received during the final 60 seconds.<br>
+Highest valid bid at closing wins. Closing time will always be between 10:00 am and 2.00 pm.<br>
 When an auction closes, the Winner will be contacted at the telephone number provided with the winning bid and the delivery address, delivery cost and the total amount to be paid <i>(bid amount plus delivery cost)</i> will be agreed and the Bank Transfer information confirmed. The Winner will then have <span id="deadlineDisplay">30 minutes</span> to pay by <b>direct Bank-to-Same Bank Transfer ONLY</b><br>
 <b>(e.g. NCB your account to NCB Boss of Luxury Brands account, Scotia Bank your account to Scotia Bank Boss of Luxury Brands account, etc.)</b><br><br>
 
@@ -598,7 +598,7 @@ False bids, fake details or failure to pay may result in being blocked from futu
 <div id="transferMethodHint" class="field-hint"></div>
 <div id="bidEntryStatus" class="bid-entry-status"></div>
 <button id="clearDetailsButton" type="button" style="display:none; background:#222; color:#FFD700; font-size:13px; padding:8px 10px; margin-top:6px;">
-  Please clear my details but let me watch the auction
+  Clear My Details / Watch Only
 </button>
 </div>
 <div id="biddingSection" style="display:none;">
@@ -656,7 +656,7 @@ function formatJMD(value) {
 }
 function loadAuction() {
   
-return fetch(WEB_APP_URL)
+fetch(WEB_APP_URL)
     .then(r => r.json())
     .then(d => {
       auction = d.auction || {};
@@ -693,9 +693,8 @@ document.getElementById("close").innerText =
   " " +
   closeDate.toLocaleTimeString([], {
     hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  }).replace("AM", "am").replace("PM", "pm");
+    minute: '2-digit'
+  });
       document.getElementById("promo").innerText = auction.whatsAppPromoMessage || "";
     document.getElementById("deadlineDisplay").innerText =
   auction.paymentDeadlineMinutes ? auction.paymentDeadlineMinutes + " minutes" : "—";
@@ -766,16 +765,15 @@ function showBids(bids) {
 
 const bidTime =
   bidDate.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
+    day: '2-digit',
+    month: 'short'
   }) +
   " " +
   bidDate.toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  }).replace("AM", "am").replace("PM", "pm");
+  hour: 'numeric',
+  minute: '2-digit',
+  second: '2-digit'
+})
 
 row.innerHTML =
   "<span>" + bid.bidderId + "</span>" +
@@ -817,27 +815,23 @@ document.getElementById("surnameInitialHint").style.display = "none";
 document.getElementById("transferMethodHint").style.display = "none";
 document.getElementById("bidAmountHint").style.display = "none";
 
-  const closedBids = Array.isArray(allAuctionBids) ? allAuctionBids : [];
+  const bids = Array.from(document.querySelectorAll(".bid-row"));
 
-  if (closedBids.length > 0) {
+  if (bids.length > 0) {
 
-    const winningBid = closedBids[0];
-    const winnerBidder = winningBid.bidderId;
-    const winnerAmount = money(winningBid.bidAmount);
+    const winnerBidder = bids[0].children[0].innerText;
+    const winnerAmount = bids[0].children[1].innerText;
 
     document.getElementById("winnerLine").innerHTML =
       "<b>" + winnerBidder + "</b><br>" + winnerAmount;
 
-    const runnerUpBid = closedBids.find(bid =>
-      bid.bidderId !== winnerBidder
-    );
+    if (bids.length > 1) {
 
-    if (runnerUpBid) {
+      const runnerBidder = bids[1].children[0].innerText;
+      const runnerAmount = bids[1].children[1].innerText;
+
       document.getElementById("runnerUpLine").innerHTML =
-        "<b>" + runnerUpBid.bidderId + "</b><br>" + money(runnerUpBid.bidAmount);
-    } else {
-      document.getElementById("runnerUpLine").innerHTML =
-        "No separate runner-up bidder.";
+        "<b>" + runnerBidder + "</b><br>" + runnerAmount;
     }
   }
 
@@ -849,26 +843,17 @@ document.getElementById("bidAmountHint").style.display = "none";
   const minutes = Math.floor((diff / (1000 * 60)) % 60);
   const seconds = Math.floor((diff / 1000) % 60);
 
-  let countdownText = "";
+  let text = "";
 
   if (days > 0) {
-    countdownText =
-      days + " days, " +
-      hours + " hours, " +
-      minutes + " minutes, " +
-      seconds + " seconds";
+    text = `Time left to Bid: ${days}d ${hours}h ${minutes}m`;
   } else {
-    countdownText =
-      hours + " hours, " +
-      minutes + " minutes, " +
-      seconds + " seconds";
+    text = `Time left: ${hours}h ${minutes}m ${seconds}s`;
   }
 
-  document.getElementById("topCountdown").innerText =
-    "Time left to Bid: " + countdownText;
-
+  document.getElementById("topCountdown").innerText = text;
   document.getElementById("liveCountdownBottom").innerText =
-    "Reminder – the Auction closes in: " + countdownText;
+  text.replace("Time left:", "Reminder – the Auction closes in:");
 }
 function playSound() {
   document.getElementById("introSound").play();
@@ -1016,7 +1001,7 @@ showFieldHint("bidAmountHint", "");
   ];
 
   const cleanFirstName = firstName.toLowerCase().replace(/[^a-z]/g, "");
-   
+
   if (badWords.some(word => cleanFirstName.includes(word.toLowerCase().replace(/[^a-z]/g, "")))) {
     await showBolbAlert("Please enter your real first name.");
     return;
@@ -1027,17 +1012,13 @@ showFieldHint("bidAmountHint", "");
     return;
   }
 
-  if (!/^\d+$/.test(phone)) {
-    await showBolbAlert("Use numbers only for your telephone number — no spaces, punctuation or special characters.");
-    return;
-  }
+  const cleanPhone = phone.replace(/\D/g, "");
 
-  if (!/^(876|658)\d{7}$/.test(phone)) {
+  if (!/^(876|658)\d{7}$/.test(cleanPhone)) {
     await showBolbAlert("Enter a valid 10-digit Jamaica phone number starting with 876 or 658.");
     return;
   }
 
-  const cleanPhone = phone;
   if (!agree) {
     await showBolbAlert("You must agree to the auction rules.");
     return;
@@ -1109,7 +1090,10 @@ showFieldHint("bidAmountHint", "");
   }
 }
 
-  stopAuctionRefresh();
+  if (auctionRefreshTimer) {
+    clearInterval(auctionRefreshTimer);
+    auctionRefreshTimer = null;
+  }
 
   if (submitButton) {
   submitButton.disabled = true;
@@ -1133,41 +1117,6 @@ showFieldHint("bidAmountHint", "");
   });
 
   let d = await r.json();
-
-  async function handleHighestBidderConfirmationIfRequired() {
-    if (!d.success && d.requiresHighestBidderConfirmation) {
-      const confirmedHighestBidder = await showBolbConfirm(
-        "<b>A further bid is NOT required</b> unless another bidder places a higher bid. Do you still wish to place this higher bid?",
-        "YOU ARE ALREADY THE HIGHEST BIDDER",
-        true,
-        "CANCEL",
-        "PROCEED"
-      );
-
-      if (!confirmedHighestBidder) {
-        return false;
-      }
-
-      bidPayload.confirmHighestBidderProceed = true;
-
-      if (submitButton) {
-        submitButton.innerText = "Submitting Bid...";
-      }
-
-      r = await fetch(WEB_APP_URL, {
-        method: "POST",
-        body: JSON.stringify(bidPayload)
-      });
-
-      d = await r.json();
-    }
-
-    return true;
-  }
-
-  if (!(await handleHighestBidderConfirmationIfRequired())) {
-    return;
-  }
 
   if (!d.success && d.requiresIdentityConfirmation) {
 
@@ -1227,10 +1176,6 @@ showFieldHint("bidAmountHint", "");
   d = await r.json();
 }
 
-  if (!(await handleHighestBidderConfirmationIfRequired())) {
-    return;
-  }
-
     
   clearBidBox();
 
@@ -1283,7 +1228,7 @@ function showBolbAlert(message, title = "Boss of Luxury Brands", buttonText = "O
     const buttonsBox = document.getElementById("bolbModalButtons");
 
     titleBox.innerText = title;
-    messageBox.innerHTML = message;
+    messageBox.innerText = message;
 
     buttonsBox.innerHTML = `
       <button id="bolbModalOk">${buttonText}</button>
@@ -1300,7 +1245,7 @@ document.getElementById("bolbModalOk").onclick = () => {
   });
 }
 
-function showBolbConfirm(message, title = "Confirm Bid", allowHtml = false, cancelText = "Cancel", proceedText = "Proceed") {
+function showBolbConfirm(message, title = "Confirm Bid") {
   return new Promise(resolve => {
 
     const backdrop = document.getElementById("bolbModalBackdrop");
@@ -1309,15 +1254,11 @@ function showBolbConfirm(message, title = "Confirm Bid", allowHtml = false, canc
     const buttonsBox = document.getElementById("bolbModalButtons");
 
     titleBox.innerText = title;
-    if (allowHtml) {
-  messageBox.innerHTML = message;
-} else {
-  messageBox.innerText = message;
-}
+    messageBox.innerText = message;
 
     buttonsBox.innerHTML = `
-      <button id="bolbModalCancel">${cancelText}</button>
-      <button id="bolbModalProceed">${proceedText}</button>
+      <button id="bolbModalCancel">Cancel</button>
+      <button id="bolbModalProceed">Proceed</button>
     `;
 
     backdrop.style.display = "flex";
@@ -1388,20 +1329,18 @@ function showAllBidsPopup() {
 
     const bidDate = new Date(bid.timestamp);
 
-const bidDateTime =
-  bidDate.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric'
-  }) +
-  " " +
-  bidDate.toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true
-  }).replace("AM", "am").replace("PM", "pm");
+    const bidDay = bidDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short'
+    });
 
-return `<tr><td>${bid.bidderId}</td><td>${money(bid.bidAmount)}</td><td>${bidDateTime}</td></tr>`;
+    const bidTime = bidDate.toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    return `<tr><td>${bid.bidderId}</td><td>${money(bid.bidAmount)}</td><td>${bidDay}</td><td>${bidTime}</td></tr>`;
 
   }).join("");
 
@@ -1418,18 +1357,20 @@ return `<tr><td>${bid.bidderId}</td><td>${money(bid.bidAmount)}</td><td>${bidDat
   messageBox.innerHTML =
     `<div class="all-bids-table-wrap">
       <table class="all-bids-table">
-<colgroup>
-  <col class="bidder-col">
-  <col class="amount-col">
-  <col class="time-col">
-</colgroup>
-<thead>
-  <tr>
-    <th>Bidder</th>
-    <th>Amount</th>
-    <th>Date & Time</th>
-  </tr>
-</thead>
+        <colgroup>
+          <col class="bidder-col">
+          <col class="amount-col">
+          <col class="date-col">
+          <col class="time-col">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Bidder</th>
+            <th>Amount</th>
+            <th>Date</th>
+            <th>Time</th>
+          </tr>
+        </thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
@@ -1494,16 +1435,11 @@ function setupLiveFieldValidation() {
 const clearDetailsButton = document.getElementById("clearDetailsButton");
 let watchOnlyMode = false;
 
-  function phoneValueIsValidForEntry() {
-    return /^(876|658)\d{7}$/.test(phoneInput.value);
-  }
-
-  function firstNameContainsBadWordForEntry() {
+  function isReadyForBidEntry() {
     const firstNameValue = firstNameInput.value.trim();
     const cleanFirstNameValue = firstNameValue.toLowerCase().replace(/[^a-z]/g, "");
-
     const badNameWordsForReadiness = [
-      "fuck", "fcuk", "rass", "rassclot", "rass clot", "bomboclaat",
+      "fuck", "fcuk", "rass", "rassclot", "rassclot", "bomboclaat",
       "bombaclaat", "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat",
       "bloodclot", "pussy", "pussyclaat", "sucku", "suckyuhmada", "suckumudda", "suckymudda", "suckuhmudda", "suckyuhmudda", "bitch",
       "shit", "asshole", "battybwoy", "battygyal", "fassyhole",
@@ -1511,24 +1447,14 @@ let watchOnlyMode = false;
       "bomba", "bumba", "blood", "claat", "clot", "raas", "batty", "bugga", "chi"
     ];
 
-    return badNameWordsForReadiness.some(word =>
+    const firstNameIsBad = badNameWordsForReadiness.some(word =>
       cleanFirstNameValue.includes(word.toLowerCase().replace(/[^a-z]/g, ""))
     );
-  }
-
-  function firstNameValueIsValidForEntry() {
-    const firstNameValue = firstNameInput.value.trim();
 
     return (
+      /^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, "")) &&
       /^[A-Za-z]{2,20}$/.test(firstNameValue) &&
-      !firstNameContainsBadWordForEntry()
-    );
-  }
-
-  function isReadyForBidEntry() {
-    return (
-      phoneValueIsValidForEntry() &&
-      firstNameValueIsValidForEntry() &&
+      !firstNameIsBad &&
       /^[A-Za-z]$/.test(surnameInitialInput.value.trim()) &&
       agreeInput.checked &&
       transferMethodInput.value.trim()
@@ -1545,11 +1471,11 @@ let watchOnlyMode = false;
     }
     const missingItems = [];
 
-    if (!phoneValueIsValidForEntry()) {
+    if (!/^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, ""))) {
       missingItems.push("your Jamaica phone number");
     }
 
-    if (!firstNameValueIsValidForEntry()) {
+    if (!/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim())) {
       missingItems.push("your first name");
     }
 
@@ -1565,8 +1491,8 @@ let watchOnlyMode = false;
       missingItems.push("Please select your bank for Bank-to-Bank Transfer");
     }
 
-    setCompletionTick("phoneTick", phoneValueIsValidForEntry());
-    setCompletionTick("firstNameTick", firstNameValueIsValidForEntry());
+    setCompletionTick("phoneTick", /^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, "")));
+    setCompletionTick("firstNameTick", /^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim()));
     setCompletionTick("surnameInitialTick", /^[A-Za-z]$/.test(surnameInitialInput.value.trim()));
     setCompletionTick("transferMethodTick", !!transferMethodInput.value.trim());
 
@@ -1640,25 +1566,15 @@ transferMethodInput.addEventListener("change", () => {
 });
 
   phoneInput.addEventListener("input", () => {
-    const phoneValue = phoneInput.value;
+    const cleanPhoneValue = phoneInput.value.replace(/\D/g, "");
 
-    if (!phoneValue) {
-      showFieldHint("phoneHint", "");
-    } else if (!/^\d+$/.test(phoneValue)) {
-      showFieldHint("phoneHint", "Use numbers only — no spaces, punctuation or special characters.");
-    } else if (!/^(8|6)/.test(phoneValue)) {
-      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    } else if (phoneValue.length >= 2 && !/^(87|65)/.test(phoneValue)) {
-      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    } else if (phoneValue.length >= 3 && !/^(876|658)/.test(phoneValue)) {
-      showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    } else if (phoneValue.length > 10) {
-      showFieldHint("phoneHint", "Use 10 numbers only");
-    } else if (phoneValue.length < 10) {
-      showFieldHint("phoneHint", "Enter all 10 numbers of your Jamaican phone number.");
-    } else {
-      showFieldHint("phoneHint", "");
-    }
+    if (!cleanPhoneValue) showFieldHint("phoneHint", "");
+    else if (!/^(8|6)/.test(cleanPhoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    else if (cleanPhoneValue.length >= 2 && !/^87|65/.test(cleanPhoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    else if (cleanPhoneValue.length >= 3 && !/^(876|658)/.test(cleanPhoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    else if (cleanPhoneValue.length > 10) showFieldHint("phoneHint", "Use 10 digits only");
+    else if (cleanPhoneValue.length < 10) showFieldHint("phoneHint", "Enter full 10-digit Jamaica phone number");
+    else showFieldHint("phoneHint", "");
 
     updateBidEntryState();
   });
@@ -1707,51 +1623,8 @@ transferMethodInput.addEventListener("change", () => {
 
 setupLiveFieldValidation();
 
-function getAuctionRefreshDelay() {
-  if (!auction || !auction.closingTime || auction.status !== "OPEN") {
-    return 15000;
-  }
-
-  const close = new Date(auction.closingTime);
-  const now = new Date();
-  const millisecondsRemaining = close.getTime() - now.getTime();
-
-  if (millisecondsRemaining <= 60000) {
-    return 1000;
-  }
-
-  if (millisecondsRemaining <= 300000) {
-    return 5000;
-  }
-
-  return 15000;
-}
-
 function startAuctionRefresh() {
-  if (auctionRefreshTimer) {
-    return;
-  }
-
-  const refreshDelay = getAuctionRefreshDelay();
-
-  auctionRefreshTimer = setTimeout(() => {
-    auctionRefreshTimer = null;
-
-    Promise.resolve(loadAuction()).finally(() => {
-      if (!auctionRefreshTimer) {
-        startAuctionRefresh();
-      }
-    });
-
-  }, refreshDelay);
-}
-
-function stopAuctionRefresh() {
-  if (auctionRefreshTimer) {
-    clearTimeout(auctionRefreshTimer);
-    clearInterval(auctionRefreshTimer);
-    auctionRefreshTimer = null;
-  }
+  auctionRefreshTimer = setInterval(loadAuction, 15000);
 }
 
 startAuctionRefresh();
