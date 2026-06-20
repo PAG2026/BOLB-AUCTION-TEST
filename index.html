@@ -598,7 +598,8 @@ False bids, fake details or failure to pay may result in being blocked from futu
 <div id="transferMethodHint" class="field-hint"></div>
 <div id="bidEntryStatus" class="bid-entry-status"></div>
 <button id="clearDetailsButton" type="button" style="display:none; background:#222; color:#FFD700; font-size:13px; padding:8px 10px; margin-top:6px;">
-Clear my details but let me watch the auction</button>
+  Clear My Details / Watch Only
+</button>
 </div>
 <div id="biddingSection" style="display:none;">
  <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
@@ -1635,30 +1636,13 @@ let watchOnlyMode = false;
       if (tick) tick.style.display = valid ? "flex" : "none";
     }
     const missingItems = [];
-    const firstNameValueForTick = firstNameInput.value.trim();
-    const cleanFirstNameValueForTick = firstNameValueForTick.toLowerCase().replace(/[^a-z]/g, "");
-    const badNameWordsForTick = [
-      "fuck", "fcuk", "rass", "rassclot", "rassclot", "bomboclaat",
-      "bombaclaat", "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat",
-      "bloodclot", "pussy", "pussyclaat", "sucku", "suckyuhmada", "suckumudda", "suckymudda", "suckuhmudda", "suckyuhmudda", "bitch",
-      "shit", "asshole", "battybwoy", "battygyal", "fassyhole",
-      "rasshole", "kakaclaat", "kaka", "wutliss", "bwoy", "bwoii", "gyal",
-      "bomba", "bumba", "blood", "claat", "clot", "raas", "batty", "bugga", "chi"
-    ];
 
-    const firstNameIsBadForTick = badNameWordsForTick.some(word =>
-      cleanFirstNameValueForTick.includes(word.toLowerCase().replace(/[^a-z]/g, ""))
-    );
-
-    const firstNameIsCompleteForTick =
-      /^[A-Za-z]{2,20}$/.test(firstNameValueForTick) && !firstNameIsBadForTick;
-    
     if (!/^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, ""))) {
       missingItems.push("your Jamaica phone number");
     }
 
-    if (!firstNameIsCompleteForTick) {
-      missingItems.push("your real first name");
+    if (!/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim())) {
+      missingItems.push("your first name");
     }
 
     if (!/^[A-Za-z]$/.test(surnameInitialInput.value.trim())) {
@@ -1673,19 +1657,11 @@ let watchOnlyMode = false;
       missingItems.push("Please select your bank for Bank-to-Bank Transfer");
     }
 
-    const phoneIsCompleteForTick =
-      /^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, ""));
+    setCompletionTick("phoneTick", /^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, "")));
+    setCompletionTick("firstNameTick", /^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim()));
+    setCompletionTick("surnameInitialTick", /^[A-Za-z]$/.test(surnameInitialInput.value.trim()));
+    setCompletionTick("transferMethodTick", !!transferMethodInput.value.trim());
 
-    const surnameInitialIsCompleteForTick =
-      /^[A-Za-z]$/.test(surnameInitialInput.value.trim());
-
-    const transferMethodIsCompleteForTick =
-      !!transferMethodInput.value.trim();
-
-    setCompletionTick("phoneTick", phoneIsCompleteForTick);
-    setCompletionTick("firstNameTick", firstNameIsCompleteForTick);
-    setCompletionTick("surnameInitialTick", surnameInitialIsCompleteForTick);
-    setCompletionTick("transferMethodTick", transferMethodIsCompleteForTick);
     bidAmountInput.disabled = !ready;
     submitBidButton.disabled = !ready;
 clearDetailsButton.style.display = agreeInput.checked ? "block" : "none";
@@ -1706,23 +1682,19 @@ clearDetailsButton.style.display = agreeInput.checked ? "block" : "none";
       bidAmountInput.value = "";
       bidAmountInput.style.display = "none";
       submitBidButton.style.display = "none";
+bidEntryStatus.style.display = agreeInput.checked && missingItems.length > 0 && !watchOnlyMode ? "block" : "none";
 bidEntryStatus.style.color = "#0066cc";
 bidEntryStatus.style.borderColor = "#0066cc";
 bidEntryStatus.style.background = "#f5fbff";
 bidEntryStatus.style.fontWeight = "normal";
 
-if (agreeInput.checked && watchOnlyMode) {
-  bidEntryStatus.style.display = "block";
-  bidEntryStatus.innerText = "To bid again, please enter your bidder details again.";
-} else if (agreeInput.checked && missingItems.length > 0) {
-  bidEntryStatus.style.display = "block";
-  bidEntryStatus.innerText =
-    "Five green ticks are required before you can submit a bid. Please enter " +
-    missingItems.join(", ").replace(", Please select your bank for Bank-to-Bank Transfer",
-      ". Please select your bank for Bank-to-Bank Transfer") +
-    ".";
+if (agreeInput.checked && missingItems.length > 0) {
+bidEntryStatus.innerText =
+  "Five green ticks are required before you can submit a bid. Please enter " +
+  missingItems.join(", ").replace(", Please select your bank for Bank-to-Bank Transfer",
+    ". Please select your bank for Bank-to-Bank Transfer") +
+  ".";
 } else {
-  bidEntryStatus.style.display = "none";
   bidEntryStatus.innerText = "";
 }
     }
@@ -1748,16 +1720,6 @@ if (placeholder) {
 
   watchOnlyMode = true;
   updateBidEntryState();
-
-  const bidEntryStatus = document.getElementById("bidEntryStatus");
-  if (bidEntryStatus) {
-    bidEntryStatus.style.display = "block";
-    bidEntryStatus.style.color = "#0066cc";
-    bidEntryStatus.style.borderColor = "#0066cc";
-    bidEntryStatus.style.background = "#f5fbff";
-    bidEntryStatus.style.fontWeight = "normal";
-    bidEntryStatus.innerText = "To bid again, please enter your bidder details again.";
-  }
 });
 transferMethodInput.addEventListener("change", () => {
   const placeholder = document.getElementById("transferMethodPlaceholder");
@@ -1781,7 +1743,6 @@ transferMethodInput.addEventListener("change", () => {
     else if (cleanPhoneValue.length < 10) showFieldHint("phoneHint", "Enter full 10-digit Jamaica phone number");
     else showFieldHint("phoneHint", "");
 
-    watchOnlyMode = false;
     updateBidEntryState();
   });
 
@@ -1802,7 +1763,6 @@ transferMethodInput.addEventListener("change", () => {
     else if (badNameWords.some(word => cleanValue.includes(word.toLowerCase().replace(/[^a-z]/g, "")))) showFieldHint("firstNameHint", "Please enter your real first name");
     else showFieldHint("firstNameHint", "");
 
-    watchOnlyMode = false;
     updateBidEntryState();
   });
 
@@ -1812,7 +1772,6 @@ transferMethodInput.addEventListener("change", () => {
     else if (!/^[A-Za-z]$/.test(value)) showFieldHint("surnameInitialHint", "Use one letter only");
     else showFieldHint("surnameInitialHint", "");
 
-    watchOnlyMode = false;
     updateBidEntryState();
   });
 
