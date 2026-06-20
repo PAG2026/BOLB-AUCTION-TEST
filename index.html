@@ -1777,6 +1777,7 @@ transferMethodInput.addEventListener("change", () => {
 }
 
 setupLiveFieldValidation();
+resetAgreementIfBrowserRestoredEmptyBidderDetails();
 
 function startAuctionRefresh() {
   auctionRefreshTimer = setInterval(loadAuction, 15000);
