@@ -783,6 +783,36 @@ row.innerHTML =
   });
 }
 
+function updateClosedAuctionResults() {
+  const winnerLine = document.getElementById("winnerLine");
+  const runnerUpLine = document.getElementById("runnerUpLine");
+  const bids = Array.isArray(allAuctionBids) ? allAuctionBids : [];
+
+  if (!winnerLine || !runnerUpLine) {
+    return;
+  }
+
+  if (!bids.length) {
+    winnerLine.innerText = "No valid bids were placed.";
+    runnerUpLine.innerText = "There is no separate runner-up bidder.";
+    return;
+  }
+
+  const winningBid = bids[0];
+  const runnerUpBid = bids.find(bid => bid.bidderId !== winningBid.bidderId);
+
+  winnerLine.innerHTML =
+    "<b>" + winningBid.bidderId + "</b><br>" + money(winningBid.bidAmount);
+
+  if (runnerUpBid) {
+    runnerUpLine.innerHTML =
+      "<b>" + runnerUpBid.bidderId + "</b><br>" + money(runnerUpBid.bidAmount);
+  } else {
+    runnerUpLine.innerText = "There is no separate runner-up bidder.";
+  }
+}
+
+
 function updateCountdown() {
   if (!auction || !auction.closingTime) return;
 
@@ -815,25 +845,7 @@ document.getElementById("surnameInitialHint").style.display = "none";
 document.getElementById("transferMethodHint").style.display = "none";
 document.getElementById("bidAmountHint").style.display = "none";
 
-  const bids = Array.from(document.querySelectorAll(".bid-row"));
-
-  if (bids.length > 0) {
-
-    const winnerBidder = bids[0].children[0].innerText;
-    const winnerAmount = bids[0].children[1].innerText;
-
-    document.getElementById("winnerLine").innerHTML =
-      "<b>" + winnerBidder + "</b><br>" + winnerAmount;
-
-    if (bids.length > 1) {
-
-      const runnerBidder = bids[1].children[0].innerText;
-      const runnerAmount = bids[1].children[1].innerText;
-
-      document.getElementById("runnerUpLine").innerHTML =
-        "<b>" + runnerBidder + "</b><br>" + runnerAmount;
-    }
-  }
+  updateClosedAuctionResults();
 
   return;
 }
