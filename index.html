@@ -812,6 +812,80 @@ function updateClosedAuctionResults() {
   }
 }
 
+function isAuctionClosedForDisplay() {
+  if (!auction || !auction.closingTime) {
+    return false;
+  }
+
+  const closingTime = new Date(auction.closingTime).getTime();
+
+  if (!Number.isFinite(closingTime)) {
+    return false;
+  }
+
+  return Date.now() >= closingTime || String(auction.status || "").toUpperCase() !== "OPEN";
+}
+
+function hideById(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.display = "none";
+  }
+}
+
+function showById(id, displayValue = "block") {
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.display = displayValue;
+  }
+}
+
+function applyClosedAuctionUi() {
+  hideById("topCountdown");
+  showById("closedPanel", "block");
+  hideById("priceBox");
+
+  const bidsTitle = document.getElementById("bidsTitle");
+  if (bidsTitle) {
+    bidsTitle.innerText = "Bidding History";
+  }
+
+  hideById("auctionRulesBox");
+  hideById("showRulesButton");
+  hideById("bidderDetailsSection");
+  hideById("bidFormTitle");
+
+  const agree = document.getElementById("agree");
+  if (agree && agree.parentElement) {
+    agree.parentElement.style.display = "none";
+  }
+
+  showById("biddingSection", "block");
+
+  hideById("liveCountdownBottom");
+  hideById("bidEntryStatus");
+
+  hideById("phoneHint");
+  hideById("firstNameHint");
+  hideById("surnameInitialHint");
+  hideById("transferMethodHint");
+  hideById("bidAmountHint");
+
+  hideById("bidAmount");
+  hideById("clearDetailsButton");
+
+  const submitBidButton = document.getElementById("submitBidButton");
+  if (submitBidButton) {
+    submitBidButton.style.display = "none";
+    submitBidButton.disabled = true;
+  }
+
+  const submitButtonByOnclick = document.querySelector('button[onclick="sendBid()"]');
+  if (submitButtonByOnclick) {
+    submitButtonByOnclick.style.display = "none";
+    submitButtonByOnclick.disabled = true;
+  }
+}
 
 function updateCountdown() {
   if (!auction || !auction.closingTime) return;
@@ -822,29 +896,7 @@ function updateCountdown() {
 
   if (diff <= 0 || auction.status !== "OPEN") {
 
-  document.getElementById("topCountdown").style.display = "none";
-
-  document.getElementById("closedPanel").style.display = "block";
-document.getElementById("priceBox").style.display = "none";
-  document.getElementById("bidsTitle").innerText = "Bidding History";
-  document.querySelector(".rules").style.display = "none";
-document.getElementById("showRulesButton").style.display = "none";
-  document.getElementById("bidFormTitle").style.display = "none";
-document.getElementById("firstName").style.display = "none";
-document.getElementById("surnameInitial").style.display = "none";
-document.getElementById("phone").style.display = "none";
-document.getElementById("agree").parentElement.style.display = "none";
-document.getElementById("transferMethod").style.display = "none";
-document.getElementById("bidAmount").style.display = "none";
-document.querySelector('button[onclick="sendBid()"]').style.display = "none";
-document.getElementById("liveCountdownBottom").style.display = "none";
-document.getElementById("bidEntryStatus").style.display = "none";
-document.getElementById("phoneHint").style.display = "none";
-document.getElementById("firstNameHint").style.display = "none";
-document.getElementById("surnameInitialHint").style.display = "none";
-document.getElementById("transferMethodHint").style.display = "none";
-document.getElementById("bidAmountHint").style.display = "none";
-
+  applyClosedAuctionUi();
   const bids = Array.from(document.querySelectorAll(".bid-row"));
 
   if (bids.length > 0) {
@@ -1379,6 +1431,12 @@ agreeCheckbox.addEventListener("change", () => {
   const agreeVisualTick = document.getElementById("agreeVisualTick");
 
   if (agreeCheckbox.checked) {
+    if (isAuctionClosedForDisplay()) {
+      applyClosedAuctionUi();
+      updateCountdown();
+      return;
+    }
+
     if (agreeText) agreeText.innerText = "I agree to the auction rules, payment deadline, and delivery terms.";
     if (agreeVisualTick) agreeVisualTick.innerText = "✓";
 
