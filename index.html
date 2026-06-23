@@ -656,7 +656,7 @@ function formatJMD(value) {
 }
 function loadAuction() {
   
-fetch(WEB_APP_URL)
+return fetch(WEB_APP_URL)
     .then(r => r.json())
     .then(d => {
       auction = d.auction || {};
@@ -845,7 +845,25 @@ document.getElementById("surnameInitialHint").style.display = "none";
 document.getElementById("transferMethodHint").style.display = "none";
 document.getElementById("bidAmountHint").style.display = "none";
 
-  updateClosedAuctionResults();
+  const bids = Array.from(document.querySelectorAll(".bid-row"));
+
+  if (bids.length > 0) {
+
+    const winnerBidder = bids[0].children[0].innerText;
+    const winnerAmount = bids[0].children[1].innerText;
+
+    document.getElementById("winnerLine").innerHTML =
+      "<b>" + winnerBidder + "</b><br>" + winnerAmount;
+
+    if (bids.length > 1) {
+
+      const runnerBidder = bids[1].children[0].innerText;
+      const runnerAmount = bids[1].children[1].innerText;
+
+      document.getElementById("runnerUpLine").innerHTML =
+        "<b>" + runnerBidder + "</b><br>" + runnerAmount;
+    }
+  }
 
   return;
 }
@@ -1102,11 +1120,7 @@ showFieldHint("bidAmountHint", "");
   }
 }
 
-  if (auctionRefreshTimer) {
-    clearInterval(auctionRefreshTimer);
-    auctionRefreshTimer = null;
-  }
-
+  stopAuctionRefresh();
   if (submitButton) {
   submitButton.disabled = true;
   submitButton.innerText = "Checking Bid...";
@@ -1229,10 +1243,9 @@ showFieldHint("bidAmountHint", "");
       "BID ACCEPTED"
     );
 
-    loadAuction();
+    await loadAuction();
 
-  } else {
-    await showBolbAlert(d.message || "Bid could not be submitted.");
+  } else {    await showBolbAlert(d.message || "Bid could not be submitted.");
   }
 
   } catch (err) {
@@ -1245,16 +1258,17 @@ showFieldHint("bidAmountHint", "");
 }
 
 
-    if (!auctionRefreshTimer) {
-      startAuctionRefresh();
-    }
-  }
+    startAuctionRefresh();  }
 }
 
-loadAuction();
-setInterval(updateCountdown, 1000);
 let auctionRefreshTimer = null;
+let auctionRefreshPaused = false;
 
+loadAuction().finally(() => {
+  startAuctionRefresh();
+});
+
+setInterval(updateCountdown, 1000);
 function showBolbAlert(message, title = "Boss of Luxury Brands", buttonText = "OK") {
   return new Promise(resolve => {
 
@@ -1791,12 +1805,59 @@ transferMethodInput.addEventListener("change", () => {
 setupLiveFieldValidation();
 resetAgreementIfBrowserRestoredEmptyBidderDetails();
 
-function startAuctionRefresh() {
-  auctionRefreshTimer = setInterval(loadAuction, 15000);
+function getAuctionRefreshDelay() {
+  if (!auction || !auction.closingTime || auction.status !== "OPEN") {
+    return 15000;
+  }
+
+  const millisecondsRemaining = new Date(auction.closingTime).getTime() - Date.now();
+
+  if (!Number.isFinite(millisecondsRemaining) || millisecondsRemaining <= 0) {
+    return 15000;
+  }
+
+  if (millisecondsRemaining <= 60000) {
+    return 1000;
+  }
+
+  if (millisecondsRemaining <= 300000) {
+    return 5000;
+  }
+
+  return 15000;
 }
 
-startAuctionRefresh();
-</script>
+function clearAuctionRefreshTimer() {
+  if (auctionRefreshTimer) {
+    clearTimeout(auctionRefreshTimer);
+    clearInterval(auctionRefreshTimer);
+    auctionRefreshTimer = null;
+  }
+}
+
+function stopAuctionRefresh() {
+  auctionRefreshPaused = true;
+  clearAuctionRefreshTimer();
+}
+
+function startAuctionRefresh() {
+  auctionRefreshPaused = false;
+  clearAuctionRefreshTimer();
+
+  auctionRefreshTimer = setTimeout(() => {
+    auctionRefreshTimer = null;
+
+    loadAuction()
+      .catch(err => {
+        console.log("Auction refresh scheduling error:", err);
+      })
+      .finally(() => {
+        if (!auctionRefreshPaused) {
+          startAuctionRefresh();
+        }
+      });
+  }, getAuctionRefreshDelay());
+}</script>
 
 <div id="bolbModalBackdrop" class="bolb-modal-backdrop">
   <div class="bolb-modal">
