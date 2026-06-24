@@ -601,10 +601,10 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </div>
 
 <button id="showRulesButton" type="button" style="display:block; background:#111; color:#FFD700; margin-top:6px; margin-bottom:6px;">
-  Review and Agree to Auction Rules
+  Please review and agree to the Auction Rules so that you may bid on this auction
 </button>
 
-<div id="agreementStatusBox" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
+<div id="agreementStatusBox" style="display:none; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
   <span id="agreeText" style="font-weight:bold; font-size:14px; flex:1 1 220px; min-width:0;">
     Please review and agree to the Auction Rules, payment deadline, and delivery terms.
   </span>
@@ -1525,6 +1525,7 @@ function getAuctionRulesModalHtml() {
 }
 
 function setRulesAgreementState(agreed) {
+  const agreementStatusBox = document.getElementById("agreementStatusBox");
   const agreeText = document.getElementById("agreeText");
   const agreeVisualTick = document.getElementById("agreeVisualTick");
   const bidderDetailsSection = document.getElementById("bidderDetailsSection");
@@ -1543,38 +1544,54 @@ function setRulesAgreementState(agreed) {
     auctionRulesBox.style.display = "none";
   }
 
-if (agreed) {
-    if (agreeText) {
-      agreeText.innerText = "Auction Rules, payment deadline, and delivery terms agreed.";
+  if (agreed) {
+    if (agreementStatusBox) {
+      agreementStatusBox.style.display = "flex";
     }
+
+    if (agreeText) {
+      agreeText.innerText = "I agree to the Auction Rules, payment deadline, and delivery terms.";
+    }
+
     if (agreeVisualTick) {
       agreeVisualTick.innerText = "✓";
       agreeVisualTick.style.display = "flex";
-    }    if (showRulesButton) {
-      showRulesButton.innerText = "View Auction Rules";
-      showRulesButton.style.display = "block";
     }
+
+    if (showRulesButton) {
+      showRulesButton.style.display = "none";
+    }
+
     if (bidderDetailsSection) {
       bidderDetailsSection.style.display = "block";
     }
+
     if (biddingSection) {
       biddingSection.style.display = "block";
     }
   } else {
-    if (agreeText) {
-      agreeText.innerText = "Please review and agree to the Auction Rules, payment deadline, and delivery terms.";
+    if (agreementStatusBox) {
+      agreementStatusBox.style.display = "none";
     }
-if (agreeVisualTick) {
+
+    if (agreeText) {
+      agreeText.innerText = "";
+    }
+
+    if (agreeVisualTick) {
       agreeVisualTick.innerText = "";
       agreeVisualTick.style.display = "none";
     }
+
     if (showRulesButton) {
-      showRulesButton.innerText = "Review and Agree to Auction Rules";
+      showRulesButton.innerText = "Please review and agree to the Auction Rules so that you may bid on this auction";
       showRulesButton.style.display = "block";
     }
+
     if (bidderDetailsSection) {
       bidderDetailsSection.style.display = "none";
     }
+
     if (biddingSection) {
       biddingSection.style.display = "none";
     }
@@ -1584,7 +1601,6 @@ if (agreeVisualTick) {
     window.updateBidEntryState();
   }
 }
-
 function openRulesModal(allowAgreement) {
   if (isAuctionClosedForDisplay()) {
     applyClosedAuctionUi();
