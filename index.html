@@ -609,7 +609,7 @@ False bids, fake details or failure to pay may result in being blocked from futu
     Please review and agree to the Auction Rules, payment deadline, and delivery terms.
   </span>
   <input type="checkbox" id="agree" style="position:absolute; opacity:0; pointer-events:none;" tabindex="-1" aria-hidden="true">
-  <span id="agreeVisualTick" style="width:28px; height:28px; border:2px solid #0a9f3d; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#0a9f3d; font-size:28px; font-weight:bold; line-height:1; flex-shrink:0;"></span>
+<span id="agreeVisualTick" style="width:28px; height:28px; border:2px solid #0a9f3d; border-radius:6px; display:none; align-items:center; justify-content:center; color:#0a9f3d; font-size:28px; font-weight:bold; line-height:1; flex-shrink:0;"></span>
 </div>
 
 <div id="bidderDetailsSection" style="display:none;">
@@ -1543,14 +1543,14 @@ function setRulesAgreementState(agreed) {
     auctionRulesBox.style.display = "none";
   }
 
-  if (agreed) {
+if (agreed) {
     if (agreeText) {
       agreeText.innerText = "Auction Rules, payment deadline, and delivery terms agreed.";
     }
     if (agreeVisualTick) {
       agreeVisualTick.innerText = "✓";
-    }
-    if (showRulesButton) {
+      agreeVisualTick.style.display = "flex";
+    }    if (showRulesButton) {
       showRulesButton.innerText = "View Auction Rules";
       showRulesButton.style.display = "block";
     }
@@ -1564,8 +1564,9 @@ function setRulesAgreementState(agreed) {
     if (agreeText) {
       agreeText.innerText = "Please review and agree to the Auction Rules, payment deadline, and delivery terms.";
     }
-    if (agreeVisualTick) {
+if (agreeVisualTick) {
       agreeVisualTick.innerText = "";
+      agreeVisualTick.style.display = "none";
     }
     if (showRulesButton) {
       showRulesButton.innerText = "Review and Agree to Auction Rules";
