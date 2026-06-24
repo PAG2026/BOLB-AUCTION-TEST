@@ -427,6 +427,63 @@ input, textarea, select, button {
   margin-top:6px;
 }
 
+#rulesModalBackdrop {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  z-index:9998;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  box-sizing:border-box;
+}
+
+#rulesModalBox {
+  width:100%;
+  max-width:480px;
+  max-height:88vh;
+  background:white;
+  color:#111;
+  border:2px solid #D4AF37;
+  border-radius:16px;
+  padding:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  box-sizing:border-box;
+  overflow:hidden;
+}
+
+#rulesModalTitle {
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+#rulesModalContent {
+  max-height:62vh;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  font-size:14px;
+  line-height:1.35;
+}
+
+#rulesModalContent .rules {
+  display:block;
+  margin-top:0;
+  background:#fff8ec;
+  border:1px solid #e2c46f;
+}
+
+#rulesModalButtons {
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
+
+#rulesModalButtons button {
+  margin-top:0;
+}
 /* 🔧 END OF NEW CODE */
 
 </style>
@@ -517,8 +574,7 @@ input, textarea, select, button {
   </div>
 </div>
   
-<div class="rules" id="auctionRulesBox">
-  <b style="display:block; margin-bottom:2px;">Auction Rules</b>
+<div class="rules" id="auctionRulesBox" style="display:none;">  <b style="display:block; margin-bottom:2px;">Auction Rules</b>
 Bidder identities are private and shown only as anonymous Bidder IDs.<br>
 Bidder IDs are assigned separately for each auction and will NOT be the same in any other auction.<br>
 The same Bidder ID will be used throughout this auction whenever the same telephone number is used to place additional bids.<br>
@@ -543,17 +599,17 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </div>
 </div>
 
-<button id="showRulesButton" type="button" style="display:none; background:#111; color:#FFD700; margin-top:6px; margin-bottom:6px;">
-  View Auction Rules
+<button id="showRulesButton" type="button" style="display:block; background:#111; color:#FFD700; margin-top:6px; margin-bottom:6px;">
+  Review and Agree to Auction Rules
 </button>
 
-<label style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
-  <span id="agreeText" style="font-weight:BOLD; font-size:14px; flex:1 1 220px; min-width:0;">
-    Please agree to the auction rules, payment deadline, and delivery terms.
-</span>
-<input type="checkbox" id="agree" style="position:absolute; opacity:0; pointer-events:none;">
-<span id="agreeVisualTick" style="width:28px; height:28px; border:2px solid #0a9f3d; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#0a9f3d; font-size:28px; font-weight:bold; line-height:1; flex-shrink:0;"></span>
-</label>
+<div id="agreementStatusBox" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
+  <span id="agreeText" style="font-weight:bold; font-size:14px; flex:1 1 220px; min-width:0;">
+    Please review and agree to the Auction Rules, payment deadline, and delivery terms.
+  </span>
+  <input type="checkbox" id="agree" style="position:absolute; opacity:0; pointer-events:none;" tabindex="-1" aria-hidden="true">
+  <span id="agreeVisualTick" style="width:28px; height:28px; border:2px solid #0a9f3d; border-radius:6px; display:flex; align-items:center; justify-content:center; color:#0a9f3d; font-size:28px; font-weight:bold; line-height:1; flex-shrink:0;"></span>
+</div>
 
 <div id="bidderDetailsSection" style="display:none;">
 <h3 id="bidFormTitle">Thank you for agreeing to the Auction Rules. Please now complete your bidder details below.</h3>
@@ -844,6 +900,7 @@ function applyClosedAuctionUi() {
   hideById("topCountdown");
   showById("closedPanel", "block");
   hideById("priceBox");
+  hideById("rulesModalBackdrop");
 
   const bidsTitle = document.getElementById("bidsTitle");
   if (bidsTitle) {
@@ -1426,49 +1483,149 @@ const agreeCheckbox = document.getElementById("agree");
 const auctionRulesBox = document.getElementById("auctionRulesBox");
 const showRulesButton = document.getElementById("showRulesButton");
 
-agreeCheckbox.addEventListener("change", () => {
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  }[character]));
+}
+
+function getAuctionRulesModalHtml() {
+  if (!auctionRulesBox) {
+    return "Auction Rules are unavailable. Please refresh the page and try again.";
+  }
+
+  const rulesClone = auctionRulesBox.cloneNode(true);
+  rulesClone.removeAttribute("id");
+  rulesClone.style.display = "block";
+
+  const deadline = rulesClone.querySelector("#deadlineDisplay");
+  if (deadline) {
+    deadline.removeAttribute("id");
+    deadline.innerText = auction && auction.paymentDeadlineMinutes
+      ? auction.paymentDeadlineMinutes + " minutes"
+      : deadline.innerText || "30 minutes";
+  }
+
+  const delivery = rulesClone.querySelector("#deliveryDisplay");
+  if (delivery) {
+    delivery.removeAttribute("id");
+    delivery.style.display = "block";
+    delivery.style.marginTop = "8px";
+    delivery.innerHTML = "<b>Delivery Terms:</b> " + escapeHtml(
+      auction && auction.deliveryTerms ? auction.deliveryTerms : "Delivery cost is separate"
+    );
+  }
+
+  return rulesClone.outerHTML;
+}
+
+function setRulesAgreementState(agreed) {
   const agreeText = document.getElementById("agreeText");
   const agreeVisualTick = document.getElementById("agreeVisualTick");
+  const bidderDetailsSection = document.getElementById("bidderDetailsSection");
+  const biddingSection = document.getElementById("biddingSection");
 
-  if (agreeCheckbox.checked) {
-    if (isAuctionClosedForDisplay()) {
-      applyClosedAuctionUi();
-      updateCountdown();
-      return;
-    }
-
-    if (agreeText) agreeText.innerText = "I agree to the auction rules, payment deadline, and delivery terms.";
-    if (agreeVisualTick) agreeVisualTick.innerText = "✓";
-
-    auctionRulesBox.style.display = "none";
-    showRulesButton.innerText = "View Auction Rules";
-    showRulesButton.style.display = "block";
-    document.getElementById("bidderDetailsSection").style.display = "block";
-    document.getElementById("biddingSection").style.display = "block";
-  } else {
-    if (agreeText) agreeText.innerText = "Please agree to the auction rules, payment deadline, and delivery terms.";
-    if (agreeVisualTick) agreeVisualTick.innerText = "";
-
-    auctionRulesBox.style.display = "block";
-    showRulesButton.innerText = "View Auction Rules";
-    showRulesButton.style.display = "none";
-    document.getElementById("bidderDetailsSection").style.display = "none";
-    document.getElementById("biddingSection").style.display = "none";
+  if (isAuctionClosedForDisplay()) {
+    applyClosedAuctionUi();
+    return;
   }
 
-});
+  if (agreeCheckbox) {
+    agreeCheckbox.checked = agreed === true;
+  }
+
+  if (auctionRulesBox) {
+    auctionRulesBox.style.display = "none";
+  }
+
+  if (agreed) {
+    if (agreeText) {
+      agreeText.innerText = "Auction Rules, payment deadline, and delivery terms agreed.";
+    }
+    if (agreeVisualTick) {
+      agreeVisualTick.innerText = "✓";
+    }
+    if (showRulesButton) {
+      showRulesButton.innerText = "View Auction Rules";
+      showRulesButton.style.display = "block";
+    }
+    if (bidderDetailsSection) {
+      bidderDetailsSection.style.display = "block";
+    }
+    if (biddingSection) {
+      biddingSection.style.display = "block";
+    }
+  } else {
+    if (agreeText) {
+      agreeText.innerText = "Please review and agree to the Auction Rules, payment deadline, and delivery terms.";
+    }
+    if (agreeVisualTick) {
+      agreeVisualTick.innerText = "";
+    }
+    if (showRulesButton) {
+      showRulesButton.innerText = "Review and Agree to Auction Rules";
+      showRulesButton.style.display = "block";
+    }
+    if (bidderDetailsSection) {
+      bidderDetailsSection.style.display = "none";
+    }
+    if (biddingSection) {
+      biddingSection.style.display = "none";
+    }
+  }
+
+  if (typeof window.updateBidEntryState === "function") {
+    window.updateBidEntryState();
+  }
+}
+
+function openRulesModal(allowAgreement) {
+  if (isAuctionClosedForDisplay()) {
+    applyClosedAuctionUi();
+    return;
+  }
+
+  const backdrop = document.getElementById("rulesModalBackdrop");
+  const content = document.getElementById("rulesModalContent");
+  const closeButton = document.getElementById("rulesModalCloseButton");
+  const agreeButton = document.getElementById("rulesModalAgreeButton");
+
+  if (!backdrop || !content || !closeButton || !agreeButton) {
+    return;
+  }
+
+  content.innerHTML = getAuctionRulesModalHtml();
+  agreeButton.style.display = allowAgreement ? "block" : "none";
+
+  closeButton.onclick = () => {
+    closeRulesModal();
+    setRulesAgreementState(agreeCheckbox.checked);
+  };
+
+  agreeButton.onclick = () => {
+    closeRulesModal();
+    setRulesAgreementState(true);
+  };
+
+  backdrop.style.display = "flex";
+}
+
+function closeRulesModal() {
+  const backdrop = document.getElementById("rulesModalBackdrop");
+  if (backdrop) {
+    backdrop.style.display = "none";
+  }
+}
 
 showRulesButton.addEventListener("click", () => {
-  if (auctionRulesBox.style.display === "none") {
-    auctionRulesBox.style.display = "block";
-    showRulesButton.innerText = "Hide Auction Rules";
-  } else {
-    auctionRulesBox.style.display = "none";
-    showRulesButton.innerText = "View Auction Rules";
-  }
-
-  showRulesButton.style.display = "block";
+  openRulesModal(!agreeCheckbox.checked);
 });
+
+setRulesAgreementState(agreeCheckbox.checked);
 
 function resetAgreementIfBrowserRestoredEmptyBidderDetails() {
   const phoneInput = document.getElementById("phone");
@@ -1479,7 +1636,6 @@ function resetAgreementIfBrowserRestoredEmptyBidderDetails() {
   const submitBidButton = document.getElementById("submitBidButton");
   const bidderDetailsSection = document.getElementById("bidderDetailsSection");
   const biddingSection = document.getElementById("biddingSection");
-  const agreeText = document.getElementById("agreeText");
   const agreeVisualTick = document.getElementById("agreeVisualTick");
   const bidEntryStatus = document.getElementById("bidEntryStatus");
 
@@ -1496,33 +1652,15 @@ function resetAgreementIfBrowserRestoredEmptyBidderDetails() {
   const agreementLooksRestored =
     agreeCheckbox.checked ||
     (agreeVisualTick && agreeVisualTick.innerText.trim() === "✓") ||
-    auctionRulesBox.style.display === "none";
+    (bidderDetailsSection && bidderDetailsSection.style.display !== "none") ||
+    (biddingSection && biddingSection.style.display !== "none");
 
   if (!bidderDetailsAreEmpty || !agreementLooksRestored) {
     return;
   }
 
   agreeCheckbox.checked = false;
-
-  if (agreeText) {
-    agreeText.innerText = "Please agree to the auction rules, payment deadline, and delivery terms.";
-  }
-
-  if (agreeVisualTick) {
-    agreeVisualTick.innerText = "";
-  }
-
-  auctionRulesBox.style.display = "block";
-  showRulesButton.innerText = "View Auction Rules";
-  showRulesButton.style.display = "none";
-
-  if (bidderDetailsSection) {
-    bidderDetailsSection.style.display = "none";
-  }
-
-  if (biddingSection) {
-    biddingSection.style.display = "none";
-  }
+  setRulesAgreementState(false);
 
   ["phoneTick", "firstNameTick", "surnameInitialTick", "transferMethodTick"].forEach(id => {
     const tick = document.getElementById(id);
@@ -1699,9 +1837,34 @@ let watchOnlyMode = false;
     );
   }
 
-  function updateBidEntryState() {
-    const ready = isReadyForBidEntry();
+function updateBidEntryState() {
     const bidEntryStatus = document.getElementById("bidEntryStatus");
+
+    if (isAuctionClosedForDisplay()) {
+      if (bidEntryStatus) {
+        bidEntryStatus.innerText = "";
+        bidEntryStatus.style.display = "none";
+      }
+
+      if (bidAmountInput) {
+        bidAmountInput.value = "";
+        bidAmountInput.disabled = true;
+        bidAmountInput.style.display = "none";
+      }
+
+      if (submitBidButton) {
+        submitBidButton.disabled = true;
+        submitBidButton.style.display = "none";
+      }
+
+      if (clearDetailsButton) {
+        clearDetailsButton.style.display = "none";
+      }
+
+      return;
+    }
+
+    const ready = isReadyForBidEntry();
 
     function setCompletionTick(id, valid) {
       const tick = document.getElementById(id);
@@ -1917,7 +2080,16 @@ function startAuctionRefresh() {
   }, getAuctionRefreshDelay());
 }</script>
 
-<div id="bolbModalBackdrop" class="bolb-modal-backdrop">
+<div id="rulesModalBackdrop">
+  <div id="rulesModalBox">
+    <div id="rulesModalTitle">Auction Rules</div>
+    <div id="rulesModalContent"></div>
+    <div id="rulesModalButtons">
+      <button id="rulesModalCloseButton" type="button">Close</button>
+      <button id="rulesModalAgreeButton" type="button">I agree to the Auction Rules, payment deadline, and delivery terms</button>
+    </div>
+  </div>
+</div><div id="bolbModalBackdrop" class="bolb-modal-backdrop">
   <div class="bolb-modal">
     
     <div id="bolbModalTitle" class="bolb-modal-title">
