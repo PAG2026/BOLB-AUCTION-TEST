@@ -1322,6 +1322,32 @@ showFieldHint("bidAmountHint", "");
 
   if (d.success) {
 
+    if (d.auctionExtended === true && d.newClosingTime) {
+      const extendedCloseDate = new Date(d.newClosingTime);
+
+      if (!Number.isNaN(extendedCloseDate.getTime())) {
+        auction.closingTime = d.newClosingTime;
+        auction.status = "OPEN";
+
+        const closeBox = document.getElementById("close");
+        if (closeBox) {
+          closeBox.innerText =
+            extendedCloseDate.toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric'
+            }) +
+            " " +
+            extendedCloseDate.toLocaleTimeString([], {
+              hour: 'numeric',
+              minute: '2-digit'
+            });
+        }
+
+        updateCountdown();
+      }
+    }
+
     const acceptedBidderId = d.bidderId || "your assigned Bidder ID";
 
     const acceptedMessage = d.isFirstBidByThisPhone === true
