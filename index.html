@@ -953,30 +953,10 @@ function updateCountdown() {
   const diff = close - now;
 
   if (diff <= 0 || auction.status !== "OPEN") {
-
-  applyClosedAuctionUi();
-  const bids = Array.from(document.querySelectorAll(".bid-row"));
-
-  if (bids.length > 0) {
-
-    const winnerBidder = bids[0].children[0].innerText;
-    const winnerAmount = bids[0].children[1].innerText;
-
-    document.getElementById("winnerLine").innerHTML =
-      "<b>" + winnerBidder + "</b><br>" + winnerAmount;
-
-    if (bids.length > 1) {
-
-      const runnerBidder = bids[1].children[0].innerText;
-      const runnerAmount = bids[1].children[1].innerText;
-
-      document.getElementById("runnerUpLine").innerHTML =
-        "<b>" + runnerBidder + "</b><br>" + runnerAmount;
-    }
+    applyClosedAuctionUi();
+    updateClosedAuctionResults();
+    return;
   }
-
-  return;
-}
 
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
