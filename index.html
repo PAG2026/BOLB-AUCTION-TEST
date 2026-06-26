@@ -1565,7 +1565,8 @@ function setRulesAgreementState(agreed) {
     }
 
     if (showRulesButton) {
-      showRulesButton.style.display = "none";
+      showRulesButton.innerText = "View Auction Rules";
+      showRulesButton.style.display = "block";
     }
 
     if (bidderDetailsSection) {
