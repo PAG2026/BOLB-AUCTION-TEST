@@ -581,7 +581,7 @@ The same Bidder ID will be used throughout this auction whenever the same teleph
 Bidder IDs are assigned solely for bidder identification and should not be interpreted as indicating who bid first, who bid last, or the order in which bids were made.<br>
 <b>Delivery cost is separate and is NOT included in any bid.</b><br>
 All valid bids are time-stamped and displayed.<br>
-Highest valid bid at closing wins. Closing time will always be between 10:00 am and 2.00 pm.<br>
+Highest valid bid at final closing wins. The scheduled closing time will normally be between 10:00 am and 2:00 pm.<br>
 If a valid bid is accepted during the final 60 seconds before the then-current closing time, the auction closing time will automatically extend by 60 seconds. This can happen more than once if further valid bids are accepted during the final 60 seconds.<br>
 When an auction closes, the Winner will be contacted at the telephone number provided with the winning bid and the delivery address, delivery cost and the total amount to be paid <i>(bid amount plus delivery cost)</i> will be agreed and the Bank Transfer information confirmed. The Winner will then have <span id="deadlineDisplay">30 minutes</span> to pay by <b>direct Bank-to-Same Bank Transfer ONLY</b><br>
 <b>(e.g. NCB your account to NCB Boss of Luxury Brands account, Scotia Bank your account to Scotia Bank Boss of Luxury Brands account, etc.)</b><br><br>
@@ -601,7 +601,7 @@ False bids, fake details or failure to pay may result in being blocked from futu
 </div>
 
 <button id="showRulesButton" type="button" style="display:block; background:#111; color:#FFD700; margin-top:6px; margin-bottom:6px;">
-  Please review and agree to the Auction Rules so that you may bid on this auction
+  Please review and agree to the Auction Rules, payment deadline, and delivery terms.
 </button>
 
 <div id="agreementStatusBox" style="display:none; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
@@ -616,7 +616,7 @@ False bids, fake details or failure to pay may result in being blocked from futu
 <h3 id="bidFormTitle">Thank you for agreeing to the Auction Rules. Please now complete your bidder details below.</h3>
 <label class="form-label" for="phone">Telephone Number</label>
 <div class="input-with-tick">
-  <input id="phone" placeholder="Phone number e.g. 8761234567">
+  <input id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Phone number e.g. 8761234567">
   <span id="phoneTick" class="completion-tick">✓</span>
 </div>
 <div id="phoneHint" class="field-hint"></div>
@@ -655,7 +655,7 @@ False bids, fake details or failure to pay may result in being blocked from futu
 <div id="transferMethodHint" class="field-hint"></div>
 <div id="bidEntryStatus" class="bid-entry-status"></div>
 <button id="clearDetailsButton" type="button" style="display:none; background:#222; color:#FFD700; font-size:13px; padding:8px 10px; margin-top:6px;">
-  Clear My Details / Watch Only
+  Please clear my details but let me watch the auction
 </button>
 </div>
 <div id="biddingSection" style="display:none;">
@@ -963,17 +963,30 @@ function updateCountdown() {
   const minutes = Math.floor((diff / (1000 * 60)) % 60);
   const seconds = Math.floor((diff / 1000) % 60);
 
+  function timePart(value, singular, plural) {
+    return value + " " + (value === 1 ? singular : plural);
+  }
+
   let text = "";
 
   if (days > 0) {
-    text = `Time left to Bid: ${days}d ${hours}h ${minutes}m`;
+    text =
+      "Time left to Bid: " +
+      timePart(days, "Day", "Days") + " " +
+      timePart(hours, "Hour", "Hours") + " " +
+      timePart(minutes, "Minute", "Minutes");
   } else {
-    text = `Time left: ${hours}h ${minutes}m ${seconds}s`;
+    text =
+      "Time left: " +
+      timePart(hours, "Hour", "Hours") + " " +
+      timePart(minutes, "Minute", "Minutes") + " " +
+      timePart(seconds, "Second", "Seconds");
   }
 
   document.getElementById("topCountdown").innerText = text;
-  document.getElementById("liveCountdownBottom").innerText =
-  text.replace("Time left:", "Reminder – the Auction closes in:");
+  document.getElementById("liveCountdownBottom").innerText = text
+    .replace("Time left to Bid:", "Reminder – the Auction closes in:")
+    .replace("Time left:", "Reminder – the Auction closes in:");
 }
 function playSound() {
   document.getElementById("introSound").play();
@@ -1045,7 +1058,7 @@ function numberToWords(num) {
 
   const firstName = document.getElementById("firstName").value.trim();
   const surnameInitial = document.getElementById("surnameInitial").value.trim();
-  const phone = document.getElementById("phone").value.trim();
+  const phone = document.getElementById("phone").value;
   const transferMethod = document.getElementById("transferMethod").value.trim();
   const bidInput = document.getElementById("bidAmount");
   const rawBid = bidInput.value.trim();
@@ -1132,10 +1145,13 @@ showFieldHint("bidAmountHint", "");
     return;
   }
 
-  const cleanPhone = phone.replace(/\D/g, "");
+  if (!/^\d+$/.test(phone)) {
+    await showBolbAlert("Use numbers only for your Jamaica phone number.\n\nDo not use letters, spaces, punctuation, or special characters.");
+    return;
+  }
 
-  if (!/^(876|658)\d{7}$/.test(cleanPhone)) {
-    await showBolbAlert("Enter a valid 10-digit Jamaica phone number starting with 876 or 658.");
+  if (!/^(876|658)\d{7}$/.test(phone)) {
+    await showBolbAlert("Enter a valid 10-number Jamaica phone number starting with 876 or 658.");
     return;
   }
 
@@ -1220,7 +1236,7 @@ showFieldHint("bidAmountHint", "");
   const bidPayload = {
     firstName: firstName,
     surnameInitial: surnameInitial.toUpperCase(),
-    phone: cleanPhone,
+    phone: phone,
     transferMethod: transferMethod,
     paymentTiming: "Within stated deadline",
     bidAmount: cleanedBid,
@@ -1591,7 +1607,7 @@ function setRulesAgreementState(agreed) {
     }
 
     if (showRulesButton) {
-      showRulesButton.innerText = "Please review and agree to the Auction Rules so that you may bid on this auction";
+      showRulesButton.innerText = "Please review and agree to the Auction Rules, payment deadline, and delivery terms.";
       showRulesButton.style.display = "block";
     }
 
@@ -1833,36 +1849,57 @@ function setupLiveFieldValidation() {
   const transferMethodInput = document.getElementById("transferMethod");
   const agreeInput = document.getElementById("agree");
   const submitBidButton = document.getElementById("submitBidButton");
-const clearDetailsButton = document.getElementById("clearDetailsButton");
-let watchOnlyMode = false;
+  const clearDetailsButton = document.getElementById("clearDetailsButton");
+  let watchOnlyMode = false;
+
+  const badNameWordsForReadiness = [
+    "fuck", "fcuk", "rass", "rassclot", "rass clot", "bomboclaat",
+    "bombaclaat", "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat",
+    "bloodclot", "pussy", "pussyclaat", "sucku", "suckyuhmada",
+    "suckumudda", "suckymudda", "suckuhmudda", "suckyuhmudda", "bitch",
+    "shit", "asshole", "battybwoy", "battygyal", "fassyhole",
+    "rasshole", "kakaclaat", "kaka", "wutliss", "bwoy", "bwoii", "gyal",
+    "bomba", "bumba", "blood", "claat", "clot", "raas", "batty", "bugga",
+    "chi"
+  ];
+
+  function cleanLettersOnly(value) {
+    return String(value || "").toLowerCase().replace(/[^a-z]/g, "");
+  }
+
+  function containsBlockedFirstNameWord(value) {
+    const cleanValue = cleanLettersOnly(value);
+
+    if (!cleanValue) {
+      return false;
+    }
+
+    return badNameWordsForReadiness.some(word => {
+      const cleanWord = cleanLettersOnly(word);
+      return cleanWord && cleanValue.includes(cleanWord);
+    });
+  }
+
+  function isValidPhoneText(value) {
+    return /^(876|658)\d{7}$/.test(String(value || ""));
+  }
+
+  function isValidFirstNameText(value) {
+    const trimmedValue = String(value || "").trim();
+    return /^[A-Za-z]{2,20}$/.test(trimmedValue) && !containsBlockedFirstNameWord(trimmedValue);
+  }
 
   function isReadyForBidEntry() {
-    const firstNameValue = firstNameInput.value.trim();
-    const cleanFirstNameValue = firstNameValue.toLowerCase().replace(/[^a-z]/g, "");
-    const badNameWordsForReadiness = [
-      "fuck", "fcuk", "rass", "rassclot", "rassclot", "bomboclaat",
-      "bombaclaat", "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat",
-      "bloodclot", "pussy", "pussyclaat", "sucku", "suckyuhmada", "suckumudda", "suckymudda", "suckuhmudda", "suckyuhmudda", "bitch",
-      "shit", "asshole", "battybwoy", "battygyal", "fassyhole",
-      "rasshole", "kakaclaat", "kaka", "wutliss", "bwoy", "bwoii", "gyal",
-      "bomba", "bumba", "blood", "claat", "clot", "raas", "batty", "bugga", "chi"
-    ];
-
-    const firstNameIsBad = badNameWordsForReadiness.some(word =>
-      cleanFirstNameValue.includes(word.toLowerCase().replace(/[^a-z]/g, ""))
-    );
-
     return (
-      /^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, "")) &&
-      /^[A-Za-z]{2,20}$/.test(firstNameValue) &&
-      !firstNameIsBad &&
+      isValidPhoneText(phoneInput.value) &&
+      isValidFirstNameText(firstNameInput.value) &&
       /^[A-Za-z]$/.test(surnameInitialInput.value.trim()) &&
       agreeInput.checked &&
       transferMethodInput.value.trim()
     );
   }
 
-function updateBidEntryState() {
+  function updateBidEntryState() {
     const bidEntryStatus = document.getElementById("bidEntryStatus");
 
     if (isAuctionClosedForDisplay()) {
@@ -1895,14 +1932,19 @@ function updateBidEntryState() {
       const tick = document.getElementById(id);
       if (tick) tick.style.display = valid ? "flex" : "none";
     }
+
     const missingItems = [];
 
-    if (!/^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, ""))) {
+    if (!isValidPhoneText(phoneInput.value)) {
       missingItems.push("your Jamaica phone number");
     }
 
-    if (!/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim())) {
-      missingItems.push("your first name");
+    if (!isValidFirstNameText(firstNameInput.value)) {
+      if (/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim()) && containsBlockedFirstNameWord(firstNameInput.value)) {
+        missingItems.push("your real first name");
+      } else {
+        missingItems.push("your first name");
+      }
     }
 
     if (!/^[A-Za-z]$/.test(surnameInitialInput.value.trim())) {
@@ -1917,14 +1959,15 @@ function updateBidEntryState() {
       missingItems.push("Please select your bank for Bank-to-Bank Transfer");
     }
 
-    setCompletionTick("phoneTick", /^(876|658)\d{7}$/.test(phoneInput.value.replace(/\D/g, "")));
-    setCompletionTick("firstNameTick", /^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim()));
+    setCompletionTick("phoneTick", isValidPhoneText(phoneInput.value));
+    setCompletionTick("firstNameTick", isValidFirstNameText(firstNameInput.value));
     setCompletionTick("surnameInitialTick", /^[A-Za-z]$/.test(surnameInitialInput.value.trim()));
     setCompletionTick("transferMethodTick", !!transferMethodInput.value.trim());
 
     bidAmountInput.disabled = !ready;
     submitBidButton.disabled = !ready;
-clearDetailsButton.style.display = agreeInput.checked ? "block" : "none";
+    clearDetailsButton.style.display = agreeInput.checked ? "block" : "none";
+
     if (ready) {
       const nextRequiredBid = Number(bidAmountInput.min || 0);
 
@@ -1932,6 +1975,7 @@ clearDetailsButton.style.display = agreeInput.checked ? "block" : "none";
       bidEntryStatus.style.color = "#cc0000";
       bidEntryStatus.style.borderColor = "#cc0000";
       bidEntryStatus.style.background = "#fff8f8";
+      bidEntryStatus.style.fontWeight = "bold";
       bidAmountInput.style.display = "block";
       submitBidButton.style.display = "block";
 
@@ -1942,65 +1986,78 @@ clearDetailsButton.style.display = agreeInput.checked ? "block" : "none";
       bidAmountInput.value = "";
       bidAmountInput.style.display = "none";
       submitBidButton.style.display = "none";
-bidEntryStatus.style.display = agreeInput.checked && missingItems.length > 0 && !watchOnlyMode ? "block" : "none";
-bidEntryStatus.style.color = "#0066cc";
-bidEntryStatus.style.borderColor = "#0066cc";
-bidEntryStatus.style.background = "#f5fbff";
-bidEntryStatus.style.fontWeight = "normal";
 
-if (agreeInput.checked && missingItems.length > 0) {
-bidEntryStatus.innerText =
-  "Five green ticks are required before you can submit a bid. Please enter " +
-  missingItems.join(", ").replace(", Please select your bank for Bank-to-Bank Transfer",
-    ". Please select your bank for Bank-to-Bank Transfer") +
-  ".";
-} else {
-  bidEntryStatus.innerText = "";
-}
+      bidEntryStatus.style.color = "#0066cc";
+      bidEntryStatus.style.borderColor = "#0066cc";
+      bidEntryStatus.style.background = "#f5fbff";
+      bidEntryStatus.style.fontWeight = "normal";
+
+      if (agreeInput.checked && watchOnlyMode && missingItems.length > 0) {
+        bidEntryStatus.innerText =
+          "Your bidder details have been cleared. You can keep watching the auction. To bid again, please enter your bidder details again.";
+        bidEntryStatus.style.display = "block";
+      } else if (agreeInput.checked && missingItems.length > 0) {
+        bidEntryStatus.innerText =
+          "Five green ticks are required before you can submit a bid. Please enter " +
+          missingItems.join(", ").replace(", Please select your bank for Bank-to-Bank Transfer",
+            ". Please select your bank for Bank-to-Bank Transfer") +
+          ".";
+        bidEntryStatus.style.display = "block";
+      } else {
+        bidEntryStatus.innerText = "";
+        bidEntryStatus.style.display = "none";
+      }
     }
   }
 
-window.updateBidEntryState = updateBidEntryState;
-clearDetailsButton.addEventListener("click", () => {
-  phoneInput.value = "";
-  firstNameInput.value = "";
-  surnameInitialInput.value = "";
-  transferMethodInput.value = "";
-const placeholder = document.getElementById("transferMethodPlaceholder");
-if (placeholder) {
-  placeholder.style.display = "block";
-}
-  bidAmountInput.value = "";
+  window.updateBidEntryState = updateBidEntryState;
 
-  showFieldHint("phoneHint", "");
-  showFieldHint("firstNameHint", "");
-  showFieldHint("surnameInitialHint", "");
-  showFieldHint("transferMethodHint", "");
-  showFieldHint("bidAmountHint", "");
+  clearDetailsButton.addEventListener("click", () => {
+    phoneInput.value = "";
+    firstNameInput.value = "";
+    surnameInitialInput.value = "";
+    transferMethodInput.value = "";
 
-  watchOnlyMode = true;
-  updateBidEntryState();
-});
-transferMethodInput.addEventListener("change", () => {
-  const placeholder = document.getElementById("transferMethodPlaceholder");
+    const placeholder = document.getElementById("transferMethodPlaceholder");
+    if (placeholder) {
+      placeholder.style.display = "block";
+    }
 
-  if (placeholder && transferMethodInput.value.trim()) {
-    placeholder.style.display = "none";
-  }
+    bidAmountInput.value = "";
 
-  watchOnlyMode = false;
-  updateBidEntryState();
-});
+    showFieldHint("phoneHint", "");
+    showFieldHint("firstNameHint", "");
+    showFieldHint("surnameInitialHint", "");
+    showFieldHint("transferMethodHint", "");
+    showFieldHint("bidAmountHint", "");
+
+    watchOnlyMode = true;
+    updateBidEntryState();
+  });
+
+  transferMethodInput.addEventListener("change", () => {
+    const placeholder = document.getElementById("transferMethodPlaceholder");
+
+    if (placeholder && transferMethodInput.value.trim()) {
+      placeholder.style.display = "none";
+    }
+
+    watchOnlyMode = false;
+    updateBidEntryState();
+  });
 
   phoneInput.addEventListener("input", () => {
-    const cleanPhoneValue = phoneInput.value.replace(/\D/g, "");
+    const phoneValue = phoneInput.value;
 
-    if (!cleanPhoneValue) showFieldHint("phoneHint", "");
-    else if (!/^(8|6)/.test(cleanPhoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    else if (cleanPhoneValue.length >= 2 && !/^87|65/.test(cleanPhoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    else if (cleanPhoneValue.length >= 3 && !/^(876|658)/.test(cleanPhoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
-    else if (cleanPhoneValue.length > 10) showFieldHint("phoneHint", "Use 10 digits only");
-    else if (cleanPhoneValue.length < 10) showFieldHint("phoneHint", "Enter full 10-digit Jamaica phone number");
+    watchOnlyMode = false;
+
+    if (!phoneValue) showFieldHint("phoneHint", "");
+    else if (/\D/.test(phoneValue)) showFieldHint("phoneHint", "Use numbers only. Do not use letters, spaces, punctuation, or special characters.");
+    else if (!/^(8|6)/.test(phoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    else if (phoneValue.length >= 2 && !/^(87|65)/.test(phoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    else if (phoneValue.length >= 3 && !/^(876|658)/.test(phoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    else if (phoneValue.length > 10) showFieldHint("phoneHint", "Use 10 numbers only");
+    else if (phoneValue.length < 10) showFieldHint("phoneHint", "Enter your full 10-number Jamaica phone number");
     else showFieldHint("phoneHint", "");
 
     updateBidEntryState();
@@ -2008,19 +2065,12 @@ transferMethodInput.addEventListener("change", () => {
 
   firstNameInput.addEventListener("input", () => {
     const value = firstNameInput.value.trim();
-    const cleanValue = value.toLowerCase().replace(/[^a-z]/g, "");
-    const badNameWords = [
-      "fuck", "fcuk", "rass", "rassclot", "rass clot", "bomboclaat",
-      "bombaclaat", "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat",
-      "bloodclot", "pussy", "pussyclaat", "sucku", "suckyuhmada", "suckumudda", "suckymudda", "suckuhmudda", "suckyuhmudda", "bitch",
-      "shit", "asshole", "battybwoy", "battygyal", "fassyhole",
-      "rasshole", "kakaclaat", "kaka", "wutliss", "bwoy", "bwoii", "gyal",
-      "bomba", "bumba", "blood", "claat", "clot", "raas", "batty", "bugga", "chi"
-    ];
+
+    watchOnlyMode = false;
 
     if (!value) showFieldHint("firstNameHint", "");
     else if (!/^[A-Za-z]+$/.test(value)) showFieldHint("firstNameHint", "Use letters only, no spaces");
-    else if (badNameWords.some(word => cleanValue.includes(word.toLowerCase().replace(/[^a-z]/g, "")))) showFieldHint("firstNameHint", "Please enter your real first name");
+    else if (containsBlockedFirstNameWord(value)) showFieldHint("firstNameHint", "Please enter your real first name");
     else showFieldHint("firstNameHint", "");
 
     updateBidEntryState();
@@ -2028,6 +2078,9 @@ transferMethodInput.addEventListener("change", () => {
 
   surnameInitialInput.addEventListener("input", () => {
     const value = surnameInitialInput.value.trim();
+
+    watchOnlyMode = false;
+
     if (!value) showFieldHint("surnameInitialHint", "");
     else if (!/^[A-Za-z]$/.test(value)) showFieldHint("surnameInitialHint", "Use one letter only");
     else showFieldHint("surnameInitialHint", "");
@@ -2047,7 +2100,6 @@ transferMethodInput.addEventListener("change", () => {
 
   updateBidEntryState();
 }
-
 setupLiveFieldValidation();
 resetAgreementIfBrowserRestoredEmptyBidderDetails();
 
@@ -2130,4 +2182,3 @@ function startAuctionRefresh() {
 </div>
 </body>
 </html>
-
