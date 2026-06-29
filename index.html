@@ -1550,13 +1550,8 @@ function getAuctionRulesModalHtml() {
   }
 
   const delivery = rulesClone.querySelector("#deliveryDisplay");
-  if (delivery) {
-    delivery.removeAttribute("id");
-    delivery.style.display = "block";
-    delivery.style.marginTop = "8px";
-    delivery.innerHTML = "<b>Delivery Terms:</b> " + escapeHtml(
-      auction && auction.deliveryTerms ? auction.deliveryTerms : "Delivery cost is separate"
-    );
+  if (delivery && delivery.parentNode) {
+    delivery.parentNode.removeChild(delivery);
   }
 
   return rulesClone.outerHTML;
