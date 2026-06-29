@@ -435,19 +435,19 @@ input, textarea, select, button {
   z-index:9998;
   align-items:center;
   justify-content:center;
-  padding:16px;
+  padding:4px;
   box-sizing:border-box;
 }
 
 #rulesModalBox {
   width:100%;
   max-width:480px;
-  max-height:88vh;
+  max-height:98vh;
   background:white;
   color:#111;
   border:2px solid #D4AF37;
   border-radius:16px;
-  padding:14px;
+  padding:8px 10px;
   box-shadow:0 10px 30px rgba(0,0,0,0.35);
   box-sizing:border-box;
   overflow:hidden;
@@ -455,13 +455,14 @@ input, textarea, select, button {
 
 #rulesModalTitle {
   text-align:center;
-  font-size:18px;
+  font-size:16px;
   font-weight:bold;
-  margin-bottom:8px;
+  line-height:1.05;
+  margin:0 0 3px 0;
 }
 
 #rulesModalContent {
-  max-height:62vh;
+  max-height:calc(98vh - 108px);
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   font-size:14px;
@@ -587,23 +588,23 @@ input, textarea, select, button {
 </div>
   
 <div class="rules" id="auctionRulesBox" style="display:none;">
-<b>Bidder identities are private</b> and are shown publicly only as anonymous Bidder IDs. Bidder IDs are assigned <b>separately for each auction</b> and are used solely for bidder identification.<br><br>
+<b>Bidder identities are private</b> and are shown publicly only as anonymous Bidder IDs. Bidder IDs are assigned <b>separately for each auction</b> and are used solely for bidder identification.<br>
 
-Bidder IDs are <b>sequentially assigned based on the first valid bid by each telephone number</b> in a particular auction. The same Bidder ID will be used throughout that auction whenever the same telephone number is used to place additional bids. <b>Bidder IDs are not carried over from one auction to another.</b><br><br>
+Bidder IDs are <b>sequentially assigned based on the first valid bid by each telephone number</b> in a particular auction. The same Bidder ID will be used throughout that auction whenever the same telephone number is used to place additional bids. <b>Bidder IDs are not carried over from one auction to another.</b><br>
 
-The scheduled <b>Auction Closing Time</b> will normally be between 10:00 am and 2:00 pm, Monday to Friday, in Jamaica. <b>If a valid bid is accepted during the last 60 seconds before the then-current closing time, the auction closing time will be automatically extended by 60 seconds.</b> This can happen more than once if further valid bids are accepted during the last 60 seconds before the then-current closing time.<br><br>
+The scheduled <b>Auction Closing Time</b> will normally be between 10:00 am and 2:00 pm, Monday to Friday, in Jamaica. <b>If a valid bid is accepted during the last 60 seconds before the then-current closing time, the auction closing time will be automatically extended by 60 seconds.</b> This can happen more than once if further valid bids are accepted during the last 60 seconds before the then-current closing time.<br>
 
-<b>All valid bids are time-stamped and displayed. The highest valid bid at FINAL auction closing wins.</b><br><br>
+<b>All valid bids are time-stamped and displayed. The highest valid bid at FINAL auction closing wins.</b><br>
 
-<b>The cost of delivery of the item to the winning bidder is separate and is NOT included in any valid bid.</b><br><br>
+<b>The cost of delivery of the item to the winning bidder is separate and is NOT included in any valid bid.</b><br>
 
-When an auction closes, <b>the Winner will be contacted at the telephone number provided with the winning bid</b>. The delivery address, delivery cost, total amount to be paid <i>(bid amount plus delivery cost)</i>, and Bank Transfer information will then be agreed or confirmed.<br><br>
+When an auction closes, <b>the Winner will be contacted at the telephone number provided with the winning bid</b>. The delivery address, delivery cost, total amount to be paid <i>(bid amount plus delivery cost)</i>, and Bank Transfer information will then be agreed or confirmed.<br>
 
-<b>The Winner will then have <span id="deadlineDisplay">30 minutes</span> to pay the agreed total amount by online Bank-to-Same-Bank Transfer ONLY</b> — e.g. from your NCB account to the account of The Boss of Luxury Brands at NCB, or from your Scotiabank account to the account of The Boss of Luxury Brands at Scotiabank, etc.<br><br>
+<b>The Winner will then have <span id="deadlineDisplay">30 minutes</span> to pay the agreed total amount by online Bank-to-Same-Bank Transfer ONLY</b> — e.g. from your NCB account to the account of The Boss of Luxury Brands at NCB, or from your Scotiabank account to the account of The Boss of Luxury Brands at Scotiabank, etc.<br>
 
-<i>Payments cannot be made on delivery by credit card or by cash.</i><br><br>
+<i>Payments cannot be made on delivery by credit card or by cash.</i><br>
 
-<b>If the Winner cannot be personally contacted within 30 minutes of the auction close OR does NOT make the Bank-to-Bank Transfer in the agreed amount within 30 minutes of being contacted, the item may be offered to the next highest bidder.</b><br><br>
+<b>If the Winner cannot be personally contacted within 30 minutes of the auction close OR does NOT make the Bank-to-Bank Transfer in the agreed amount within 30 minutes of being contacted, the item may be offered to the next highest bidder.</b><br>
 
 False bids, fake details, or failure to pay may result in being blocked from future auctions.<br>
 
