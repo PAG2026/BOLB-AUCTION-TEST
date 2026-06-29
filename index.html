@@ -1977,7 +1977,15 @@ function setupLiveFieldValidation() {
 
     bidAmountInput.disabled = !ready;
     submitBidButton.disabled = !ready;
-    clearDetailsButton.style.display = agreeInput.checked ? "block" : "none";
+
+    const hasAnyBidderDetail =
+      phoneInput.value.trim() ||
+      firstNameInput.value.trim() ||
+      surnameInitialInput.value.trim() ||
+      transferMethodInput.value.trim();
+
+    clearDetailsButton.style.display =
+      agreeInput.checked && hasAnyBidderDetail ? "block" : "none";
 
     if (ready) {
       const nextRequiredBid = Number(bidAmountInput.min || 0);
