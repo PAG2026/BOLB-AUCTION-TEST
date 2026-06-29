@@ -465,7 +465,7 @@ input, textarea, select, button {
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
   font-size:14px;
-  line-height:1.35;
+  line-height:1.25;
 }
 
 #rulesModalContent .rules {
@@ -473,10 +473,22 @@ input, textarea, select, button {
   margin-top:0;
   background:#fff8ec;
   border:1px solid #e2c46f;
+  line-height:1.25;
+}
+
+#rulesModalContent .rules .rules-paragraph {
+  margin:0 0 8px 0;
+}
+
+#rulesModalContent .rules .rules-help {
+  text-align:center;
+  font-weight:bold;
+  margin-top:6px;
 }
 
 #rulesModalButtons {
-  display:flex;
+  display:grid;
+  grid-template-columns:32fr 68fr;
   gap:10px;
   margin-top:10px;
 }
