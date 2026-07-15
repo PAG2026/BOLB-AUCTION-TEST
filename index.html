@@ -497,6 +497,23 @@ input, textarea, select, button {
 #rulesModalButtons button {
   margin-top:0;
 }
+
+#rulesScrollInstruction {
+  display:none;
+  margin:6px 0 0;
+  color:#0066cc;
+  font-size:13px;
+  font-weight:bold;
+  line-height:1.25;
+  text-align:center;
+}
+
+#rulesModalAgreeButton:disabled {
+  background:#b8b8b8;
+  color:#f5f5f5;
+  cursor:not-allowed;
+  opacity:0.75;
+}
 /* 🔧 END OF NEW CODE */
 
 </style>
@@ -917,8 +934,7 @@ function applyClosedAuctionUi() {
   hideById("topCountdown");
   showById("closedPanel", "block");
   hideById("priceBox");
-  hideById("rulesModalBackdrop");
-
+  closeRulesModal();
   const bidsTitle = document.getElementById("bidsTitle");
   if (bidsTitle) {
     bidsTitle.innerText = "Bidding History";
@@ -1635,6 +1651,8 @@ function setRulesAgreementState(agreed) {
     window.updateBidEntryState();
   }
 }
+let rulesScrollGateCleanup = null;
+
 function openRulesModal(allowAgreement) {
   if (isAuctionClosedForDisplay()) {
     applyClosedAuctionUi();
@@ -1645,13 +1663,57 @@ function openRulesModal(allowAgreement) {
   const content = document.getElementById("rulesModalContent");
   const closeButton = document.getElementById("rulesModalCloseButton");
   const agreeButton = document.getElementById("rulesModalAgreeButton");
+  const scrollInstruction = document.getElementById("rulesScrollInstruction");
 
-  if (!backdrop || !content || !closeButton || !agreeButton) {
+  if (!backdrop || !content || !closeButton || !agreeButton || !scrollInstruction) {
     return;
   }
 
+  if (typeof rulesScrollGateCleanup === "function") {
+    rulesScrollGateCleanup();
+    rulesScrollGateCleanup = null;
+  }
+
   content.innerHTML = getAuctionRulesModalHtml();
+  content.scrollTop = 0;
+
   agreeButton.style.display = allowAgreement ? "block" : "none";
+  agreeButton.disabled = true;
+  agreeButton.setAttribute("aria-disabled", "true");
+  scrollInstruction.style.display = allowAgreement ? "block" : "none";
+
+  let scrollGateSatisfied = false;
+  const bottomTolerance = 3;
+
+  const checkScrollGate = () => {
+    if (!allowAgreement || scrollGateSatisfied) {
+      return;
+    }
+
+    const rulesFitWithoutScrolling =
+      content.scrollHeight <= content.clientHeight + bottomTolerance;
+
+    const rulesScrolledToBottom =
+      content.scrollTop + content.clientHeight >=
+      content.scrollHeight - bottomTolerance;
+
+    if (rulesFitWithoutScrolling || rulesScrolledToBottom) {
+      scrollGateSatisfied = true;
+      agreeButton.disabled = false;
+      agreeButton.setAttribute("aria-disabled", "false");
+      scrollInstruction.style.display = "none";
+    }
+  };
+
+  if (allowAgreement) {
+    content.addEventListener("scroll", checkScrollGate, { passive: true });
+    window.addEventListener("resize", checkScrollGate);
+
+    rulesScrollGateCleanup = () => {
+      content.removeEventListener("scroll", checkScrollGate);
+      window.removeEventListener("resize", checkScrollGate);
+    };
+  }
 
   closeButton.onclick = () => {
     closeRulesModal();
@@ -1659,20 +1721,32 @@ function openRulesModal(allowAgreement) {
   };
 
   agreeButton.onclick = () => {
+    if (!allowAgreement || agreeButton.disabled || !scrollGateSatisfied) {
+      return;
+    }
+
     closeRulesModal();
     setRulesAgreementState(true);
   };
 
   backdrop.style.display = "flex";
+
+  if (allowAgreement) {
+    window.requestAnimationFrame(checkScrollGate);
+  }
 }
 
 function closeRulesModal() {
+  if (typeof rulesScrollGateCleanup === "function") {
+    rulesScrollGateCleanup();
+    rulesScrollGateCleanup = null;
+  }
+
   const backdrop = document.getElementById("rulesModalBackdrop");
   if (backdrop) {
     backdrop.style.display = "none";
   }
 }
-
 showRulesButton.addEventListener("click", () => {
   openRulesModal(!agreeCheckbox.checked);
 });
@@ -2180,8 +2254,10 @@ function startAuctionRefresh() {
   <div id="rulesModalBox">
     <div id="rulesModalTitle">Auction Rules</div>
     <div id="rulesModalContent"></div>
-    <div id="rulesModalButtons">
-      <button id="rulesModalCloseButton" type="button">Close</button>
+    <div id="rulesScrollInstruction" role="status" aria-live="polite">
+      Please scroll to the end of the Auction Rules before agreeing.
+    </div>
+    <div id="rulesModalButtons">      <button id="rulesModalCloseButton" type="button">Close</button>
       <button id="rulesModalAgreeButton" type="button">I agree to the Auction Rules, payment deadline, and delivery terms</button>
     </div>
   </div>
