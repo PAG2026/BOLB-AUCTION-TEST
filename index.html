@@ -1720,11 +1720,17 @@ function openRulesModal(allowAgreement) {
     };
   }
 
-  closeButton.onclick = () => {
-    closeRulesModal();
-    setRulesAgreementState(agreeCheckbox.checked);
-  };
+closeButton.onclick = () => {
+  if (allowAgreement && !agreeCheckbox.checked) {
+    content.scrollTop = 0;
+    agreeButton.disabled = true;
+    agreeButton.setAttribute("aria-disabled", "true");
+    scrollInstruction.style.display = "block";
+  }
 
+  closeRulesModal();
+  setRulesAgreementState(agreeCheckbox.checked);
+};
   agreeButton.onclick = () => {
     if (!allowAgreement || agreeButton.disabled || !scrollGateSatisfied) {
       return;
@@ -1734,11 +1740,18 @@ function openRulesModal(allowAgreement) {
     setRulesAgreementState(true);
   };
 
-  backdrop.style.display = "flex";
+backdrop.style.display = "flex";
 
-  if (allowAgreement) {
-    window.requestAnimationFrame(checkScrollGate);
-  }
+if (allowAgreement) {
+  window.requestAnimationFrame(() => {
+    content.scrollTop = 0;
+
+    window.requestAnimationFrame(() => {
+      content.scrollTop = 0;
+      checkScrollGate();
+    });
+  });
+}
 }
 
 function closeRulesModal() {
