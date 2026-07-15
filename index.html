@@ -443,7 +443,8 @@ input, textarea, select, button {
   width:100%;
   max-width:480px;
   max-height:98vh;
-  background:white;
+  max-height:98dvh;
+background:white;
   color:#111;
   border:2px solid #D4AF37;
   border-radius:16px;
@@ -462,9 +463,9 @@ input, textarea, select, button {
 }
 
 #rulesModalContent {
-  max-height:calc(98vh - 108px);
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
+  max-height:calc(98vh - 190px);
+  max-height:calc(98dvh - 190px);
+  overflow-y:auto;  -webkit-overflow-scrolling:touch;
   font-size:14px;
   line-height:1.25;
 }
@@ -496,6 +497,11 @@ input, textarea, select, button {
 
 #rulesModalButtons button {
   margin-top:0;
+  padding:10px 6px;
+  font-size:14px;
+  line-height:1.2;
+  white-space:normal;
+  height:auto;
 }
 
 #rulesScrollInstruction {
