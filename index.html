@@ -754,7 +754,27 @@ function loadAuction() {
 return fetch(WEB_APP_URL)
     .then(r => r.json())
     .then(d => {
-      auction = d.auction || {};
+      if (!d || d.success === false || !d.auction) {
+        auction = null;
+        allAuctionBids = [];
+
+        const message =
+          d && d.message
+            ? d.message
+            : "There is currently no OPEN auction.";
+
+        const loadingScreen = document.getElementById("loadingScreen");
+        const auctionCard = document.getElementById("auctionCard");
+
+        loadingScreen.innerHTML =
+          "<b>Boss of Luxury Brands Auction</b><br><br>" +
+          escapeHtml(message);
+        loadingScreen.style.display = "block";
+        auctionCard.style.display = "none";
+        return;
+      }
+
+      auction = d.auction;
 
 document.getElementById("itemDescription").innerText = auction.itemDescription || auction.productName || "";
       document.getElementById("start").innerText = money(auction.startingBid);
