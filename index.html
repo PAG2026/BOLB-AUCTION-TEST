@@ -521,17 +521,20 @@ margin:2px 0 6px;  color:#0066cc;
 }
 
 
-.optional-public-message {
-  display:none;
-  background:#fff8ec;
-  border:1px solid #e2c46f;
+
+.bidding-disabled-notice {
+  width:100%;
+  box-sizing:border-box;
+  margin:6px 0 8px;
+  padding:9px 10px;
+  border:2px solid #cc0000;
   border-radius:10px;
-  padding:8px 10px;
-  margin:6px 0;
+  background:#fff8f8;
+  color:#cc0000;
   font-size:14px;
-  line-height:1.35;
+  font-weight:bold;
+  line-height:1.3;
   text-align:center;
-  overflow-wrap:anywhere;
 }
 
 .bolb-modal.media-modal {
@@ -608,10 +611,7 @@ margin:2px 0 6px;  color:#0066cc;
 <button id="morePicturesButton" type="button" style="display:none; background:#111; color:#FFD700; font-size:13px; padding:6px 10px; margin:4px auto 8px auto;">
   View More Pictures
 </button>
-  <div id="introMessage" class="optional-public-message"></div>
-  <button id="soundButton" type="button" style="display:none;" onclick="playSound()">▶ Play Auction Intro</button>
-  <audio id="introSound" preload="none"></audio>
-
+  <audio id="introSound" preload="none" style="display:none;"></audio>
 
   <p id="itemDescription" class="productDescription"></p>
 
@@ -622,8 +622,8 @@ margin:2px 0 6px;  color:#0066cc;
     <div class="row"><span>Minimum Increase</span><b id="min"></b></div>
     <div class="row"><span>Closes</span><b id="close"></b></div>
   </div>
-<div id="promo" class="optional-public-message"></div>
 <div class="countdown" id="topCountdown"></div>
+<div id="biddingAvailabilityNotice" class="bidding-disabled-notice" style="display:none;"></div>
 
 <div id="closedPanel" style="display:none; background:#111; color:white; border-radius:14px; padding:14px; margin:10px 0; text-align:center; border:2px solid #D4AF37;">
   <div style="font-size:18px; font-weight:bold; color:#FFD700;">
@@ -685,11 +685,11 @@ The scheduled <b>Auction Closing Time</b> will normally be between 10:00 am and 
 
 When an auction closes, <b>the Winner will be contacted at the telephone number provided with the winning bid</b>. The delivery address, delivery cost, total amount to be paid <i>(bid amount plus delivery cost)</i>, and Bank Transfer information will then be agreed or confirmed.<br>
 
-<b>The Winner will then have <span class="deadlineDisplayValue">30 minutes</span> to pay the agreed total amount by online Bank-to-Same-Bank Transfer ONLY</b> — e.g. from your NCB account to the account of The Boss of Luxury Brands at NCB, or from your Scotiabank account to the account of The Boss of Luxury Brands at Scotiabank, etc.<br>
+<b>The Winner will then have <span class="deadlineDisplayValue">30 minutes</span> to pay the agreed total amount by online Bank-to-Same-Bank Transfer ONLY</b> — e.g. from the Winner’s NCB account to the account of The Boss of Luxury Brands at NCB, or from the Winner’s Scotiabank account to the account of The Boss of Luxury Brands at Scotiabank, etc.<br>
 
 <i>Payments cannot be made on delivery by credit card or by cash.</i><br>
 
-<b>If the Winner cannot be personally contacted within <span class="deadlineDisplayValue">30 minutes</span> of the auction close OR does NOT make the Bank-to-Bank Transfer in the agreed amount within <span class="deadlineDisplayValue">30 minutes</span> of being contacted, the item may be offered to the next highest bidder.</b><br>
+<b>If the Winner cannot be personally contacted within <span class="deadlineDisplayValue">30 minutes</span> after the auction close OR does NOT make the Bank-to-Bank Transfer in the agreed amount within <span class="deadlineDisplayValue">30 minutes</span> after being contacted, the item may be offered to the next highest bidder.</b><br>
 
 False bids, fake details, or failure to pay may result in being blocked from future auctions.<br>
 
@@ -810,13 +810,16 @@ const BAD_NAME_WORDS = [
 let auction = null;
 let allAuctionBids = [];
 let displayedAuctionId = "";
-let publicSessionInvalidated = true;
+let displayedMaterialTermsSignature = "";
 let currentDisplayBidEligible = false;
+let currentBiddingDisabledMessage = "";
 let watchOnlyMode = false;
 let bidSubmissionInProgress = false;
 let auctionRefreshTimer = null;
 let auctionRefreshPaused = false;
 let rulesScrollGateCleanup = null;
+const INTRO_AUDIO_PRESENTATION_KEY_PREFIX = "bolbIntroAudioPresented:";
+const introAudioPresentedInMemory = new Set();
 
 function money(value) {
   return "J$" + Number(value || 0).toLocaleString("en-US");
@@ -974,6 +977,20 @@ function getMediaSignature(value) {
   });
 }
 
+function getMaterialAuctionTermsSignature(value) {
+  if (!value) return "";
+
+  return JSON.stringify({
+    id: String(value.id || "").trim().toUpperCase(),
+    itemDescription: String(value.itemDescription || value.productName || "").trim(),
+    startingBid: Number(value.startingBid || 0),
+    minimumIncrease: Number(value.minimumIncrease || 0),
+    paymentDeadlineMinutes: Number(
+      value.paymentDeadlineMinutes || DEFAULT_PAYMENT_DEADLINE_MINUTES
+    )
+  });
+}
+
 function getBidSignature(bids) {
   return JSON.stringify((Array.isArray(bids) ? bids : []).map(bid => [
     String(bid.bidderId || ""),
@@ -1021,26 +1038,7 @@ function clearMediaState() {
     bannerImage.dataset.configuredSource = "";
   }
 
-  const introSound = document.getElementById("introSound");
-  if (introSound) {
-    try {
-      introSound.pause();
-    } catch (err) {
-      console.log("Audio pause was unavailable:", err);
-    }
-    introSound.onerror = null;
-    introSound.oncanplay = null;
-    introSound.onended = null;
-    introSound.removeAttribute("src");
-    introSound.dataset.configuredSource = "";
-    if (typeof introSound.load === "function") introSound.load();
-  }
-
-  const soundButton = document.getElementById("soundButton");
-  if (soundButton) {
-    soundButton.style.display = "none";
-    soundButton.innerText = "▶ Play Auction Intro";
-  }
+  clearIntroAudioElement();
 
   const mediaButton = document.getElementById("morePicturesButton");
   if (mediaButton) {
@@ -1120,7 +1118,9 @@ function setRulesAgreementState(agreed, forceOpenState = false) {
 function resetPublicAuctionState() {
   auction = null;
   allAuctionBids = [];
+  displayedMaterialTermsSignature = "";
   currentDisplayBidEligible = false;
+  currentBiddingDisabledMessage = "";
   watchOnlyMode = false;
   bidSubmissionInProgress = false;
 
@@ -1170,8 +1170,7 @@ function resetPublicAuctionState() {
   setText("liveCountdownBottom", "");
   setText("winnerLine", "");
   setText("runnerUpLine", "");
-  setOptionalText("promo", "");
-  setOptionalText("introMessage", "");
+  setOptionalText("biddingAvailabilityNotice", "");
 
   const bids = document.getElementById("bids");
   if (bids) bids.innerHTML = "";
@@ -1203,11 +1202,15 @@ function showControlledLoadMessage(message) {
   if (auctionCard) auctionCard.style.display = "none";
 }
 
-function invalidatePublicSessionForControlledResponse(message) {
-  const priorDisplayedAuctionId = displayedAuctionId;
-  publicSessionInvalidated = true;
-  resetPublicAuctionState();
-  displayedAuctionId = priorDisplayedAuctionId;
+function suspendPublicAuctionForControlledResponse(message) {
+  // A controlled no-OPEN or configuration response makes the currently
+  // displayed page unavailable, but does not automatically destroy a bidder's
+  // same-auction session. If the same Auction ID returns with unchanged
+  // material terms, the session is restored. A different Auction ID or changed
+  // material terms still triggers the full reset in renderAuctionResponse().
+  closeAllModals();
+  currentDisplayBidEligible = false;
+  currentBiddingDisabledMessage = "";
   showControlledLoadMessage(message || "There is currently no OPEN auction.");
 }
 
@@ -1278,81 +1281,122 @@ function updateProductImage(link) {
   image.src = requested;
 }
 
-function updateIntroSound(link) {
+function clearIntroAudioElement() {
   const audio = document.getElementById("introSound");
-  const button = document.getElementById("soundButton");
-  if (!audio || !button) return;
-
-  const requested = String(link || "").trim();
-  if (!requested) {
-    try {
-      audio.pause();
-    } catch (err) {
-      console.log("Audio pause was unavailable:", err);
-    }
-    audio.removeAttribute("src");
-    audio.dataset.configuredSource = "";
-    audio.onerror = null;
-    audio.oncanplay = null;
-    audio.onended = null;
-    if (typeof audio.load === "function") audio.load();
-    button.style.display = "none";
-    button.innerText = "▶ Play Auction Intro";
-    return;
-  }
-
-  if (audio.dataset.configuredSource === requested) return;
+  if (!audio) return;
 
   try {
     audio.pause();
   } catch (err) {
-    console.log("Audio pause was unavailable:", err);
+    // Audio cleanup must remain silent.
   }
 
-  audio.dataset.configuredSource = requested;
-  button.innerText = "▶ Play Auction Intro";
-  button.style.display = "block";
-
-  audio.onerror = () => {
-    if (audio.dataset.configuredSource === requested) {
-      audio.removeAttribute("src");
-      button.style.display = "none";
-      button.innerText = "▶ Play Auction Intro";
-    }
-  };
-
-  audio.oncanplay = () => {
-    if (audio.dataset.configuredSource === requested) {
-      button.style.display = "block";
-    }
-  };
-
-  audio.onended = () => {
-    button.innerText = "▶ Play Auction Intro";
-  };
-
-  audio.src = requested;
-  audio.preload = "metadata";
-  if (typeof audio.load === "function") audio.load();
-}
-
-async function playSound() {
-  const audio = document.getElementById("introSound");
-  const button = document.getElementById("soundButton");
-  if (!audio || !button || !audio.getAttribute("src")) return;
+  audio.onerror = null;
+  audio.onended = null;
+  audio.removeAttribute("src");
+  audio.dataset.configuredSource = "";
 
   try {
-    if (!audio.paused) {
-      audio.pause();
-      button.innerText = "▶ Play Auction Intro";
-      return;
-    }
-
-    await audio.play();
-    button.innerText = "❚❚ Pause Auction Intro";
+    if (typeof audio.load === "function") audio.load();
   } catch (err) {
-    console.log("Auction intro could not be played:", err);
-    await showBolbAlert("The auction intro audio could not be played on this device.");
+    // Audio cleanup must remain silent.
+  }
+}
+
+function getIntroAudioPresentationKey(auctionId) {
+  const normalizedId = String(auctionId || "").trim().toUpperCase();
+  return normalizedId ? INTRO_AUDIO_PRESENTATION_KEY_PREFIX + normalizedId : "";
+}
+
+function hasRecordedFirstAuctionPresentation(auctionId) {
+  const key = getIntroAudioPresentationKey(auctionId);
+  if (!key) return true;
+  if (introAudioPresentedInMemory.has(key)) return true;
+
+  try {
+    if (window.sessionStorage && window.sessionStorage.getItem(key) === "1") {
+      introAudioPresentedInMemory.add(key);
+      return true;
+    }
+  } catch (err) {
+    // sessionStorage may be unavailable; the in-memory guard still prevents
+    // repeats during the current loaded page.
+  }
+
+  return false;
+}
+
+function recordFirstAuctionPresentation(auctionId) {
+  const key = getIntroAudioPresentationKey(auctionId);
+  if (!key) return false;
+
+  introAudioPresentedInMemory.add(key);
+
+  try {
+    if (window.sessionStorage) window.sessionStorage.setItem(key, "1");
+  } catch (err) {
+    // The presentation has already been recorded in memory. Storage failure
+    // must never interrupt the auction or create a visible warning.
+  }
+
+  return true;
+}
+
+function isValidOpenAuctionForIntroAudio(value) {
+  if (!value || String(value.status || "").trim().toUpperCase() !== "OPEN") {
+    return false;
+  }
+
+  const closingTime = new Date(value.closingTime).getTime();
+  return Number.isFinite(closingTime) && Date.now() < closingTime;
+}
+
+function attemptIntroAudioPlayback(value) {
+  if (!isValidOpenAuctionForIntroAudio(value)) return;
+
+  const auctionId = String(value.id || "").trim();
+  if (!auctionId || hasRecordedFirstAuctionPresentation(auctionId)) return;
+
+  // Record first presentation before checking whether Column F is blank and
+  // before attempting playback. This prevents later F additions or refreshes
+  // from creating a second attempt in the same tab/session.
+  recordFirstAuctionPresentation(auctionId);
+
+  const requested = String(value.introSoundLink || "").trim();
+  if (!requested) {
+    clearIntroAudioElement();
+    return;
+  }
+
+  const audio = document.getElementById("introSound");
+  if (!audio) return;
+
+  clearIntroAudioElement();
+  audio.dataset.configuredSource = requested;
+  audio.preload = "auto";
+  audio.onerror = () => {
+    if (audio.dataset.configuredSource === requested) {
+      clearIntroAudioElement();
+    }
+  };
+  audio.src = requested;
+
+  try {
+    if (typeof audio.load === "function") audio.load();
+  } catch (err) {
+    // Loading failure must remain silent and must not create a retry.
+  }
+
+  try {
+    const playResult = audio.play();
+    if (playResult && typeof playResult.catch === "function") {
+      playResult.catch(() => {
+        // Audible autoplay may be rejected by the browser. The failure is
+        // intentionally silent, with no button, popup or later retry.
+      });
+    }
+  } catch (err) {
+    // Synchronous autoplay rejection must also remain silent.
   }
 }
 
@@ -1469,8 +1513,7 @@ function isAuctionClosedForDisplay() {
   const closingTime = new Date(auction.closingTime).getTime();
   if (!Number.isFinite(closingTime)) return true;
 
-  return currentDisplayBidEligible !== true ||
-    String(auction.status || "").toUpperCase() !== "OPEN" ||
+  return String(auction.status || "").toUpperCase() !== "OPEN" ||
     Date.now() >= closingTime;
 }
 
@@ -1528,8 +1571,10 @@ function updateCountdown() {
   const close = new Date(auction.closingTime);
   const difference = close.getTime() - Date.now();
 
-  if (!currentDisplayBidEligible || auction.status !== "OPEN" || difference <= 0) {
+  if (auction.status !== "OPEN" || difference <= 0) {
     currentDisplayBidEligible = false;
+    currentBiddingDisabledMessage = "";
+    setOptionalText("biddingAvailabilityNotice", "");
     applyClosedAuctionUi();
     return;
   }
@@ -1574,25 +1619,35 @@ function updateCountdown() {
 function renderAuctionResponse(data) {
   const incomingAuction = data.auction;
   const incomingAuctionId = String(incomingAuction.id || "").trim();
+  const incomingMaterialTermsSignature =
+    getMaterialAuctionTermsSignature(incomingAuction);
   const previousAuction = auction;
   const previousBids = allAuctionBids;
   const mediaModalWasOpen = isSharedModalOpenWithClass("media-modal");
   const allBidsModalWasOpen = isSharedModalOpenWithClass("all-bids-modal");
   const previousMediaSignature = getMediaSignature(previousAuction);
   const previousBidSignature = getBidSignature(previousBids);
+  const materialTermsChanged =
+    !!displayedAuctionId &&
+    displayedAuctionId === incomingAuctionId &&
+    !!displayedMaterialTermsSignature &&
+    displayedMaterialTermsSignature !== incomingMaterialTermsSignature;
   const requiresFreshSession =
-    publicSessionInvalidated ||
     !displayedAuctionId ||
-    displayedAuctionId !== incomingAuctionId;
+    displayedAuctionId !== incomingAuctionId ||
+    materialTermsChanged;
 
   if (requiresFreshSession) {
     resetPublicAuctionState();
   }
 
   displayedAuctionId = incomingAuctionId;
-  publicSessionInvalidated = false;
+  displayedMaterialTermsSignature = incomingMaterialTermsSignature;
   auction = incomingAuction;
   allAuctionBids = Array.isArray(data.bids) ? data.bids : [];
+  currentBiddingDisabledMessage = String(
+    data.biddingDisabledMessage || ""
+  ).trim();
   const suppliedBidEligible = data.bidEligible;
   const inferredClosingTime = new Date(auction.closingTime).getTime();
   currentDisplayBidEligible = typeof suppliedBidEligible === "boolean"
@@ -1622,12 +1677,14 @@ function renderAuctionResponse(data) {
     bidInput.step = String(Number(auction.minimumIncrease || 500));
   }
 
-  setOptionalText("promo", auction.whatsAppPromoMessage || "");
-  setOptionalText("introMessage", auction.introMessage || "");
+  // Columns C and G are private/redundant and have no public response or DOM path.
+  setOptionalText(
+    "biddingAvailabilityNotice",
+    currentBiddingDisabledMessage
+  );
   updateRulesDeadlineDisplay();
   updateBannerImage(auction.bannerImageLink || "");
   updateProductImage(auction.productPhotoLink || "");
-  updateIntroSound(auction.introSoundLink || "");
   updateAdditionalMediaButton();
   showBids(allAuctionBids);
 
@@ -1657,6 +1714,8 @@ function renderAuctionResponse(data) {
   const auctionCard = document.getElementById("auctionCard");
   if (loadingScreen) loadingScreen.style.display = "none";
   if (auctionCard) auctionCard.style.display = "block";
+
+  attemptIntroAudioPlayback(auction);
 }
 
 function loadAuction() {
@@ -1667,7 +1726,7 @@ function loadAuction() {
     })
     .then(data => {
       if (!data || data.success === false || !data.auction) {
-        invalidatePublicSessionForControlledResponse(
+        suspendPublicAuctionForControlledResponse(
           data && data.message ? data.message : "There is currently no OPEN auction."
         );
         return;
@@ -2101,6 +2160,22 @@ function updateBidEntryState() {
     return;
   }
 
+  if (currentBiddingDisabledMessage) {
+    bidEntryStatus.innerText = currentBiddingDisabledMessage;
+    bidEntryStatus.style.display = "block";
+    bidEntryStatus.style.color = "#cc0000";
+    bidEntryStatus.style.borderColor = "#cc0000";
+    bidEntryStatus.style.background = "#fff8f8";
+    bidEntryStatus.style.fontWeight = "bold";
+    bidAmount.value = "";
+    bidAmount.disabled = true;
+    bidAmount.style.display = "none";
+    submitButton.disabled = true;
+    submitButton.style.display = "none";
+    clearDetailsButton.style.display = "none";
+    return;
+  }
+
   const phoneValid = isValidPhoneText(phone.value);
   const firstNameValid = isValidFirstNameText(firstName.value);
   const initialValid = /^[A-Za-z]$/.test(surnameInitial.value.trim());
@@ -2289,6 +2364,14 @@ async function sendBid() {
   if (isAuctionClosedForDisplay()) {
     applyClosedAuctionUi();
     await showBolbAlert("Auction closed. No further bids are being accepted.");
+    return;
+  }
+
+  if (!currentDisplayBidEligible || currentBiddingDisabledMessage) {
+    await showBolbAlert(
+      currentBiddingDisabledMessage ||
+      "Bidding is temporarily unavailable. Please wait and try again."
+    );
     return;
   }
 
@@ -2521,6 +2604,8 @@ async function sendBid() {
           auction.closingTime = result.newClosingTime;
           auction.status = "OPEN";
           currentDisplayBidEligible = true;
+          currentBiddingDisabledMessage = "";
+          setOptionalText("biddingAvailabilityNotice", "");
           setText("close", formatClosingDateTime(result.newClosingTime));
           updateCountdown();
         }
