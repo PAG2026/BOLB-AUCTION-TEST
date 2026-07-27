@@ -763,7 +763,8 @@ function containsBlockedFirstNameWord(value) {
     "suckymudda", "suckuhmudda", "suckyuhmudda", "bitch", "shit",
     "asshole", "battybwoy", "battygyal", "fassyhole", "rasshole",
     "kakaclaat", "kaka", "wutliss", "bwoy", "bwoii", "gyal", "bomba",
-    "bumba", "blood", "claat", "clot", "raas", "batty", "bugga"
+    "bumba", "blood", "claat", "clot", "raas", "batty", "bugga",
+    "cunt", "cunts"
   ];
 
   return blockedNames.includes(cleanValue);
@@ -1334,62 +1335,51 @@ showFieldHint("bidAmountHint", "");
   let d = await r.json();
 
   if (!d.success && d.requiresIdentityConfirmation) {
+    const issue = d.identityIssue || {};
+    const changedFields = [];
 
-  const issue = d.identityIssue || {};
+    if (issue.firstNameChanged) changedFields.push("First name");
+    if (issue.initialChanged) changedFields.push("Surname initial");
+    if (issue.bankChanged) changedFields.push("Bank selected for Bank-to-Bank Transfer");
+    if (changedFields.length === 0) changedFields.push("Bidder details");
 
-  let changedFields = [];
+    const identityMessage =
+      "This telephone number is already linked to a Bidder ID for this auction.\n\n" +
+      "The following details differ from the reference details first accepted for this telephone number:\n" +
+      changedFields.map(field => "- " + field).join("\n") +
+      "\n\nYou have now entered:\n" +
+      "First name: " + firstName + "\n" +
+      "Surname initial: " + surnameInitial.toUpperCase() + "\n" +
+      "Bank: " + transferMethod +
+      "\n\nIf you proceed, this bid will be registered under the same Bidder ID already assigned to this telephone number." +
+      "\n\nOnly proceed if you are authorised to use this telephone number to place this bid. By pressing Confirm & Proceed, you confirm that authorisation." +
+      "\n\nThe Boss of Luxury Brands may contact this telephone number after bidding to verify the changed details before finalizing the auction result, confirming delivery address or accepting payment." +
+      "\n\nThe Boss of Luxury Brands will also be alerted that different bidder details were entered for this telephone number.";
 
-  if (issue.firstNameChanged) changedFields.push("First name");
-  if (issue.initialChanged) changedFields.push("Surname initial");
-  if (issue.bankChanged) changedFields.push("Bank selected for Bank-to-Bank Transfer");
+    if (submitButton) {
+      submitButton.innerText = "Confirm Details...";
+    }
 
-  let changedDetails =
-    "One or more of the details you entered are different from the details previously accepted for this telephone number.\n\n" +
-    "Different details detected:\n" +
-    changedFields.map(field => "- " + field).join("\n");
+    const confirmedIdentity = await showIdentityChangeConfirm(identityMessage);
 
-  let newDetails =
-    "\n\nYou have now entered:\n\n" +
-    "First name: " + firstName + "\n" +
-    "Surname initial: " + surnameInitial.toUpperCase() + "\n" +
-    "Bank: " + transferMethod;
+    if (!confirmedIdentity) {
+      return;
+    }
 
-  let warningText =
-    "\n\nIf you proceed, this bid will be registered as having been made by the same Bidder ID already assigned to this telephone number." +
+    bidPayload.confirmIdentityChange = true;
+    bidPayload.confirmIdentityAuthorization = true;
 
-    "\n\nThe Boss of Luxury Brands may contact this telephone number after bidding to verify the changed details before finalizing the auction result, confirming delivery address or accepting payment." +
+    if (submitButton) {
+      submitButton.innerText = "Submitting Bid...";
+    }
 
-    "\n\nThe Boss of Luxury Brands will also be alerted that different bidder details were entered for this telephone number.";
+    r = await fetch(WEB_APP_URL, {
+      method: "POST",
+      body: JSON.stringify(bidPayload)
+    });
 
-  if (submitButton) {
-    submitButton.innerText = "Confirm Details...";
+    d = await r.json();
   }
-
-  const confirmedIdentity = await showBolbConfirm(
-    "This telephone number has already been used for this auction.\n\n" +
-    changedDetails +
-    newDetails +
-    warningText,
-    "Confirm Changed Bidder Details"
-  );
-
-  if (!confirmedIdentity) {
-    return;
-  }
-
- bidPayload.confirmIdentityChange = true;
-
-  if (submitButton) {
-    submitButton.innerText = "Submitting Bid...";
-  } 
-
-  r = await fetch(WEB_APP_URL, {
-    method: "POST",
-    body: JSON.stringify(bidPayload)
-  });
-
-  d = await r.json();
-}
 
   if (!d.success && d.requiresHighestBidderConfirmation) {
     if (submitButton) {
@@ -1545,6 +1535,41 @@ function showBolbConfirm(message, title = "Confirm Bid") {
       resolve(true);
     };
 
+  });
+}
+
+function showIdentityChangeConfirm(message) {
+  return new Promise(resolve => {
+    const backdrop = document.getElementById("bolbModalBackdrop");
+    const modal = backdrop.querySelector(".bolb-modal");
+    const titleBox = document.getElementById("bolbModalTitle");
+    const messageBox = document.getElementById("bolbModalMessage");
+    const buttonsBox = document.getElementById("bolbModalButtons");
+
+    if (modal) {
+      modal.classList.remove("all-bids-modal");
+    }
+
+    titleBox.innerText = "Confirm Changed Bidder Details";
+    messageBox.innerText = message;
+    messageBox.scrollTop = 0;
+
+    buttonsBox.innerHTML = `
+      <button id="bolbModalCancel">Cancel Bid</button>
+      <button id="bolbModalProceed">Confirm &amp; Proceed</button>
+    `;
+
+    backdrop.style.display = "flex";
+
+    document.getElementById("bolbModalCancel").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(false);
+    };
+
+    document.getElementById("bolbModalProceed").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(true);
+    };
   });
 }
 
