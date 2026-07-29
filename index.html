@@ -719,6 +719,7 @@ False bids, fake details, or failure to pay may result in being blocked from fut
 
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyPjd2lIMtKk1_z_nCTUFViNtYSr1LkQu7IDCHPsMvZ9UZoBUefLf6RyPbii5zpyJPQDw/exec";
+const JAMAICA_TIME_ZONE = "America/Jamaica";
 
 let auction = null;
 let allAuctionBids = [];
@@ -827,12 +828,15 @@ document.getElementById("close").innerText =
   closeDate.toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: JAMAICA_TIME_ZONE
   }) +
   " " +
   closeDate.toLocaleTimeString([], {
     hour: 'numeric',
-    minute: '2-digit'
+    minute: '2-digit',
+    timeZone: JAMAICA_TIME_ZONE,
+    hour12: true
   });
       document.getElementById("introMessage").innerText = auction.introMessage || "";
 
@@ -902,13 +906,16 @@ function showBids(bids) {
     const bidTime =
       bidDate.toLocaleDateString('en-GB', {
         day: '2-digit',
-        month: 'short'
+        month: 'short',
+        timeZone: JAMAICA_TIME_ZONE
       }) +
       " " +
       bidDate.toLocaleTimeString([], {
         hour: 'numeric',
         minute: '2-digit',
-        second: '2-digit'
+        second: '2-digit',
+        timeZone: JAMAICA_TIME_ZONE,
+        hour12: true
       });
 
     const bidderCell = document.createElement("span");
@@ -1424,12 +1431,15 @@ showFieldHint("bidAmountHint", "");
             extendedCloseDate.toLocaleDateString('en-GB', {
               day: 'numeric',
               month: 'short',
-              year: 'numeric'
+              year: 'numeric',
+              timeZone: JAMAICA_TIME_ZONE
             }) +
             " " +
             extendedCloseDate.toLocaleTimeString([], {
               hour: 'numeric',
-              minute: '2-digit'
+              minute: '2-digit',
+              timeZone: JAMAICA_TIME_ZONE,
+              hour12: true
             });
         }
 
@@ -1948,12 +1958,15 @@ function showAllBidsPopup() {
     const bidDate = new Date(bid.timestamp);
     const bidDay = bidDate.toLocaleDateString('en-GB', {
       day: '2-digit',
-      month: 'short'
+      month: 'short',
+      timeZone: JAMAICA_TIME_ZONE
     });
     const bidTime = bidDate.toLocaleTimeString([], {
       hour: 'numeric',
       minute: '2-digit',
-      second: '2-digit'
+      second: '2-digit',
+      timeZone: JAMAICA_TIME_ZONE,
+      hour12: true
     });
 
     const row = document.createElement("tr");
