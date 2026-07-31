@@ -780,6 +780,7 @@ return fetch(WEB_APP_URL)
     .then(r => r.json())
     .then(d => {
       if (!d || d.success === false || !d.auction) {
+        stopAuctionRefresh();
         auction = null;
         allAuctionBids = [];
 
@@ -1055,6 +1056,7 @@ function updateCountdown() {
   const diff = close - now;
 
   if (diff <= 0 || auction.status !== "OPEN") {
+    stopAuctionRefresh();
     applyClosedAuctionUi();
     updateClosedAuctionResults();
     return;
@@ -2322,6 +2324,22 @@ function stopAuctionRefresh() {
 function startAuctionRefresh() {
   auctionRefreshPaused = false;
   clearAuctionRefreshTimer();
+
+  const closingTimeMs =
+    auction && auction.closingTime
+      ? new Date(auction.closingTime).getTime()
+      : NaN;
+
+  if (
+    !auction ||
+    !auction.closingTime ||
+    auction.status !== "OPEN" ||
+    !Number.isFinite(closingTimeMs) ||
+    closingTimeMs <= Date.now()
+  ) {
+    auctionRefreshPaused = true;
+    return;
+  }
 
   auctionRefreshTimer = setTimeout(() => {
     auctionRefreshTimer = null;
