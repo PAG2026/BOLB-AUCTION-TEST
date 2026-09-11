@@ -427,6 +427,49 @@ input, textarea, select, button {
   margin-top:6px;
 }
 
+.bolb-modal.auction-media-modal {
+  max-width:520px;
+}
+
+.auction-media-picture {
+  margin:0 0 18px;
+}
+
+.auction-media-picture img {
+  display:block;
+  width:100%;
+  max-width:440px;
+  height:auto;
+  margin:0 auto 6px;
+  border-radius:12px;
+}
+
+.auction-media-caption {
+  font-size:14px;
+  font-weight:bold;
+  text-align:center;
+}
+
+.auction-media-video {
+  display:block;
+  width:100%;
+  max-width:440px;
+  height:auto;
+  margin:8px auto;
+  background:#000;
+  border-radius:12px;
+}
+
+.auction-media-video-frame {
+  display:block;
+  width:100%;
+  max-width:440px;
+  aspect-ratio:16 / 9;
+  margin:8px auto;
+  border:0;
+  border-radius:12px;
+}
+
 #rulesModalBackdrop {
   display:none;
   position:fixed;
@@ -746,6 +789,21 @@ function cleanBidValue(value) {
   return String(value || "").replace(/J\$/gi, "").replace(/,/g, "").replace(/\s+/g, "").trim();
 }
 
+function normalizeFirstName(value) {
+  const trimmedValue = String(value || "").trim();
+  return typeof trimmedValue.normalize === "function"
+    ? trimmedValue.normalize("NFC")
+    : trimmedValue;
+}
+
+function isValidFirstName(value) {
+  const normalizedValue = normalizeFirstName(value);
+  const letters = normalizedValue.match(/\p{L}/gu) || [];
+
+  return letters.length >= 2 &&
+    /^(?:\p{L}\p{M}*)+(?:[ '\u2019-](?:\p{L}\p{M}*)+)*$/u.test(normalizedValue);
+}
+
 function normalizeFirstNameForFilter(value) {
   return String(value || "").toLowerCase().replace(/[^a-z]/g, "");
 }
@@ -860,8 +918,15 @@ if (!initialLoadComplete) {
       }
 
 const morePicturesButton = document.getElementById("morePicturesButton");
+const hasExtraPictures = Array.isArray(auction.extraPictureLinks) && auction.extraPictureLinks.length > 0;
+const hasAuctionVideo = !!String(auction.auctionVideoLink || "").trim();
 
-if (Array.isArray(auction.extraPictureLinks) && auction.extraPictureLinks.length > 0) {
+if (hasExtraPictures || hasAuctionVideo) {
+  morePicturesButton.textContent = hasExtraPictures && hasAuctionVideo
+    ? "View Pictures and Video"
+    : hasExtraPictures
+      ? "View More Pictures"
+      : "View Auction Video";
   morePicturesButton.style.display = "block";
 } else {
   morePicturesButton.style.display = "none";
@@ -1160,7 +1225,9 @@ function numberToWords(num) {
     return;
   }
 
-  const firstName = document.getElementById("firstName").value.trim();
+  const firstNameInput = document.getElementById("firstName");
+  const firstName = normalizeFirstName(firstNameInput.value);
+  firstNameInput.value = firstName;
   const surnameInitial = document.getElementById("surnameInitial").value.trim();
   const phone = document.getElementById("phone").value;
   const transferMethod = document.getElementById("transferMethod").value.trim();
@@ -1223,8 +1290,8 @@ showFieldHint("surnameInitialHint", "");
 showFieldHint("phoneHint", "");
 showFieldHint("bidAmountHint", "");
 
-  if (!/^[A-Za-z]{2,20}$/.test(firstName)) {
-    await showBolbAlert("Enter a valid first name with no spaces using letters only.");
+  if (!isValidFirstName(firstName)) {
+    await showBolbAlert("Enter a valid first name using at least 2 letters. Single internal spaces, hyphens and apostrophes are allowed.");
     return;
   }
 
@@ -2005,44 +2072,92 @@ function showAllBidsPopup() {
 
 document.getElementById("viewAllBidsButton").addEventListener("click", showAllBidsPopup);
 
-function showMorePicturesPopup() {
-  if (!auction || !Array.isArray(auction.extraPictureLinks) || auction.extraPictureLinks.length === 0) {
+function showAuctionMediaPopup() {
+  const pictureLinks = auction && Array.isArray(auction.extraPictureLinks)
+    ? auction.extraPictureLinks.filter(Boolean)
+    : [];
+  const videoLink = auction ? String(auction.auctionVideoLink || "").trim() : "";
+
+  if (!pictureLinks.length && !videoLink) {
     return;
   }
 
   const backdrop = document.getElementById("bolbModalBackdrop");
+  const modal = backdrop.querySelector(".bolb-modal");
   const titleBox = document.getElementById("bolbModalTitle");
   const messageBox = document.getElementById("bolbModalMessage");
   const buttonsBox = document.getElementById("bolbModalButtons");
 
-  titleBox.textContent = "More Pictures";
+  modal.classList.remove("all-bids-modal");
+  modal.classList.add("auction-media-modal");
+  titleBox.textContent = pictureLinks.length && videoLink
+    ? "Auction Pictures and Video"
+    : pictureLinks.length
+      ? "Auction Pictures"
+      : "Auction Video";
   messageBox.textContent = "";
 
-  const pictureContainer = document.createElement("div");
-
-  auction.extraPictureLinks.forEach(link => {
+  pictureLinks.forEach((link, index) => {
+    const figure = document.createElement("figure");
+    figure.className = "auction-media-picture";
     const image = document.createElement("img");
     image.src = String(link || "");
-    image.alt = "Additional auction picture";
-    image.style.width = "100%";
-    image.style.maxWidth = "360px";
-    image.style.height = "auto";
-    image.style.display = "block";
-    image.style.margin = "8px auto";
-    image.style.borderRadius = "12px";
-    pictureContainer.appendChild(image);
+    image.alt = "Additional auction picture " + (index + 1) + " of " + pictureLinks.length;
+    image.loading = "lazy";
+    image.decoding = "async";
+
+    const caption = document.createElement("figcaption");
+    caption.className = "auction-media-caption";
+    caption.textContent = "Picture " + (index + 1) + " of " + pictureLinks.length;
+
+    figure.appendChild(image);
+    figure.appendChild(caption);
+    messageBox.appendChild(figure);
   });
 
-  messageBox.appendChild(pictureContainer);
+  if (videoLink) {
+    if (/^https:\/\/drive\.google\.com\/file\/d\/[^/]+\/preview(?:[?#].*)?$/i.test(videoLink)) {
+      const videoFrame = document.createElement("iframe");
+      videoFrame.className = "auction-media-video-frame";
+      videoFrame.title = "Auction video";
+      videoFrame.loading = "lazy";
+      videoFrame.allow = "fullscreen";
+      videoFrame.allowFullscreen = true;
+      videoFrame.src = videoLink;
+      messageBox.appendChild(videoFrame);
+    } else {
+      const video = document.createElement("video");
+      video.className = "auction-media-video";
+      video.controls = true;
+      video.autoplay = false;
+      video.preload = "metadata";
+      video.playsInline = true;
+      video.src = videoLink;
+      messageBox.appendChild(video);
+    }
+  }
+
   buttonsBox.innerHTML = `<button id="bolbModalOk">Close</button>`;
   backdrop.style.display = "flex";
 
   document.getElementById("bolbModalOk").onclick = () => {
+    const video = messageBox.querySelector("video");
+    if (video) {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    }
+    const videoFrame = messageBox.querySelector("iframe");
+    if (videoFrame) {
+      videoFrame.removeAttribute("src");
+    }
+    messageBox.textContent = "";
     backdrop.style.display = "none";
+    modal.classList.remove("auction-media-modal");
   };
 }
 
-document.getElementById("morePicturesButton").addEventListener("click", showMorePicturesPopup);
+document.getElementById("morePicturesButton").addEventListener("click", showAuctionMediaPopup);
 
 function setupLiveFieldValidation() {
   const phoneInput = document.getElementById("phone");
@@ -2060,8 +2175,8 @@ function setupLiveFieldValidation() {
   }
 
   function isValidFirstNameText(value) {
-    const trimmedValue = String(value || "").trim();
-    return /^[A-Za-z]{2,20}$/.test(trimmedValue) && !containsBlockedFirstNameWord(trimmedValue);
+    const normalizedValue = normalizeFirstName(value);
+    return isValidFirstName(normalizedValue) && !containsBlockedFirstNameWord(normalizedValue);
   }
 
   function isReadyForBidEntry() {
@@ -2115,7 +2230,7 @@ function setupLiveFieldValidation() {
     }
 
     if (!isValidFirstNameText(firstNameInput.value)) {
-      if (/^[A-Za-z]{2,20}$/.test(firstNameInput.value.trim()) && containsBlockedFirstNameWord(firstNameInput.value)) {
+      if (isValidFirstName(firstNameInput.value) && containsBlockedFirstNameWord(firstNameInput.value)) {
         missingItems.push("your real first name");
       } else {
         missingItems.push("your first name");
@@ -2247,12 +2362,12 @@ function setupLiveFieldValidation() {
   });
 
   firstNameInput.addEventListener("input", () => {
-    const value = firstNameInput.value.trim();
+    const value = normalizeFirstName(firstNameInput.value);
 
     watchOnlyMode = false;
 
     if (!value) showFieldHint("firstNameHint", "");
-    else if (!/^[A-Za-z]+$/.test(value)) showFieldHint("firstNameHint", "Use letters only, no spaces");
+    else if (!isValidFirstName(value)) showFieldHint("firstNameHint", "Use at least 2 letters. Single internal spaces, hyphens and apostrophes are allowed");
     else if (containsBlockedFirstNameWord(value)) showFieldHint("firstNameHint", "Please enter your real first name");
     else showFieldHint("firstNameHint", "");
 
