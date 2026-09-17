@@ -763,10 +763,11 @@ False bids, fake details, or failure to pay may result in being blocked from fut
 <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw9QeZipqY3HEkUBrniWnlVBWiMRKmAZnm7Nyhl7pbwwwqwP9OEOADbThMvIYgSVNr5/exec";
 const JAMAICA_TIME_ZONE = "America/Jamaica";
+const DEFAULT_BANNER_IMAGE_URL = "https://i.postimg.cc/65q01fW7/BOLB-Banner.png";
 
 let auction = null;
 let allAuctionBids = [];
-let initialLoadComplete = false;
+let displayedAuctionId = "";
 
 function money(v) {
   return "J$" + Number(v || 0).toLocaleString();
@@ -832,6 +833,100 @@ function containsBlockedFirstNameWord(value) {
 function formatJMD(value) {
   return "J$" + Number(value || 0).toLocaleString();
 }
+
+function updateBannerImage(customBannerUrl) {
+  const banner = document.getElementById("bannerImage");
+  const requestedUrl = String(customBannerUrl || "").trim();
+
+  banner.onerror = () => {
+    banner.onerror = null;
+    banner.src = DEFAULT_BANNER_IMAGE_URL;
+  };
+  banner.src = requestedUrl || DEFAULT_BANNER_IMAGE_URL;
+}
+
+function updateProductImage(productImageUrl) {
+  const image = document.getElementById("productImage");
+  const requestedUrl = String(productImageUrl || "").trim();
+
+  image.onload = null;
+  image.onerror = null;
+  image.removeAttribute("src");
+  image.style.opacity = "1";
+
+  if (!requestedUrl) {
+    image.style.display = "none";
+    return;
+  }
+
+  image.style.display = "block";
+  image.style.opacity = "0.3";
+  image.onload = () => {
+    image.style.opacity = "1";
+  };
+  image.onerror = () => {
+    image.style.display = "none";
+    image.removeAttribute("src");
+  };
+  image.src = requestedUrl;
+}
+
+function updateIntroSound(introSoundUrl) {
+  const audio = document.getElementById("introSound");
+  const button = document.getElementById("soundButton");
+  const requestedUrl = String(introSoundUrl || "").trim();
+
+  audio.pause();
+  audio.removeAttribute("src");
+  audio.oncanplay = null;
+  audio.onerror = null;
+  button.style.display = "none";
+
+  if (!requestedUrl) {
+    audio.load();
+    return;
+  }
+
+  audio.oncanplay = () => {
+    button.style.display = "block";
+  };
+  audio.onerror = () => {
+    button.style.display = "none";
+    audio.removeAttribute("src");
+  };
+  audio.src = requestedUrl;
+  audio.load();
+}
+
+function closeOpenAuctionMediaPopup() {
+  const backdrop = document.getElementById("bolbModalBackdrop");
+  const modal = backdrop ? backdrop.querySelector(".bolb-modal") : null;
+  const messageBox = document.getElementById("bolbModalMessage");
+
+  if (!modal || !modal.classList.contains("auction-media-modal")) {
+    return;
+  }
+
+  const video = messageBox ? messageBox.querySelector("video") : null;
+  const videoFrame = messageBox ? messageBox.querySelector("iframe") : null;
+
+  if (video) {
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+  }
+
+  if (videoFrame) {
+    videoFrame.removeAttribute("src");
+  }
+
+  if (messageBox) {
+    messageBox.textContent = "";
+  }
+
+  backdrop.style.display = "none";
+  modal.classList.remove("auction-media-modal");
+}
 function loadAuction() {
   
 return fetch(WEB_APP_URL)
@@ -858,7 +953,14 @@ return fetch(WEB_APP_URL)
         return;
       }
 
+      const nextAuctionId = String(d.auction.id || "");
+
+      if (displayedAuctionId && displayedAuctionId !== nextAuctionId) {
+        closeOpenAuctionMediaPopup();
+      }
+
       auction = d.auction;
+      displayedAuctionId = nextAuctionId;
 
 document.getElementById("itemDescription").innerText = auction.itemDescription || auction.productName || "";
       document.getElementById("start").innerText = money(auction.startingBid);
@@ -899,23 +1001,9 @@ document.getElementById("close").innerText =
   });
       document.getElementById("introMessage").innerText = auction.introMessage || "";
 
-     const img = document.getElementById("productImage");
-
-if (!initialLoadComplete) {
-  img.style.display = "block";
-  img.style.opacity = "0.3";
-
-  img.onload = () => {
-    img.style.opacity = "1";
-  };
-
-  img.src = auction.productPhotoLink || "";
-}
-
-      if (auction.introSoundLink) {
-        document.getElementById("introSound").src = auction.introSoundLink;
-        document.getElementById("soundButton").style.display = "block";
-      }
+      updateBannerImage(auction.bannerImageLink);
+      updateProductImage(auction.productPhotoLink);
+      updateIntroSound(auction.introSoundLink);
 
 const morePicturesButton = document.getElementById("morePicturesButton");
 const hasExtraPictures = Array.isArray(auction.extraPictureLinks) && auction.extraPictureLinks.length > 0;
@@ -942,7 +1030,6 @@ if (typeof window.updateBidEntryState === "function") {
 
 document.getElementById("loadingScreen").style.display = "none";
 document.getElementById("auctionCard").style.display = "block";
-initialLoadComplete = true;
     })
     .catch(err => {
   console.log(err);
