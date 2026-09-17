@@ -586,7 +586,6 @@ margin:2px 0 6px;  color:#0066cc;
 <button id="morePicturesButton" type="button" style="display:none; background:#111; color:#FFD700; font-size:13px; padding:6px 10px; margin:4px auto 8px auto;">
   View More Pictures
 </button>
-  <div id="introMessage" style="display:none;"></div>
   <button id="soundButton" style="display:none;" onclick="playSound()">▶ Play Auction Intro</button>
   <audio id="introSound"></audio>
 
@@ -600,8 +599,6 @@ margin:2px 0 6px;  color:#0066cc;
     <div class="row"><span>Minimum Increase</span><b id="min"></b></div>
     <div class="row"><span>Closes</span><b id="close"></b></div>
   </div>
-<div id="deadlineHidden" style="display:none;"></div>
-<div id="deliveryHidden" style="display:none;"></div>
 <div class="countdown" id="topCountdown"></div>
 
 <div id="closedPanel" style="display:none; background:#111; color:white; border-radius:14px; padding:14px; margin:10px 0; text-align:center; border:2px solid #D4AF37;">
@@ -660,19 +657,17 @@ The scheduled <b>Auction Closing Time</b> will normally be between 10:00 am and 
 
 <b>All valid bids are time-stamped and displayed. The highest valid bid at FINAL auction closing wins.</b><br>
 
-<b>The cost of delivery of the item to the winning bidder is separate and is NOT included in any valid bid.</b><br>
+<b id="deliveryPolicyDisplay"></b><br>
 
 When an auction closes, <b>the Winner will be contacted at the telephone number provided with the winning bid</b>. The delivery address, delivery cost, total amount to be paid <i>(bid amount plus delivery cost)</i>, and Bank Transfer information will then be agreed or confirmed.<br>
 
-<b>The Winner will then have <span id="deadlineDisplay">30 minutes</span> to pay the agreed total amount by online Bank-to-Same-Bank Transfer ONLY</b> — e.g. from your NCB account to the account of The Boss of Luxury Brands at NCB, or from your Scotiabank account to the account of The Boss of Luxury Brands at Scotiabank, etc.<br>
+<b>The Winner will then have <span class="paymentDeadlineDisplay"></span> to pay the agreed total amount by online Bank-to-Same-Bank Transfer ONLY</b> — e.g. from your NCB account to the account of The Boss of Luxury Brands at NCB, or from your Scotiabank account to the account of The Boss of Luxury Brands at Scotiabank, etc.<br>
 
 <i>Payments cannot be made on delivery by credit card or by cash.</i><br>
 
-<b>If the Winner cannot be personally contacted within 30 minutes of the auction close OR does NOT make the Bank-to-Bank Transfer in the agreed amount within 30 minutes of being contacted, the item may be offered to the next highest bidder.</b><br>
+<b>If the Winner cannot be personally contacted within <span class="paymentDeadlineDisplay"></span> of the auction close OR does NOT make the Bank-to-Bank Transfer in the agreed amount within <span class="paymentDeadlineDisplay"></span> of being contacted, the item may be offered to the next highest bidder.</b><br>
 
 False bids, fake details, or failure to pay may result in being blocked from future auctions.<br>
-
-<span id="deliveryDisplay" style="display:none;"></span>
 
 <div style="text-align:center; font-weight:bold;">
   <span style="color:red;">NEED HELP?</span> Call/WhatsApp<br>
@@ -927,6 +922,20 @@ function closeOpenAuctionMediaPopup() {
   backdrop.style.display = "none";
   modal.classList.remove("auction-media-modal");
 }
+
+function updateAuctionRulesConfig(auctionData) {
+  const deadlineMinutes = Number(auctionData && auctionData.paymentDeadlineMinutes);
+  const deliveryPolicy = String(auctionData && auctionData.deliveryPolicy || "").trim();
+
+  if (!Number.isSafeInteger(deadlineMinutes) || deadlineMinutes <= 0 || !deliveryPolicy) {
+    throw new Error("Auction rules configuration is missing or invalid.");
+  }
+
+  document.querySelectorAll(".paymentDeadlineDisplay").forEach(element => {
+    element.textContent = deadlineMinutes + " minutes";
+  });
+  document.getElementById("deliveryPolicyDisplay").textContent = deliveryPolicy;
+}
 function loadAuction() {
   
 return fetch(WEB_APP_URL)
@@ -961,6 +970,7 @@ return fetch(WEB_APP_URL)
 
       auction = d.auction;
       displayedAuctionId = nextAuctionId;
+      updateAuctionRulesConfig(auction);
 
 document.getElementById("itemDescription").innerText = auction.itemDescription || auction.productName || "";
       document.getElementById("start").innerText = money(auction.startingBid);
@@ -999,8 +1009,6 @@ document.getElementById("close").innerText =
     timeZone: JAMAICA_TIME_ZONE,
     hour12: true
   });
-      document.getElementById("introMessage").innerText = auction.introMessage || "";
-
       updateBannerImage(auction.bannerImageLink);
       updateProductImage(auction.productPhotoLink);
       updateIntroSound(auction.introSoundLink);
