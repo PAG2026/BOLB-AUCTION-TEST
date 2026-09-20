@@ -470,6 +470,205 @@ input, textarea, select, button {
   border-radius:12px;
 }
 
+/* Auction media, refresh and alert improvements (2026-09-20). */
+#productImage {
+  width:100%;
+  max-width:340px;
+  max-height:380px;
+  object-fit:contain;
+}
+
+.auction-media-modal .bolb-modal-message,
+.intro-audio-modal .bolb-modal-message {
+  max-height:calc(100vh - 190px);
+  max-height:calc(100dvh - 190px);
+  overflow-y:auto;
+  padding:2px;
+}
+
+.auction-media-section-title {
+  margin:8px 0 2px;
+  font-size:18px;
+  font-weight:bold;
+  color:#111;
+}
+
+.auction-media-guidance {
+  margin:0 0 8px;
+  font-size:14px;
+  line-height:1.3;
+  color:#444;
+}
+
+.auction-media-video-frame,
+.intro-audio-frame {
+  width:100%;
+  max-width:none;
+  min-height:210px;
+  aspect-ratio:16 / 9;
+  background:#111;
+}
+
+.auction-media-open-link {
+  display:inline-block;
+  margin:4px auto 14px;
+  padding:9px 14px;
+  border-radius:10px;
+  background:#222;
+  color:#FFD700;
+  font-size:14px;
+  font-weight:bold;
+  text-decoration:none;
+}
+
+.auction-picture-carousel {
+  width:100%;
+  margin:8px auto 0;
+}
+
+.auction-picture-stage {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:220px;
+  max-height:52vh;
+  padding:4px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  background:#fafafa;
+  box-sizing:border-box;
+  overflow:hidden;
+}
+
+.auction-picture-stage img {
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:50vh;
+  object-fit:contain;
+  border-radius:8px;
+}
+
+.auction-picture-stage a {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  cursor:zoom-in;
+}
+
+.auction-picture-controls {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:6px;
+}
+
+.auction-picture-controls button {
+  margin:0;
+  padding:9px 6px;
+  background:#222;
+  color:#FFD700;
+  font-size:14px;
+}
+
+.auction-picture-controls button:disabled {
+  opacity:0.45;
+}
+
+.auction-picture-caption {
+  margin:6px 0 2px;
+  text-align:center;
+  font-size:15px;
+  font-weight:bold;
+}
+
+.auction-live-tools {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin:8px 0 4px;
+}
+
+.auction-live-tools button {
+  margin:0;
+  padding:9px 7px;
+  background:#222;
+  color:#FFD700;
+  font-size:13px;
+}
+
+#lastUpdatedStatus {
+  min-height:18px;
+  margin:3px 0 6px;
+  color:#555;
+  font-size:12px;
+  text-align:center;
+}
+
+#connectionStatus {
+  display:none;
+  margin:6px 0;
+  padding:8px 10px;
+  border:1px solid #b36b00;
+  border-radius:10px;
+  background:#fff4dc;
+  color:#7a4300;
+  font-size:13px;
+  font-weight:bold;
+  text-align:center;
+}
+
+#newBidAlert {
+  display:none;
+  position:sticky;
+  top:4px;
+  z-index:20;
+  margin:8px 0;
+  padding:12px;
+  border:3px solid #FFD700;
+  border-radius:12px;
+  background:#111;
+  color:white;
+  text-align:center;
+  box-shadow:0 6px 18px rgba(0,0,0,0.28);
+}
+
+#newBidAlert strong {
+  display:block;
+  color:#FFD700;
+  font-size:18px;
+  margin-bottom:3px;
+}
+
+#dismissBidAlertButton {
+  width:auto;
+  min-width:120px;
+  margin:8px auto 0;
+  padding:7px 14px;
+  background:#25D366;
+  color:white;
+  font-size:13px;
+}
+
+@media (max-width:600px) {
+  .bolb-modal.auction-media-modal,
+  .bolb-modal.intro-audio-modal {
+    padding:12px;
+  }
+
+  .auction-media-video-frame,
+  .intro-audio-frame {
+    min-height:190px;
+  }
+
+  .auction-picture-stage {
+    min-height:190px;
+  }
+}
+
 #rulesModalBackdrop {
   display:none;
   position:fixed;
@@ -581,12 +780,12 @@ margin:2px 0 6px;  color:#0066cc;
     <h2>Private Luxury Auction</h2>
   </div>
 
-<img id="productImage" style="max-width:220px; margin:10px auto; display:block;">
+<img id="productImage" style="max-width:340px; margin:10px auto; display:block;">
 
-<button id="morePicturesButton" type="button" style="display:none; background:#111; color:#FFD700; font-size:13px; padding:6px 10px; margin:4px auto 8px auto;">
-  View More Pictures
+<button id="morePicturesButton" type="button" style="display:none; background:#111; color:#FFD700; font-size:13px; padding:8px 10px; margin:4px auto 8px auto;">
+  View Auction Video and Pictures
 </button>
-  <button id="soundButton" style="display:none;" onclick="playSound()">▶ Play Auction Intro</button>
+  <button id="soundButton" type="button" style="display:none; background:#222; color:#FFD700;" onclick="playSound()">▶ Play Auction Introduction</button>
   <audio id="introSound"></audio>
 
 
@@ -597,9 +796,23 @@ margin:2px 0 6px;  color:#0066cc;
 </b></div>
     <div class="row"><span>Starting Bid</span><b id="start"></b></div>
     <div class="row"><span>Minimum Increase</span><b id="min"></b></div>
-    <div class="row"><span>Closes</span><b id="close"></b></div>
+    <div class="row"><span>Closes (Jamaica time)</span><b id="close"></b></div>
   </div>
 <div class="countdown" id="topCountdown"></div>
+
+<div id="connectionStatus" role="status" aria-live="polite"></div>
+
+<div class="auction-live-tools">
+  <button id="enableBidAlertsButton" type="button">🔔 Enable Bid Alerts</button>
+  <button id="refreshBidsButton" type="button">↻ Refresh Bids</button>
+</div>
+<div id="lastUpdatedStatus" role="status" aria-live="polite">Waiting for the latest auction update…</div>
+
+<div id="newBidAlert" role="alert" aria-live="assertive">
+  <strong>🔔 NEW HIGHER BID</strong>
+  <span id="newBidAlertMessage"></span>
+  <button id="dismissBidAlertButton" type="button">Dismiss</button>
+</div>
 
 <div id="closedPanel" style="display:none; background:#111; color:white; border-radius:14px; padding:14px; margin:10px 0; text-align:center; border:2px solid #D4AF37;">
   <div style="font-size:18px; font-weight:bold; color:#FFD700;">
@@ -763,6 +976,168 @@ const DEFAULT_BANNER_IMAGE_URL = "https://i.postimg.cc/65q01fW7/BOLB-Banner.png"
 let auction = null;
 let allAuctionBids = [];
 let displayedAuctionId = "";
+let auctionLoadInFlight = null;
+let successfulAuctionLoad = false;
+let hasInitialBidSnapshot = false;
+let lastSeenHighestBidKey = "";
+let suppressNextBidAlert = false;
+let bidAlertsEnabled = false;
+let bidAlertAudioContext = null;
+let refreshResumeTimer = null;
+let currentIntroSoundUrl = "";
+const ORIGINAL_DOCUMENT_TITLE = document.title;
+
+function addCacheBuster(url) {
+  const separator = String(url || "").includes("?") ? "&" : "?";
+  return String(url || "") + separator + "_bolb=" + Date.now();
+}
+
+function formatJamaicaClock(dateValue) {
+  const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toLocaleTimeString([], {
+    hour:"numeric",
+    minute:"2-digit",
+    second:"2-digit",
+    hour12:true,
+    timeZone:JAMAICA_TIME_ZONE
+  });
+}
+
+function setConnectionStatus(message) {
+  const box = document.getElementById("connectionStatus");
+  if (!box) return;
+
+  if (message) {
+    box.textContent = message;
+    box.style.display = "block";
+  } else {
+    box.textContent = "";
+    box.style.display = "none";
+  }
+}
+
+function updateLastUpdatedStatus() {
+  const box = document.getElementById("lastUpdatedStatus");
+  if (!box) return;
+  box.textContent = "Bids updated: " + formatJamaicaClock(new Date()) + " Jamaica time";
+}
+
+function getHighestBidKey(bids) {
+  const highestBid = Array.isArray(bids) && bids.length ? bids[0] : null;
+  if (!highestBid) return "";
+
+  return [
+    String(highestBid.bidderId || ""),
+    String(highestBid.bidAmount || ""),
+    String(highestBid.timestamp || "")
+  ].join("|");
+}
+
+function dismissNewBidAlert() {
+  const alertBox = document.getElementById("newBidAlert");
+  if (alertBox) alertBox.style.display = "none";
+  document.title = ORIGINAL_DOCUMENT_TITLE;
+}
+
+function playBidAlertChime() {
+  if (!bidAlertsEnabled || !bidAlertAudioContext) return;
+
+  const context = bidAlertAudioContext;
+  const startTime = context.currentTime;
+
+  [880, 1175].forEach((frequency, index) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const noteStart = startTime + (index * 0.18);
+    const noteEnd = noteStart + 0.16;
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, noteStart);
+    gain.gain.setValueAtTime(0.0001, noteStart);
+    gain.gain.exponentialRampToValueAtTime(0.28, noteStart + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(noteStart);
+    oscillator.stop(noteEnd);
+  });
+}
+
+function showNewBidAlert(highestBid) {
+  if (!highestBid || isAuctionClosedForDisplay()) return;
+
+  const alertBox = document.getElementById("newBidAlert");
+  const messageBox = document.getElementById("newBidAlertMessage");
+
+  if (messageBox) {
+    messageBox.textContent =
+      "New highest bid: " + money(highestBid.bidAmount) +
+      (highestBid.bidderId ? " by " + String(highestBid.bidderId) : "") + ".";
+  }
+
+  if (alertBox) alertBox.style.display = "block";
+  document.title = "🔔 NEW BID – " + ORIGINAL_DOCUMENT_TITLE;
+  playBidAlertChime();
+}
+
+async function toggleBidAlerts() {
+  const button = document.getElementById("enableBidAlertsButton");
+
+  if (bidAlertsEnabled) {
+    bidAlertsEnabled = false;
+    if (button) {
+      button.textContent = "🔔 Enable Bid Alerts";
+      button.style.background = "#222";
+    }
+    return;
+  }
+
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContextClass) {
+    await showBolbAlert(
+      "This browser cannot play automatic bid-alert sounds. The on-screen new-bid alert will still work.",
+      "Bid Alerts"
+    );
+    return;
+  }
+
+  try {
+    bidAlertAudioContext = bidAlertAudioContext || new AudioContextClass();
+    if (bidAlertAudioContext.state === "suspended") {
+      await bidAlertAudioContext.resume();
+    }
+    bidAlertsEnabled = true;
+    if (button) {
+      button.textContent = "🔔 Bid Alerts Enabled";
+      button.style.background = "#087b32";
+    }
+    playBidAlertChime();
+  } catch (error) {
+    console.log("Bid alert audio could not be enabled:", error);
+    await showBolbAlert(
+      "Sound could not be enabled on this device. The on-screen new-bid alert will still work.",
+      "Bid Alerts"
+    );
+  }
+}
+
+function driveFileIdFromUrl(url) {
+  const value = String(url || "").trim();
+  const pathMatch = value.match(/drive\.google\.com\/file\/d\/([^/?#]+)/i);
+  const queryMatch = value.match(/[?&]id=([^&#]+)/i);
+  return pathMatch ? pathMatch[1] : queryMatch ? queryMatch[1] : "";
+}
+
+function toDrivePreviewUrl(url) {
+  const fileId = driveFileIdFromUrl(url);
+  return fileId ? "https://drive.google.com/file/d/" + fileId + "/preview" : "";
+}
 
 function money(v) {
   return "J$" + Number(v || 0).toLocaleString();
@@ -847,7 +1222,13 @@ function updateProductImage(productImageUrl) {
   image.onload = null;
   image.onerror = null;
   image.removeAttribute("src");
+  image.removeAttribute("role");
+  image.removeAttribute("tabindex");
+  image.removeAttribute("title");
+  image.onclick = null;
+  image.onkeydown = null;
   image.style.opacity = "1";
+  image.style.cursor = "default";
 
   if (!requestedUrl) {
     image.style.display = "none";
@@ -864,6 +1245,17 @@ function updateProductImage(productImageUrl) {
     image.removeAttribute("src");
   };
   image.src = requestedUrl;
+  image.style.cursor = "zoom-in";
+  image.setAttribute("role", "button");
+  image.setAttribute("tabindex", "0");
+  image.title = "Open the product picture full-size";
+  image.onclick = () => window.open(requestedUrl, "_blank", "noopener,noreferrer");
+  image.onkeydown = event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      image.click();
+    }
+  };
 }
 
 function updateIntroSound(introSoundUrl) {
@@ -871,26 +1263,102 @@ function updateIntroSound(introSoundUrl) {
   const button = document.getElementById("soundButton");
   const requestedUrl = String(introSoundUrl || "").trim();
 
+  currentIntroSoundUrl = requestedUrl;
   audio.pause();
   audio.removeAttribute("src");
   audio.oncanplay = null;
   audio.onerror = null;
-  button.style.display = "none";
+  audio.load();
 
   if (!requestedUrl) {
-    audio.load();
+    button.style.display = "none";
     return;
   }
 
-  audio.oncanplay = () => {
-    button.style.display = "block";
-  };
-  audio.onerror = () => {
-    button.style.display = "none";
+  /*
+    Google Drive download URLs are not reliably streamable through a native
+    <audio> element on Safari/iOS. Keep the control visible and load the
+    introduction only after the bidder taps it. Drive audio opens in its
+    preview player; direct audio URLs use native controls.
+  */
+  button.style.display = "block";
+  button.textContent = "▶ Play Auction Introduction";
+}
+
+function closeIntroSoundPopup() {
+  const backdrop = document.getElementById("bolbModalBackdrop");
+  const modal = backdrop ? backdrop.querySelector(".bolb-modal") : null;
+  const messageBox = document.getElementById("bolbModalMessage");
+
+  if (!modal || !modal.classList.contains("intro-audio-modal")) return;
+
+  const audio = messageBox ? messageBox.querySelector("audio") : null;
+  const frame = messageBox ? messageBox.querySelector("iframe") : null;
+
+  if (audio) {
+    audio.pause();
     audio.removeAttribute("src");
-  };
-  audio.src = requestedUrl;
-  audio.load();
+    audio.load();
+  }
+  if (frame) frame.removeAttribute("src");
+  if (messageBox) messageBox.textContent = "";
+
+  backdrop.style.display = "none";
+  modal.classList.remove("intro-audio-modal");
+}
+
+function showIntroSoundPopup() {
+  const sourceUrl = String(currentIntroSoundUrl || "").trim();
+  if (!sourceUrl) {
+    showBolbAlert("The auction introduction is not available.", "Auction Introduction");
+    return;
+  }
+
+  const backdrop = document.getElementById("bolbModalBackdrop");
+  const modal = backdrop.querySelector(".bolb-modal");
+  const titleBox = document.getElementById("bolbModalTitle");
+  const messageBox = document.getElementById("bolbModalMessage");
+  const buttonsBox = document.getElementById("bolbModalButtons");
+  const drivePreviewUrl = toDrivePreviewUrl(sourceUrl);
+
+  modal.classList.remove("all-bids-modal", "auction-media-modal");
+  modal.classList.add("intro-audio-modal");
+  titleBox.textContent = "Auction Introduction";
+  messageBox.textContent = "";
+
+  const guidance = document.createElement("p");
+  guidance.className = "auction-media-guidance";
+  guidance.textContent = "Tap the play control below to hear the auction introduction.";
+  messageBox.appendChild(guidance);
+
+  if (drivePreviewUrl) {
+    const frame = document.createElement("iframe");
+    frame.className = "intro-audio-frame";
+    frame.title = "Auction introduction audio";
+    frame.loading = "eager";
+    frame.allow = "autoplay";
+    frame.src = drivePreviewUrl;
+    messageBox.appendChild(frame);
+  } else {
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.preload = "metadata";
+    audio.style.width = "100%";
+    audio.src = sourceUrl;
+    messageBox.appendChild(audio);
+  }
+
+  const fallbackLink = document.createElement("a");
+  fallbackLink.className = "auction-media-open-link";
+  fallbackLink.href = drivePreviewUrl || sourceUrl;
+  fallbackLink.target = "_blank";
+  fallbackLink.rel = "noopener noreferrer";
+  fallbackLink.textContent = "Open Audio in a New Window";
+  messageBox.appendChild(fallbackLink);
+
+  buttonsBox.innerHTML = `<button id="bolbModalOk">Close</button>`;
+  backdrop.style.display = "flex";
+  document.getElementById("bolbModalOk").onclick = closeIntroSoundPopup;
 }
 
 function closeOpenAuctionMediaPopup() {
@@ -937,114 +1405,201 @@ function updateAuctionRulesConfig(auctionData) {
   document.getElementById("deliveryPolicyDisplay").textContent = deliveryPolicy;
 }
 function loadAuction() {
-  
-return fetch(WEB_APP_URL)
-    .then(r => r.json())
+  if (auctionLoadInFlight) {
+    return auctionLoadInFlight;
+  }
+
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  const timeoutId = controller
+    ? setTimeout(() => controller.abort(), 12000)
+    : null;
+  const requestOptions = {
+    cache:"no-store"
+  };
+
+  if (controller) requestOptions.signal = controller.signal;
+
+  auctionLoadInFlight = fetch(addCacheBuster(WEB_APP_URL), requestOptions)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Auction service returned " + response.status + ".");
+      }
+      return response.json();
+    })
     .then(d => {
       if (!d || d.success === false || !d.auction) {
-        stopAuctionRefresh();
+        const message = d && d.message
+          ? String(d.message)
+          : "There is currently no OPEN auction.";
+
+        if (successfulAuctionLoad && auction) {
+          setConnectionStatus(message + " The last confirmed auction information remains on screen while the app retries.");
+          return false;
+        }
+
         auction = null;
         allAuctionBids = [];
 
-        const message =
-          d && d.message
-            ? d.message
-            : "There is currently no OPEN auction.";
-
         const loadingScreen = document.getElementById("loadingScreen");
         const auctionCard = document.getElementById("auctionCard");
-
         loadingScreen.innerHTML =
           "<b>Boss of Luxury Brands Auction</b><br><br>" +
-          escapeHtml(message);
+          escapeHtml(message) +
+          '<br><button id="initialRetryButton" type="button">Try Again</button>';
         loadingScreen.style.display = "block";
         auctionCard.style.display = "none";
-        return;
+
+        const retryButton = document.getElementById("initialRetryButton");
+        if (retryButton) retryButton.onclick = () => refreshAuctionNow("manual");
+        return false;
       }
 
       const nextAuctionId = String(d.auction.id || "");
+      const auctionChanged = !!displayedAuctionId && displayedAuctionId !== nextAuctionId;
 
-      if (displayedAuctionId && displayedAuctionId !== nextAuctionId) {
+      if (auctionChanged) {
         closeOpenAuctionMediaPopup();
+        closeIntroSoundPopup();
+        dismissNewBidAlert();
+        hasInitialBidSnapshot = false;
+        lastSeenHighestBidKey = "";
       }
 
       auction = d.auction;
       displayedAuctionId = nextAuctionId;
       updateAuctionRulesConfig(auction);
 
-document.getElementById("itemDescription").innerText = auction.itemDescription || auction.productName || "";
+      document.getElementById("itemDescription").innerText =
+        auction.itemDescription || auction.productName || "";
       document.getElementById("start").innerText = money(auction.startingBid);
       document.getElementById("min").innerText = money(auction.minimumIncrease);
-const hasExistingBids = Array.isArray(d.bids) && d.bids.length > 0;
-const nextBid = hasExistingBids
-  ? Number(d.highestBid || 0) + Number(auction.minimumIncrease || 0)
-  : Number(auction.startingBid || 0);
-const bidInput = document.getElementById("bidAmount");
-bidInput.min = nextBid;
-bidInput.step = Number(auction.minimumIncrease || 500);
-if (typeof window.updateBidEntryState === "function") {
-  window.updateBidEntryState();
-}
-      const hasBids = Array.isArray(d.bids) && d.bids.length > 0;
 
-if (hasBids) {
-  document.getElementById("highestBidRow").style.display = "flex";
-  document.getElementById("high").innerText = money(d.highestBid);
-} else {
-  document.getElementById("highestBidRow").style.display = "none";
-  document.getElementById("high").innerText = "";
-}
+      const hasExistingBids = Array.isArray(d.bids) && d.bids.length > 0;
+      const nextBid = hasExistingBids
+        ? Number(d.highestBid || 0) + Number(auction.minimumIncrease || 0)
+        : Number(auction.startingBid || 0);
+      const bidInput = document.getElementById("bidAmount");
+      bidInput.min = nextBid;
+      bidInput.step = Number(auction.minimumIncrease || 500);
+
+      if (hasExistingBids) {
+        document.getElementById("highestBidRow").style.display = "flex";
+        document.getElementById("high").innerText = money(d.highestBid);
+      } else {
+        document.getElementById("highestBidRow").style.display = "none";
+        document.getElementById("high").innerText = "";
+      }
+
       const closeDate = new Date(auction.closingTime);
-document.getElementById("close").innerText =
-  closeDate.toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    timeZone: JAMAICA_TIME_ZONE
-  }) +
-  " " +
-  closeDate.toLocaleTimeString([], {
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZone: JAMAICA_TIME_ZONE,
-    hour12: true
-  });
+      document.getElementById("close").innerText =
+        closeDate.toLocaleDateString("en-GB", {
+          day:"numeric",
+          month:"short",
+          year:"numeric",
+          timeZone:JAMAICA_TIME_ZONE
+        }) +
+        " " +
+        closeDate.toLocaleTimeString([], {
+          hour:"numeric",
+          minute:"2-digit",
+          timeZone:JAMAICA_TIME_ZONE,
+          hour12:true
+        });
+
       updateBannerImage(auction.bannerImageLink);
       updateProductImage(auction.productPhotoLink);
       updateIntroSound(auction.introSoundLink);
 
-const morePicturesButton = document.getElementById("morePicturesButton");
-const hasExtraPictures = Array.isArray(auction.extraPictureLinks) && auction.extraPictureLinks.length > 0;
-const hasAuctionVideo = !!String(auction.auctionVideoLink || "").trim();
+      const morePicturesButton = document.getElementById("morePicturesButton");
+      const hasExtraPictures =
+        Array.isArray(auction.extraPictureLinks) && auction.extraPictureLinks.length > 0;
+      const hasAuctionVideo = !!String(auction.auctionVideoLink || "").trim();
 
-if (hasExtraPictures || hasAuctionVideo) {
-  morePicturesButton.textContent = hasExtraPictures && hasAuctionVideo
-    ? "View Pictures and Video"
-    : hasExtraPictures
-      ? "View More Pictures"
-      : "View Auction Video";
-  morePicturesButton.style.display = "block";
-} else {
-  morePicturesButton.style.display = "none";
-}
+      if (hasExtraPictures || hasAuctionVideo) {
+        morePicturesButton.textContent = hasExtraPictures && hasAuctionVideo
+          ? "View Auction Video and Pictures"
+          : hasExtraPictures
+            ? "View Auction Pictures"
+            : "View Auction Video";
+        morePicturesButton.style.display = "block";
+      } else {
+        morePicturesButton.style.display = "none";
+      }
 
-      allAuctionBids = d.bids || [];
-showBids(allAuctionBids);
-updateCountdown();
+      allAuctionBids = Array.isArray(d.bids) ? d.bids : [];
+      const currentHighestBidKey = getHighestBidKey(allAuctionBids);
+      const highestBidChanged =
+        hasInitialBidSnapshot &&
+        currentHighestBidKey !== lastSeenHighestBidKey &&
+        !!currentHighestBidKey;
 
-if (typeof window.updateBidEntryState === "function") {
-  window.updateBidEntryState();
-}
+      showBids(allAuctionBids);
+      successfulAuctionLoad = true;
+      setConnectionStatus("");
+      updateLastUpdatedStatus();
+      updateCountdown();
 
-document.getElementById("loadingScreen").style.display = "none";
-document.getElementById("auctionCard").style.display = "block";
+      if (!isAuctionClosedForDisplay()) {
+        const liveTools = document.querySelector(".auction-live-tools");
+        const refreshButton = document.getElementById("refreshBidsButton");
+        showById("enableBidAlertsButton", "block");
+        if (liveTools) liveTools.style.gridTemplateColumns = "1fr 1fr";
+        if (refreshButton) refreshButton.style.gridColumn = "auto";
+      }
+
+      if (highestBidChanged) {
+        if (suppressNextBidAlert) {
+          suppressNextBidAlert = false;
+        } else {
+          showNewBidAlert(allAuctionBids[0]);
+        }
+      } else if (suppressNextBidAlert) {
+        /* An accepted bid refresh completed without a changed snapshot. */
+        suppressNextBidAlert = false;
+      }
+
+      lastSeenHighestBidKey = currentHighestBidKey;
+      hasInitialBidSnapshot = true;
+
+      if (typeof window.updateBidEntryState === "function") {
+        window.updateBidEntryState();
+      }
+
+      document.getElementById("loadingScreen").style.display = "none";
+      document.getElementById("auctionCard").style.display = "block";
+      return true;
     })
     .catch(err => {
-  console.log(err);
-  console.log("Auction refresh error:", err);
-document.getElementById("loadingScreen").innerHTML = "<b>Unable to load auction details.</b><br><br>Please check your connection and refresh the page.";
-document.getElementById("auctionCard").style.display = "none";
-});
+      console.log("Auction refresh error:", err);
+
+      const timedOut = err && err.name === "AbortError";
+      const message = timedOut
+        ? "The latest update is taking too long. Retrying automatically."
+        : "Connection interrupted. Retrying automatically.";
+
+      setConnectionStatus(message);
+
+      if (!successfulAuctionLoad) {
+        const loadingScreen = document.getElementById("loadingScreen");
+        loadingScreen.innerHTML =
+          "<b>Unable to load auction details.</b><br><br>" +
+          escapeHtml(message) +
+          '<br><button id="initialRetryButton" type="button">Try Again</button>';
+        loadingScreen.style.display = "block";
+        document.getElementById("auctionCard").style.display = "none";
+
+        const retryButton = document.getElementById("initialRetryButton");
+        if (retryButton) retryButton.onclick = () => refreshAuctionNow("manual");
+      }
+
+      return false;
+    })
+    .finally(() => {
+      if (timeoutId) clearTimeout(timeoutId);
+      auctionLoadInFlight = null;
+    });
+
+  return auctionLoadInFlight;
 }
 
 function showBids(bids) {
@@ -1194,6 +1749,12 @@ function applyClosedAuctionUi() {
 
   hideById("bidAmount");
   hideById("clearDetailsButton");
+  hideById("enableBidAlertsButton");
+
+  const liveTools = document.querySelector(".auction-live-tools");
+  const refreshButton = document.getElementById("refreshBidsButton");
+  if (liveTools) liveTools.style.gridTemplateColumns = "1fr";
+  if (refreshButton) refreshButton.style.gridColumn = "1 / -1";
 
   const submitBidButton = document.getElementById("submitBidButton");
   if (submitBidButton) {
@@ -1253,7 +1814,7 @@ function updateCountdown() {
     .replace("Time left:", "Reminder – the Auction closes in:");
 }
 function playSound() {
-  document.getElementById("introSound").play();
+  showIntroSoundPopup();
 }
 
 function numberToWords(num) {
@@ -1622,6 +2183,7 @@ showFieldHint("bidAmountHint", "");
       "BID ACCEPTED"
     );
 
+    suppressNextBidAlert = true;
     await loadAuction();
 
   } else {
@@ -2183,42 +2745,36 @@ function showAuctionMediaPopup() {
   const messageBox = document.getElementById("bolbModalMessage");
   const buttonsBox = document.getElementById("bolbModalButtons");
 
-  modal.classList.remove("all-bids-modal");
+  modal.classList.remove("all-bids-modal", "intro-audio-modal");
   modal.classList.add("auction-media-modal");
   titleBox.textContent = pictureLinks.length && videoLink
-    ? "Auction Pictures and Video"
+    ? "Auction Video and Pictures"
     : pictureLinks.length
       ? "Auction Pictures"
       : "Auction Video";
   messageBox.textContent = "";
 
-  pictureLinks.forEach((link, index) => {
-    const figure = document.createElement("figure");
-    figure.className = "auction-media-picture";
-    const image = document.createElement("img");
-    image.src = String(link || "");
-    image.alt = "Additional auction picture " + (index + 1) + " of " + pictureLinks.length;
-    image.loading = "lazy";
-    image.decoding = "async";
-
-    const caption = document.createElement("figcaption");
-    caption.className = "auction-media-caption";
-    caption.textContent = "Picture " + (index + 1) + " of " + pictureLinks.length;
-
-    figure.appendChild(image);
-    figure.appendChild(caption);
-    messageBox.appendChild(figure);
-  });
-
   if (videoLink) {
-    if (/^https:\/\/drive\.google\.com\/file\/d\/[^/]+\/preview(?:[?#].*)?$/i.test(videoLink)) {
+    const sectionTitle = document.createElement("div");
+    sectionTitle.className = "auction-media-section-title";
+    sectionTitle.textContent = "Auction Video";
+    messageBox.appendChild(sectionTitle);
+
+    const guidance = document.createElement("p");
+    guidance.className = "auction-media-guidance";
+    guidance.textContent = "Tap the play control below to watch the auction video.";
+    messageBox.appendChild(guidance);
+
+    const drivePreviewUrl = toDrivePreviewUrl(videoLink);
+
+    if (drivePreviewUrl) {
       const videoFrame = document.createElement("iframe");
       videoFrame.className = "auction-media-video-frame";
       videoFrame.title = "Auction video";
-      videoFrame.loading = "lazy";
-      videoFrame.allow = "fullscreen";
+      videoFrame.loading = "eager";
+      videoFrame.allow = "autoplay; fullscreen";
       videoFrame.allowFullscreen = true;
-      videoFrame.src = videoLink;
+      videoFrame.src = drivePreviewUrl;
       messageBox.appendChild(videoFrame);
     } else {
       const video = document.createElement("video");
@@ -2230,6 +2786,89 @@ function showAuctionMediaPopup() {
       video.src = videoLink;
       messageBox.appendChild(video);
     }
+
+    const fallbackLink = document.createElement("a");
+    fallbackLink.className = "auction-media-open-link";
+    fallbackLink.href = drivePreviewUrl || videoLink;
+    fallbackLink.target = "_blank";
+    fallbackLink.rel = "noopener noreferrer";
+    fallbackLink.textContent = "Open Video in a New Window";
+    messageBox.appendChild(fallbackLink);
+  }
+
+  if (pictureLinks.length) {
+    const picturesTitle = document.createElement("div");
+    picturesTitle.className = "auction-media-section-title";
+    picturesTitle.textContent = "Additional Pictures";
+    messageBox.appendChild(picturesTitle);
+
+    const picturesGuidance = document.createElement("p");
+    picturesGuidance.className = "auction-media-guidance";
+    picturesGuidance.textContent =
+      "Use Previous and Next to view each picture. Tap a picture to open it full-size and zoom.";
+    messageBox.appendChild(picturesGuidance);
+
+    const carousel = document.createElement("div");
+    carousel.className = "auction-picture-carousel";
+
+    const stage = document.createElement("div");
+    stage.className = "auction-picture-stage";
+    const imageLink = document.createElement("a");
+    imageLink.target = "_blank";
+    imageLink.rel = "noopener noreferrer";
+    imageLink.title = "Open this auction picture full-size";
+    const image = document.createElement("img");
+    image.loading = "eager";
+    image.decoding = "async";
+    imageLink.appendChild(image);
+    stage.appendChild(imageLink);
+
+    const caption = document.createElement("div");
+    caption.className = "auction-picture-caption";
+
+    const controls = document.createElement("div");
+    controls.className = "auction-picture-controls";
+    const previousButton = document.createElement("button");
+    previousButton.type = "button";
+    previousButton.textContent = "← Previous";
+    const nextButton = document.createElement("button");
+    nextButton.type = "button";
+    nextButton.textContent = "Next →";
+
+    controls.appendChild(previousButton);
+    controls.appendChild(nextButton);
+    carousel.appendChild(stage);
+    carousel.appendChild(caption);
+    carousel.appendChild(controls);
+    messageBox.appendChild(carousel);
+
+    let pictureIndex = 0;
+
+    function renderPicture() {
+      const currentPictureUrl = String(pictureLinks[pictureIndex] || "");
+      image.src = currentPictureUrl;
+      imageLink.href = currentPictureUrl;
+      image.alt =
+        "Additional auction picture " + (pictureIndex + 1) + " of " + pictureLinks.length;
+      caption.textContent = "Picture " + (pictureIndex + 1) + " of " + pictureLinks.length;
+      previousButton.disabled = pictureIndex === 0;
+      nextButton.disabled = pictureIndex === pictureLinks.length - 1;
+    }
+
+    previousButton.onclick = () => {
+      if (pictureIndex > 0) {
+        pictureIndex -= 1;
+        renderPicture();
+      }
+    };
+    nextButton.onclick = () => {
+      if (pictureIndex < pictureLinks.length - 1) {
+        pictureIndex += 1;
+        renderPicture();
+      }
+    };
+
+    renderPicture();
   }
 
   buttonsBox.innerHTML = `<button id="bolbModalOk">Close</button>`;
@@ -2497,6 +3136,10 @@ setupLiveFieldValidation();
 resetAgreementIfBrowserRestoredEmptyBidderDetails();
 
 function getAuctionRefreshDelay() {
+  if (document.hidden) {
+    return 15000;
+  }
+
   if (!auction || !auction.closingTime || auction.status !== "OPEN") {
     return 15000;
   }
@@ -2511,11 +3154,7 @@ function getAuctionRefreshDelay() {
     return 1000;
   }
 
-  if (millisecondsRemaining <= 300000) {
-    return 5000;
-  }
-
-  return 15000;
+  return 5000;
 }
 
 function clearAuctionRefreshTimer() {
@@ -2535,13 +3174,22 @@ function startAuctionRefresh() {
   auctionRefreshPaused = false;
   clearAuctionRefreshTimer();
 
+  if (!auction) {
+    auctionRefreshTimer = setTimeout(() => {
+      auctionRefreshTimer = null;
+      loadAuction().finally(() => {
+        if (!auctionRefreshPaused) startAuctionRefresh();
+      });
+    }, getAuctionRefreshDelay());
+    return;
+  }
+
   const closingTimeMs =
     auction && auction.closingTime
       ? new Date(auction.closingTime).getTime()
       : NaN;
 
   if (
-    !auction ||
     !auction.closingTime ||
     auction.status !== "OPEN" ||
     !Number.isFinite(closingTimeMs) ||
@@ -2564,7 +3212,54 @@ function startAuctionRefresh() {
         }
       });
   }, getAuctionRefreshDelay());
-}</script>
+}
+
+async function refreshAuctionNow(reason) {
+  const refreshButton = document.getElementById("refreshBidsButton");
+  clearAuctionRefreshTimer();
+
+  if (refreshButton && reason === "manual") {
+    refreshButton.disabled = true;
+    refreshButton.textContent = "Refreshing…";
+  }
+
+  try {
+    await loadAuction();
+  } finally {
+    if (refreshButton && reason === "manual") {
+      refreshButton.disabled = false;
+      refreshButton.textContent = "↻ Refresh Bids";
+    }
+
+    if (!auctionRefreshPaused || !auction) {
+      startAuctionRefresh();
+    }
+  }
+}
+
+function queueImmediateAuctionRefresh(reason) {
+  if (document.hidden) return;
+  if (refreshResumeTimer) clearTimeout(refreshResumeTimer);
+
+  refreshResumeTimer = setTimeout(() => {
+    refreshResumeTimer = null;
+    refreshAuctionNow(reason);
+  }, 150);
+}
+
+document.getElementById("refreshBidsButton").addEventListener("click", () => {
+  refreshAuctionNow("manual");
+});
+document.getElementById("enableBidAlertsButton").addEventListener("click", toggleBidAlerts);
+document.getElementById("dismissBidAlertButton").addEventListener("click", dismissNewBidAlert);
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) queueImmediateAuctionRefresh("visible");
+});
+window.addEventListener("pageshow", () => queueImmediateAuctionRefresh("pageshow"));
+window.addEventListener("focus", () => queueImmediateAuctionRefresh("focus"));
+window.addEventListener("online", () => queueImmediateAuctionRefresh("online"));
+</script>
 
 <div id="rulesModalBackdrop">
   <div id="rulesModalBox">
