@@ -478,8 +478,7 @@ input, textarea, select, button {
   object-fit:contain;
 }
 
-.auction-media-modal .bolb-modal-message,
-.intro-audio-modal .bolb-modal-message {
+.auction-media-modal .bolb-modal-message
   max-height:calc(100vh - 190px);
   max-height:calc(100dvh - 190px);
   overflow-y:auto;
@@ -500,8 +499,7 @@ input, textarea, select, button {
   color:#444;
 }
 
-.auction-media-video-frame,
-.intro-audio-frame {
+.auction-media-video-frame
   width:100%;
   max-width:none;
   min-height:210px;
@@ -654,13 +652,11 @@ input, textarea, select, button {
 }
 
 @media (max-width:600px) {
-  .bolb-modal.auction-media-modal,
-  .bolb-modal.intro-audio-modal {
+  .bolb-modal.auction-media-modal
     padding:12px;
   }
 
-  .auction-media-video-frame,
-  .intro-audio-frame {
+  .auction-media-video-frame
     min-height:190px;
   }
 
@@ -785,8 +781,6 @@ margin:2px 0 6px;  color:#0066cc;
 <button id="morePicturesButton" type="button" style="display:none; background:#111; color:#FFD700; font-size:13px; padding:8px 10px; margin:4px auto 8px auto;">
   View Auction Video and Pictures
 </button>
-  <button id="soundButton" type="button" style="display:none; background:#222; color:#FFD700;" onclick="playSound()">▶ Play Auction Introduction</button>
-  <audio id="introSound"></audio>
 
 
   <p id="itemDescription" class="productDescription"></p>
@@ -984,7 +978,6 @@ let suppressNextBidAlert = false;
 let bidAlertsEnabled = false;
 let bidAlertAudioContext = null;
 let refreshResumeTimer = null;
-let currentIntroSoundUrl = "";
 const ORIGINAL_DOCUMENT_TITLE = document.title;
 
 function addCacheBuster(url) {
@@ -1258,108 +1251,6 @@ function updateProductImage(productImageUrl) {
   };
 }
 
-function updateIntroSound(introSoundUrl) {
-  const audio = document.getElementById("introSound");
-  const button = document.getElementById("soundButton");
-  const requestedUrl = String(introSoundUrl || "").trim();
-
-  currentIntroSoundUrl = requestedUrl;
-  audio.pause();
-  audio.removeAttribute("src");
-  audio.oncanplay = null;
-  audio.onerror = null;
-  audio.load();
-
-  if (!requestedUrl) {
-    button.style.display = "none";
-    return;
-  }
-
-  /*
-    Google Drive download URLs are not reliably streamable through a native
-    <audio> element on Safari/iOS. Keep the control visible and load the
-    introduction only after the bidder taps it. Drive audio opens in its
-    preview player; direct audio URLs use native controls.
-  */
-  button.style.display = "block";
-  button.textContent = "▶ Play Auction Introduction";
-}
-
-function closeIntroSoundPopup() {
-  const backdrop = document.getElementById("bolbModalBackdrop");
-  const modal = backdrop ? backdrop.querySelector(".bolb-modal") : null;
-  const messageBox = document.getElementById("bolbModalMessage");
-
-  if (!modal || !modal.classList.contains("intro-audio-modal")) return;
-
-  const audio = messageBox ? messageBox.querySelector("audio") : null;
-  const frame = messageBox ? messageBox.querySelector("iframe") : null;
-
-  if (audio) {
-    audio.pause();
-    audio.removeAttribute("src");
-    audio.load();
-  }
-  if (frame) frame.removeAttribute("src");
-  if (messageBox) messageBox.textContent = "";
-
-  backdrop.style.display = "none";
-  modal.classList.remove("intro-audio-modal");
-}
-
-function showIntroSoundPopup() {
-  const sourceUrl = String(currentIntroSoundUrl || "").trim();
-  if (!sourceUrl) {
-    showBolbAlert("The auction introduction is not available.", "Auction Introduction");
-    return;
-  }
-
-  const backdrop = document.getElementById("bolbModalBackdrop");
-  const modal = backdrop.querySelector(".bolb-modal");
-  const titleBox = document.getElementById("bolbModalTitle");
-  const messageBox = document.getElementById("bolbModalMessage");
-  const buttonsBox = document.getElementById("bolbModalButtons");
-  const drivePreviewUrl = toDrivePreviewUrl(sourceUrl);
-
-  modal.classList.remove("all-bids-modal", "auction-media-modal");
-  modal.classList.add("intro-audio-modal");
-  titleBox.textContent = "Auction Introduction";
-  messageBox.textContent = "";
-
-  const guidance = document.createElement("p");
-  guidance.className = "auction-media-guidance";
-  guidance.textContent = "Tap the play control below to hear the auction introduction.";
-  messageBox.appendChild(guidance);
-
-  if (drivePreviewUrl) {
-    const frame = document.createElement("iframe");
-    frame.className = "intro-audio-frame";
-    frame.title = "Auction introduction audio";
-    frame.loading = "eager";
-    frame.allow = "autoplay";
-    frame.src = drivePreviewUrl;
-    messageBox.appendChild(frame);
-  } else {
-    const audio = document.createElement("audio");
-    audio.controls = true;
-    audio.preload = "metadata";
-    audio.style.width = "100%";
-    audio.src = sourceUrl;
-    messageBox.appendChild(audio);
-  }
-
-  const fallbackLink = document.createElement("a");
-  fallbackLink.className = "auction-media-open-link";
-  fallbackLink.href = drivePreviewUrl || sourceUrl;
-  fallbackLink.target = "_blank";
-  fallbackLink.rel = "noopener noreferrer";
-  fallbackLink.textContent = "Open Audio in a New Window";
-  messageBox.appendChild(fallbackLink);
-
-  buttonsBox.innerHTML = `<button id="bolbModalOk">Close</button>`;
-  backdrop.style.display = "flex";
-  document.getElementById("bolbModalOk").onclick = closeIntroSoundPopup;
-}
 
 function closeOpenAuctionMediaPopup() {
   const backdrop = document.getElementById("bolbModalBackdrop");
@@ -1459,7 +1350,6 @@ function loadAuction() {
 
       if (auctionChanged) {
         closeOpenAuctionMediaPopup();
-        closeIntroSoundPopup();
         dismissNewBidAlert();
         hasInitialBidSnapshot = false;
         lastSeenHighestBidKey = "";
@@ -1508,7 +1398,6 @@ function loadAuction() {
 
       updateBannerImage(auction.bannerImageLink);
       updateProductImage(auction.productPhotoLink);
-      updateIntroSound(auction.introSoundLink);
 
       const morePicturesButton = document.getElementById("morePicturesButton");
       const hasExtraPictures =
@@ -1812,9 +1701,6 @@ function updateCountdown() {
   document.getElementById("liveCountdownBottom").innerText = text
     .replace("Time left to Bid:", "Reminder – the Auction closes in:")
     .replace("Time left:", "Reminder – the Auction closes in:");
-}
-function playSound() {
-  showIntroSoundPopup();
 }
 
 function numberToWords(num) {
@@ -2745,7 +2631,7 @@ function showAuctionMediaPopup() {
   const messageBox = document.getElementById("bolbModalMessage");
   const buttonsBox = document.getElementById("bolbModalButtons");
 
-  modal.classList.remove("all-bids-modal", "intro-audio-modal");
+  modal.classList.remove("all-bids-modal");
   modal.classList.add("auction-media-modal");
   titleBox.textContent = pictureLinks.length && videoLink
     ? "Auction Video and Pictures"
