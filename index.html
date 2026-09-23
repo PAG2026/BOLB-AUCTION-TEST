@@ -5,6 +5,11 @@
 <title>Boss of Luxury Brands Auction</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
+:root {
+  --bolb-brand-gold:#F3BE00;
+  --bolb-advisory-blue:#0066cc;
+}
+
 html, body {
   max-width:100%;
   overflow-x:hidden;
@@ -44,13 +49,13 @@ body {
     height: auto;
     max-height: 90px;
     object-fit: contain;
-    margin-top: 14px;
-    margin-bottom: 4px;
+    margin-top: 8px;
+    margin-bottom: 0;
 }
 
 .header h2 {
-  margin: -14px 0 6px 0;
-  color: #FFD700;
+  margin: -20px 0 5px 0;
+  color: var(--bolb-brand-gold);
   text-align: center;
   font-weight: bold;
 }
@@ -244,7 +249,7 @@ label {
   height: auto;
   max-height: 90px;
   object-fit: contain;
-  margin-bottom: 4px
+  margin-bottom: 0;
 }
 
 #productImage {
@@ -484,20 +489,6 @@ input, textarea, select, button {
   padding:2px;
 }
 
-.auction-media-section-title {
-  margin:8px 0 2px;
-  font-size:18px;
-  font-weight:bold;
-  color:#111;
-}
-
-.auction-media-guidance {
-  margin:0 0 8px;
-  font-size:14px;
-  line-height:1.3;
-  color:#444;
-}
-
 .auction-media-video-frame {
   width:100%;
   max-width:none;
@@ -506,96 +497,51 @@ input, textarea, select, button {
   background:#111;
 }
 
-.auction-media-open-link {
-  display:inline-block;
-  margin:4px auto 14px;
-  padding:9px 14px;
-  border-radius:10px;
-  background:#222;
-  color:#FFD700;
-  font-size:14px;
-  font-weight:bold;
-  text-decoration:none;
-}
-
-.auction-picture-carousel {
+.auction-picture-gallery {
   width:100%;
-  margin:8px auto 0;
+  margin:10px auto 0;
 }
 
-.auction-picture-stage {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  min-height:220px;
-  max-height:52vh;
-  padding:4px;
-  border:1px solid #ddd;
-  border-radius:12px;
-  background:#fafafa;
-  box-sizing:border-box;
-  overflow:hidden;
-}
-
-.auction-picture-stage img {
+.auction-picture-gallery img {
   display:block;
   width:100%;
   height:auto;
-  max-height:50vh;
-  object-fit:contain;
-  border-radius:8px;
-}
-
-.auction-picture-stage a {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  height:100%;
-  cursor:zoom-in;
-}
-
-.auction-picture-controls {
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  margin-top:6px;
-}
-
-.auction-picture-controls button {
-  margin:0;
-  padding:9px 6px;
-  background:#222;
-  color:#FFD700;
-  font-size:14px;
-}
-
-.auction-picture-controls button:disabled {
-  opacity:0.45;
-}
-
-.auction-picture-caption {
-  margin:6px 0 2px;
-  text-align:center;
-  font-size:15px;
-  font-weight:bold;
+  margin:0 0 12px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  box-sizing:border-box;
 }
 
 .auction-live-tools {
-  display:flex;
+  display:none;
   justify-content:center;
-  margin:4px 0 2px;
+  margin:2px 0 6px;
 }
 
 .auction-live-tools button {
   width:auto;
-  min-width:140px;
+  min-width:0;
   margin:0;
-  padding:7px 12px;
-  background:#222;
-  color:#FFD700;
+  padding:6px 10px;
+  background:white;
+  color:var(--bolb-advisory-blue);
+  border:1px solid var(--bolb-advisory-blue);
   font-size:13px;
+}
+
+#viewAllBidsButton,
+#clearDetailsButton {
+  width:auto;
+  background:transparent;
+  color:var(--bolb-advisory-blue);
+  padding:5px 3px;
+  border-radius:0;
+  text-decoration:underline;
+  font-size:13px;
+}
+
+#clearDetailsButton {
+  margin:6px auto 0;
 }
 
 #lastUpdatedStatus {
@@ -621,12 +567,16 @@ input, textarea, select, button {
 
 #newBidAlert {
   display:none;
-  position:sticky;
-  top:4px;
-  z-index:20;
-  margin:8px 0;
+  position:fixed;
+  top:calc(env(safe-area-inset-top, 0px) + 10px);
+  left:50%;
+  transform:translateX(-50%);
+  z-index:10050;
+  width:calc(100% - 24px);
+  max-width:496px;
+  margin:0;
   padding:12px;
-  border:3px solid #FFD700;
+  border:3px solid var(--bolb-brand-gold);
   border-radius:12px;
   background:#111;
   color:white;
@@ -636,7 +586,7 @@ input, textarea, select, button {
 
 #newBidAlert strong {
   display:block;
-  color:#FFD700;
+  color:var(--bolb-brand-gold);
   font-size:18px;
   margin-bottom:3px;
 }
@@ -660,9 +610,6 @@ input, textarea, select, button {
     min-height:190px;
   }
 
-  .auction-picture-stage {
-    min-height:190px;
-  }
 }
 
 #rulesModalBackdrop {
@@ -778,12 +725,11 @@ margin:2px 0 6px;  color:#0066cc;
 
 <img id="productImage" style="max-width:340px; margin:10px auto; display:block;">
 
+  <p id="itemDescription" class="productDescription"></p>
+
 <button id="morePicturesButton" type="button" style="display:none; background:#111; color:#FFD700; font-size:13px; padding:8px 10px; margin:4px auto 8px auto;">
   View Auction Video and Pictures
 </button>
-
-
-  <p id="itemDescription" class="productDescription"></p>
 
   <div class="price-box" id="priceBox">
    <div class="row" id="highestBidRow"><span>Highest Bid</span><b class="highest" id="high">
@@ -930,17 +876,17 @@ False bids, fake details, or failure to pay may result in being blocked from fut
 </div>
 <div id="transferMethodHint" class="field-hint"></div>
 <div id="bidEntryStatus" class="bid-entry-status"></div>
-<button id="clearDetailsButton" type="button" style="display:none; background:#222; color:#FFD700; font-size:13px; padding:8px 10px; margin-top:6px;">
+<button id="clearDetailsButton" type="button" style="display:none;">
   Please clear my details but let me watch the auction
 </button>
 </div>
 <div id="biddingSection" style="display:none;">
  <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
 
-<div class="auction-live-tools">
-  <button id="refreshBidsButton" type="button">↻ Refresh Bids</button>
-</div>
 <div id="lastUpdatedStatus" role="status" aria-live="polite">Waiting for the latest auction update…</div>
+<div class="auction-live-tools" id="auctionLiveTools">
+  <button id="refreshBidsButton" type="button">Refresh bids now</button>
+</div>
 
 <h3 id="bidsTitle" style="font-size:16px; font-weight:bold; margin-bottom:6px; text-align:center; width:100%;">Current Highest Three (3) Bids</h3>
 
@@ -948,8 +894,7 @@ False bids, fake details, or failure to pay may result in being blocked from fut
 
 <div style="text-align:center; margin-top:6px;">
   <button id="viewAllBidsButton"
-    type="button"
-    style="background:#222; color:#FFD700; font-size:13px; padding:6px 10px;">
+    type="button">
     View All Bids
   </button>
 </div>
@@ -977,6 +922,7 @@ let suppressNextBidAlert = false;
 let bidAlertsEnabled = false;
 let bidAlertAudioContext = null;
 let refreshResumeTimer = null;
+let currentBidderId = "";
 const ORIGINAL_DOCUMENT_TITLE = document.title;
 
 function addCacheBuster(url) {
@@ -1000,6 +946,41 @@ function formatJamaicaClock(dateValue) {
   });
 }
 
+function setManualRefreshVisibility(visible) {
+  const toolsBox = document.getElementById("auctionLiveTools");
+  if (toolsBox) toolsBox.style.display = visible ? "flex" : "none";
+}
+
+function bidderSessionStorageKey(auctionId) {
+  return "bolb-current-bidder:" + String(auctionId || "");
+}
+
+function restoreCurrentBidderId(auctionId) {
+  currentBidderId = "";
+
+  try {
+    currentBidderId = sessionStorage.getItem(bidderSessionStorageKey(auctionId)) || "";
+  } catch (error) {
+    console.log("Bidder display label could not be restored:", error);
+  }
+}
+
+function rememberCurrentBidderId(auctionId, bidderId) {
+  currentBidderId = String(bidderId || "");
+  if (!currentBidderId) return;
+
+  try {
+    sessionStorage.setItem(bidderSessionStorageKey(auctionId), currentBidderId);
+  } catch (error) {
+    console.log("Bidder display label could not be saved:", error);
+  }
+}
+
+function bidderDisplayLabel(bidderId) {
+  const value = String(bidderId || "");
+  return currentBidderId && value === currentBidderId ? "ME" : value;
+}
+
 function setConnectionStatus(message) {
   const box = document.getElementById("connectionStatus");
   if (!box) return;
@@ -1007,16 +988,20 @@ function setConnectionStatus(message) {
   if (message) {
     box.textContent = message;
     box.style.display = "block";
+    setManualRefreshVisibility(successfulAuctionLoad);
   } else {
     box.textContent = "";
     box.style.display = "none";
+    setManualRefreshVisibility(false);
   }
 }
 
 function updateLastUpdatedStatus() {
   const box = document.getElementById("lastUpdatedStatus");
   if (!box) return;
-  box.textContent = "Bids updated: " + formatJamaicaClock(new Date()) + " Jamaica time";
+  box.textContent = "Live updates on — last checked at " +
+    formatJamaicaClock(new Date()) + " Jamaica time";
+  setManualRefreshVisibility(false);
 }
 
 function getHighestBidKey(bids) {
@@ -1042,16 +1027,16 @@ function playBidAlertChime() {
   const context = bidAlertAudioContext;
   const startTime = context.currentTime;
 
-  [880, 1175].forEach((frequency, index) => {
+  [659, 784, 988, 784, 988, 1175].forEach((frequency, index) => {
     const oscillator = context.createOscillator();
     const gain = context.createGain();
-    const noteStart = startTime + (index * 0.18);
-    const noteEnd = noteStart + 0.16;
+    const noteStart = startTime + (index * 0.46);
+    const noteEnd = noteStart + 0.40;
 
     oscillator.type = "sine";
     oscillator.frequency.setValueAtTime(frequency, noteStart);
     gain.gain.setValueAtTime(0.0001, noteStart);
-    gain.gain.exponentialRampToValueAtTime(0.28, noteStart + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.24, noteStart + 0.035);
     gain.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
     oscillator.connect(gain);
     gain.connect(context.destination);
@@ -1343,6 +1328,7 @@ function loadAuction() {
 
       auction = d.auction;
       displayedAuctionId = nextAuctionId;
+      restoreCurrentBidderId(displayedAuctionId);
       updateAuctionRulesConfig(auction);
 
       document.getElementById("itemDescription").innerText =
@@ -1502,7 +1488,7 @@ function showBids(bids) {
       });
 
     const bidderCell = document.createElement("span");
-    bidderCell.textContent = String(bid.bidderId || "");
+    bidderCell.textContent = bidderDisplayLabel(bid.bidderId);
 
     const amountCell = document.createElement("b");
     amountCell.textContent = money(bid.bidAmount);
@@ -2031,6 +2017,9 @@ showFieldHint("bidAmountHint", "");
     }
 
     const acceptedBidderId = d.bidderId || "your assigned Bidder ID";
+    if (d.bidderId) {
+      rememberCurrentBidderId(auction.id, d.bidderId);
+    }
 
     const acceptedMessage = d.isFirstBidByThisPhone === true
       ? "Your bid has been accepted.\n\nYour Bidder ID for this auction is: " + acceptedBidderId + ".\n\nPlease write down or remember this Bidder ID so that you can track your bids throughout the auction.\n\nYou are currently the Highest Bidder."
@@ -2558,7 +2547,7 @@ function showAllBidsPopup() {
 
     const row = document.createElement("tr");
     const values = [
-      String(bid.bidderId || ""),
+      bidderDisplayLabel(bid.bidderId),
       money(bid.bidAmount),
       bidDay,
       bidTime
@@ -2616,16 +2605,6 @@ function showAuctionMediaPopup() {
   messageBox.textContent = "";
 
   if (videoLink) {
-    const sectionTitle = document.createElement("div");
-    sectionTitle.className = "auction-media-section-title";
-    sectionTitle.textContent = "Auction Video";
-    messageBox.appendChild(sectionTitle);
-
-    const guidance = document.createElement("p");
-    guidance.className = "auction-media-guidance";
-    guidance.textContent = "Tap the play control below to watch the auction video.";
-    messageBox.appendChild(guidance);
-
     const drivePreviewUrl = toDrivePreviewUrl(videoLink);
 
     if (drivePreviewUrl) {
@@ -2647,89 +2626,22 @@ function showAuctionMediaPopup() {
       video.src = videoLink;
       messageBox.appendChild(video);
     }
-
-    const fallbackLink = document.createElement("a");
-    fallbackLink.className = "auction-media-open-link";
-    fallbackLink.href = drivePreviewUrl || videoLink;
-    fallbackLink.target = "_blank";
-    fallbackLink.rel = "noopener noreferrer";
-    fallbackLink.textContent = "Open Video in a New Window";
-    messageBox.appendChild(fallbackLink);
   }
 
   if (pictureLinks.length) {
-    const picturesTitle = document.createElement("div");
-    picturesTitle.className = "auction-media-section-title";
-    picturesTitle.textContent = "Additional Pictures";
-    messageBox.appendChild(picturesTitle);
+    const gallery = document.createElement("div");
+    gallery.className = "auction-picture-gallery";
 
-    const picturesGuidance = document.createElement("p");
-    picturesGuidance.className = "auction-media-guidance";
-    picturesGuidance.textContent =
-      "Use Previous and Next to view each picture. Tap a picture to open it full-size and zoom.";
-    messageBox.appendChild(picturesGuidance);
+    pictureLinks.forEach((pictureUrl, index) => {
+      const image = document.createElement("img");
+      image.loading = index === 0 ? "eager" : "lazy";
+      image.decoding = "async";
+      image.src = String(pictureUrl || "");
+      image.alt = "Auction picture " + (index + 1);
+      gallery.appendChild(image);
+    });
 
-    const carousel = document.createElement("div");
-    carousel.className = "auction-picture-carousel";
-
-    const stage = document.createElement("div");
-    stage.className = "auction-picture-stage";
-    const imageLink = document.createElement("a");
-    imageLink.target = "_blank";
-    imageLink.rel = "noopener noreferrer";
-    imageLink.title = "Open this auction picture full-size";
-    const image = document.createElement("img");
-    image.loading = "eager";
-    image.decoding = "async";
-    imageLink.appendChild(image);
-    stage.appendChild(imageLink);
-
-    const caption = document.createElement("div");
-    caption.className = "auction-picture-caption";
-
-    const controls = document.createElement("div");
-    controls.className = "auction-picture-controls";
-    const previousButton = document.createElement("button");
-    previousButton.type = "button";
-    previousButton.textContent = "← Previous";
-    const nextButton = document.createElement("button");
-    nextButton.type = "button";
-    nextButton.textContent = "Next →";
-
-    controls.appendChild(previousButton);
-    controls.appendChild(nextButton);
-    carousel.appendChild(stage);
-    carousel.appendChild(caption);
-    carousel.appendChild(controls);
-    messageBox.appendChild(carousel);
-
-    let pictureIndex = 0;
-
-    function renderPicture() {
-      const currentPictureUrl = String(pictureLinks[pictureIndex] || "");
-      image.src = currentPictureUrl;
-      imageLink.href = currentPictureUrl;
-      image.alt =
-        "Additional auction picture " + (pictureIndex + 1) + " of " + pictureLinks.length;
-      caption.textContent = "Picture " + (pictureIndex + 1) + " of " + pictureLinks.length;
-      previousButton.disabled = pictureIndex === 0;
-      nextButton.disabled = pictureIndex === pictureLinks.length - 1;
-    }
-
-    previousButton.onclick = () => {
-      if (pictureIndex > 0) {
-        pictureIndex -= 1;
-        renderPicture();
-      }
-    };
-    nextButton.onclick = () => {
-      if (pictureIndex < pictureLinks.length - 1) {
-        pictureIndex += 1;
-        renderPicture();
-      }
-    };
-
-    renderPicture();
+    messageBox.appendChild(gallery);
   }
 
   buttonsBox.innerHTML = `<button id="bolbModalOk">Close</button>`;
@@ -2891,10 +2803,7 @@ function setupLiveFieldValidation() {
         bidEntryStatus.style.display = "block";
       } else if (agreeInput.checked && missingItems.length > 0) {
         bidEntryStatus.innerText =
-          "Five green ticks are required before you can submit a bid. Please enter " +
-          missingItems.join(", ").replace(", Please select your bank for Bank-to-Bank Transfer",
-            ". Please select your bank for Bank-to-Bank Transfer") +
-          ".";
+          "Five green ticks above are required for you to submit a bid.";
         bidEntryStatus.style.display = "block";
       } else {
         bidEntryStatus.innerText = "";
@@ -3089,7 +2998,7 @@ async function refreshAuctionNow(reason) {
   } finally {
     if (refreshButton && reason === "manual") {
       refreshButton.disabled = false;
-      refreshButton.textContent = "↻ Refresh Bids";
+      refreshButton.textContent = "Refresh bids now";
     }
 
     if (!auctionRefreshPaused || !auction) {
