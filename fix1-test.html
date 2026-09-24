@@ -1,0 +1,3151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Boss of Luxury Brands Auction</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root {
+  --bolb-brand-gold:#F3BE00;
+  --bolb-advisory-blue:#0066cc;
+}
+
+html, body {
+  max-width:100%;
+  overflow-x:hidden;
+}
+
+body {
+  font-family: Arial, sans-serif; 
+  background:#fff8ec;
+  margin:0;
+  padding:10px;
+  color:#111;
+  width:100%;
+  box-sizing:border-box;
+}
+.card {
+  max-width:520px;
+  width:100%;
+  margin:auto;
+  background:white;
+  border-radius:18px;
+  padding:12px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.1);
+  box-sizing:border-box;
+  overflow-x:hidden;
+}
+.header {
+  text-align:center;
+  background:#111;
+  color:white;
+  padding:0;
+  border-radius:15px;
+  overflow:hidden;
+}
+
+#bannerImage {
+    width: 100%;
+    height: auto;
+    max-height: 90px;
+    object-fit: contain;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+.header h2 {
+  margin: -20px 0 5px 0;
+  color: var(--bolb-brand-gold);
+  text-align: center;
+  font-weight: bold;
+}
+
+#productImage {
+    width: 100%;
+    max-width: 150px;
+    height: auto;
+    display: block;
+    margin: 6px auto 6px auto;
+}
+
+.price-box {
+  background:#fff8ec;
+  border:1px solid #e2c46f;
+  padding:8px 10px;
+  border-radius:12px;
+  margin:6px 0;
+}
+.row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:3px 0;
+}
+.highest {
+  color:#c9a227;
+  font-size:16px;
+  font-weight:bold;
+}
+
+input, textarea, select {
+  width:100%;
+  max-width:100%;
+  padding:10px;
+  margin:2px 0 6px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+  font-size:16px;
+}
+
+.bid-entry-status {
+  display:none;
+  width:100%;
+  max-width:100%;
+  padding:10px 12px;
+  margin:8px 0 8px;
+  border-radius:10px;
+  border:2px solid #cc0000;
+  background:#fff8f8;
+  box-sizing:border-box;
+  font-size:16px;
+  font-weight:bold;
+  line-height:1.25;
+  white-space:normal;
+  color:#cc0000;
+  text-align:center;
+}
+
+.field-hint {
+  display:none;
+  font-size:14px;
+  font-weight:normal;
+  margin-top:-2px;
+  margin-bottom:8px;
+  padding-left:4px;
+  color:#0066cc;
+  text-align:left;
+}
+
+.form-label {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#111;
+  font-size:14px;
+  font-weight:bold;
+  margin:8px 0 3px;
+}
+
+.completion-tick {
+  display:none;
+  position:absolute;
+  right:12px;
+  top:50%;
+  transform:translateY(-50%);
+  width:28px;
+  height:28px;
+  border:2px solid #0a9f3d;
+  border-radius:6px;
+  background:white;
+  color:#0a9f3d;
+  font-size:28px;
+  font-weight:bold;
+  line-height:1;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
+}
+
+.input-with-tick {
+  position:relative;
+}
+
+.input-with-tick input,
+.input-with-tick select {
+  padding-right:48px;
+  background:white;
+}
+
+textarea {
+  min-height:52px;
+}
+
+button {
+  width:100%;
+  background:#25D366;
+  color:white;
+  border:none;
+  padding:13px;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:normal;
+  margin-top:8px;
+}
+
+.bid-row {
+  display:grid;
+  grid-template-columns: minmax(0, 32%) minmax(0, 28%) minmax(0, 40%);
+  column-gap:3px;
+  border-bottom:1px solid #eee;
+  padding:4px 2px;
+  font-size:11px;
+  line-height:1.2;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+.bid-id {
+  text-align:left;
+}
+
+.bid-amount {
+  text-align:right;
+  font-weight:bold;
+}
+
+.bid-time {
+  text-align:right;
+}
+
+.rules, .info-box {
+  background:#f5f5f5;
+  padding:8px;
+  border-radius:10px;
+  font-size:13px;
+  margin-top:4px;
+  line-height:1.35;}
+
+.countdown {
+  text-align:center;
+  color:#d62828;
+  font-weight:bold;
+  font-size:18px;
+  margin:3px 0;
+}
+.small {
+  font-size:13px;
+  color:#555;
+}
+
+.compact-title {
+  margin-bottom:4px;
+}
+
+.hidden-if-empty:empty {
+  display:none;
+}
+
+label {
+   font-size:13px;
+  display:block;
+  margin:6px 0;
+}
+
+/* 🔧 MOBILE OPTIMIZATION STARTS HERE */
+
+#bannerImage {
+  width: 100%;
+  height: auto;
+  max-height: 90px;
+  object-fit: contain;
+  margin-bottom: 0;
+}
+
+#productImage {
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+  display: block;
+  margin: 6px auto 6px auto;
+}
+
+h1 {
+  font-size: 22px;
+  margin: 2px 0 8px 0;
+  color: #D4AF37;
+  text-align: center;
+font-weight: bold;
+}
+
+h2 {
+  font-size: 20px;
+  margin: 6px 0;
+}
+
+h3 {
+  margin: 6px 0 6px 0;
+  font-size:15px;
+  font-weight:bold;
+}
+p {
+  font-size: 14px;
+  margin: 6px 0;
+}
+
+.info-box {
+  padding: 10px;
+  margin: 10px 0;
+}
+
+#topCountdown {
+  font-size: 16px;
+}
+
+#liveCountdownBottom {
+  font-size: 16px;
+}
+
+input, textarea, select, button {
+  padding: 10px;
+  font-size: 16px;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  h1 { font-size: 20px; }
+  h2 { font-size: 18px; }
+  #productImage { max-width: 180px; }
+}
+
+.productDescription {
+  font-size: 15px;
+  text-align: center;
+  margin: 6px 0 12px 0;
+  line-height: 1.35;
+  font-weight: bold;
+}
+
+.bolb-modal-backdrop {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  z-index:9999;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+  box-sizing:border-box;
+}
+
+.bolb-modal {
+  width:100%;
+  max-width:420px;
+  background:white;
+  color:#111;
+  border:2px solid #D4AF37;
+  border-radius:16px;
+  padding:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  text-align:center;
+  box-sizing:border-box;
+}
+
+.bolb-modal-title {
+  font-weight:bold;
+  font-size:18px;
+  color:#111;
+  margin-bottom:1px;
+}
+
+.bolb-modal-message {
+  font-size:16px;
+  line-height:1.4;
+  white-space:pre-line;
+  margin-bottom:14px;
+  max-height:70vh;
+  overflow-y:auto;
+}
+
+.bolb-modal-buttons {
+  display:flex;
+  gap:10px;
+  justify-content:center;
+}
+
+.bolb-modal-buttons button {
+  margin-top:0;
+}
+
+.bolb-modal-buttons button {
+  margin-top:0;
+}
+
+.bolb-modal.all-bids-modal {
+  max-width:420px;
+  padding:6px 10px 8px;
+}
+
+.bolb-modal.all-bids-modal .bolb-modal-title {
+  margin:0 0 2px 0;
+  padding:0;
+  line-height:1.1;
+}
+
+.bolb-modal.all-bids-modal .bolb-modal-message {
+  margin:0;
+  padding:0;
+  max-height:none;
+  overflow:visible;
+  line-height:1;
+  white-space:normal;
+}
+
+.bolb-modal.all-bids-modal .all-bids-table-wrap {
+  max-height:calc(100vh - 105px);
+  overflow-y:auto;
+  margin:0;
+  padding:0;
+  background:white;
+}
+
+.bolb-modal.all-bids-modal .all-bids-table {
+  width:auto;
+  max-width:100%;
+  border-collapse:collapse;
+  table-layout:auto;
+  font-size:11px;
+  line-height:1.05;
+  margin:0 auto;
+  padding:0;
+}
+
+.bolb-modal.all-bids-modal .all-bids-table th,
+.bolb-modal.all-bids-modal .all-bids-table td {
+  text-align:left;
+  padding:2px 2px;
+  border-bottom:1px solid #ddd;
+  white-space:nowrap;
+}
+
+.bolb-modal.all-bids-modal .all-bids-table th {
+  font-weight:bold;
+}
+
+.bolb-modal.all-bids-modal .bidder-col { width:74px; }
+.bolb-modal.all-bids-modal .amount-col { width:78px; }
+.bolb-modal.all-bids-modal .date-col { width:62px; }
+.bolb-modal.all-bids-modal .time-col { width:82px; }
+.bolb-modal.all-bids-modal .bolb-modal-buttons {
+  margin-top:6px;
+}
+
+.bolb-modal.auction-media-modal {
+  max-width:520px;
+}
+
+.auction-media-picture {
+  margin:0 0 18px;
+}
+
+.auction-media-picture img {
+  display:block;
+  width:100%;
+  max-width:440px;
+  height:auto;
+  margin:0 auto 6px;
+  border-radius:12px;
+}
+
+.auction-media-caption {
+  font-size:14px;
+  font-weight:bold;
+  text-align:center;
+}
+
+.auction-media-video {
+  display:block;
+  width:100%;
+  max-width:440px;
+  height:auto;
+  margin:8px auto;
+  background:#000;
+  border-radius:12px;
+}
+
+.auction-media-video-frame {
+  display:block;
+  width:100%;
+  max-width:440px;
+  aspect-ratio:16 / 9;
+  margin:8px auto;
+  border:0;
+  border-radius:12px;
+}
+
+/* Auction media, refresh and alert improvements (2026-09-20). */
+#productImage {
+  width:100%;
+  max-width:340px;
+  max-height:380px;
+  object-fit:contain;
+}
+
+.auction-media-modal .bolb-modal-message {
+  max-height:calc(100vh - 190px);
+  max-height:calc(100dvh - 190px);
+  overflow-y:auto;
+  padding:2px;
+}
+
+.auction-media-video-frame {
+  width:100%;
+  max-width:none;
+  min-height:210px;
+  aspect-ratio:16 / 9;
+  background:#111;
+}
+
+.auction-picture-gallery {
+  width:100%;
+  margin:10px auto 0;
+}
+
+.auction-picture-gallery img {
+  display:block;
+  width:100%;
+  height:auto;
+  margin:0 0 12px;
+  border:1px solid #ddd;
+  border-radius:12px;
+  box-sizing:border-box;
+}
+
+.auction-live-tools {
+  display:none;
+  justify-content:center;
+  margin:2px 0 6px;
+}
+
+.auction-live-tools button {
+  width:auto;
+  min-width:0;
+  margin:0;
+  padding:6px 10px;
+  background:white;
+  color:var(--bolb-advisory-blue);
+  border:1px solid var(--bolb-advisory-blue);
+  font-size:13px;
+}
+
+#viewAllBidsButton,
+#clearDetailsButton {
+  width:auto;
+  background:transparent;
+  color:var(--bolb-advisory-blue);
+  padding:5px 3px;
+  border-radius:0;
+  text-decoration:underline;
+  font-size:13px;
+}
+
+#clearDetailsButton {
+  margin:6px auto 0;
+}
+
+#lastUpdatedStatus {
+  min-height:18px;
+  margin:3px 0 6px;
+  color:#555;
+  font-size:12px;
+  text-align:center;
+}
+
+#connectionStatus {
+  display:none;
+  margin:6px 0;
+  padding:8px 10px;
+  border:1px solid #b36b00;
+  border-radius:10px;
+  background:#fff4dc;
+  color:#7a4300;
+  font-size:13px;
+  font-weight:bold;
+  text-align:center;
+}
+
+#newBidAlert {
+  display:none;
+  position:fixed;
+  top:calc(env(safe-area-inset-top, 0px) + 10px);
+  left:50%;
+  transform:translateX(-50%);
+  z-index:10050;
+  width:calc(100% - 24px);
+  max-width:496px;
+  margin:0;
+  padding:12px;
+  border:3px solid var(--bolb-brand-gold);
+  border-radius:12px;
+  background:#111;
+  color:white;
+  text-align:center;
+  box-shadow:0 6px 18px rgba(0,0,0,0.28);
+}
+
+#newBidAlert strong {
+  display:block;
+  color:var(--bolb-brand-gold);
+  font-size:18px;
+  margin-bottom:3px;
+}
+
+#dismissBidAlertButton {
+  width:auto;
+  min-width:120px;
+  margin:8px auto 0;
+  padding:7px 14px;
+  background:#25D366;
+  color:white;
+  font-size:13px;
+}
+
+@media (max-width:600px) {
+  .bolb-modal.auction-media-modal {
+    padding:12px;
+  }
+
+  .auction-media-video-frame {
+    min-height:190px;
+  }
+
+}
+
+#rulesModalBackdrop {
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.55);
+  z-index:9998;
+  align-items:center;
+  justify-content:center;
+  padding:4px;
+  box-sizing:border-box;
+}
+
+#rulesModalBox {
+  width:100%;
+  max-width:480px;
+  max-height:98vh;
+  max-height:98dvh;
+background:white;
+  color:#111;
+  border:2px solid #D4AF37;
+  border-radius:16px;
+  padding:8px 10px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.35);
+  box-sizing:border-box;
+  overflow:hidden;
+}
+
+#rulesModalTitle {
+  text-align:center;
+  font-size:16px;
+  font-weight:bold;
+  line-height:1.05;
+  margin:0 0 3px 0;
+}
+
+#rulesModalContent {
+  max-height:calc(98vh - 190px);
+  max-height:calc(98dvh - 190px);
+  overflow-y:auto;  -webkit-overflow-scrolling:touch;
+  font-size:14px;
+  line-height:1.25;
+}
+
+#rulesModalContent .rules {
+  display:block;
+  margin-top:0;
+  background:#fff8ec;
+  border:1px solid #e2c46f;
+  line-height:1.25;
+}
+
+#rulesModalContent .rules .rules-paragraph {
+  margin:0 0 8px 0;
+}
+
+#rulesModalContent .rules .rules-help {
+  text-align:center;
+  font-weight:bold;
+  margin-top:6px;
+}
+
+#rulesModalButtons {
+  display:grid;
+  grid-template-columns:32fr 68fr;
+  gap:10px;
+  margin-top:10px;
+}
+
+#rulesModalButtons button {
+  margin-top:0;
+  padding:10px 6px;
+  font-size:14px;
+  line-height:1.2;
+  white-space:normal;
+  height:auto;
+}
+
+#rulesScrollInstruction {
+  display:none;
+margin:2px 0 6px;  color:#0066cc;
+  font-size:13px;
+  font-weight:bold;
+  line-height:1.25;
+  text-align:center;
+}
+
+#rulesModalAgreeButton:disabled {
+  background:#b8b8b8;
+  color:#f5f5f5;
+  cursor:not-allowed;
+  opacity:0.75;
+}
+/* 🔧 END OF NEW CODE */
+
+</style>
+</head>
+
+<body>
+
+<div id="loadingScreen" style="max-width:520px; margin:40px auto; background:white; border-radius:18px; padding:18px; text-align:center; font-family:Arial, sans-serif; box-shadow:0 8px 25px rgba(0,0,0,0.1);">
+  <b>Loading Boss of Luxury Brands Auction...</b><br><br>
+  Please wait while the latest auction details are loaded.
+</div>
+
+<div class="card" id="auctionCard" style="display:none;">
+
+  <div class="header">
+    <img id="bannerImage" src="https://i.postimg.cc/65q01fW7/BOLB-Banner.png" alt="Boss of Luxury Brands Banner">
+    <h2>Private Luxury Auction</h2>
+  </div>
+
+<img id="productImage" style="max-width:340px; margin:10px auto; display:block;">
+
+  <p id="itemDescription" class="productDescription"></p>
+
+<button id="morePicturesButton" type="button" style="display:none; background:#111; color:#FFD700; font-size:13px; padding:8px 10px; margin:4px auto 8px auto;">
+  View Auction Video and Pictures
+</button>
+
+  <div class="price-box" id="priceBox">
+   <div class="row" id="highestBidRow"><span>Highest Bid</span><b class="highest" id="high">
+</b></div>
+    <div class="row"><span>Starting Bid</span><b id="start"></b></div>
+    <div class="row"><span>Minimum Increase</span><b id="min"></b></div>
+    <div class="row"><span>Closes (Jamaica time)</span><b id="close"></b></div>
+  </div>
+<div class="countdown" id="topCountdown"></div>
+
+<div id="connectionStatus" role="status" aria-live="polite"></div>
+
+<div id="newBidAlert" role="alert" aria-live="assertive">
+  <strong>🔔 NEW HIGHER BID</strong>
+  <span id="newBidAlertMessage"></span>
+  <button id="dismissBidAlertButton" type="button">Dismiss</button>
+</div>
+
+<div id="closedPanel" style="display:none; background:#111; color:white; border-radius:14px; padding:14px; margin:10px 0; text-align:center; border:2px solid #D4AF37;">
+  <div style="font-size:18px; font-weight:bold; color:#FFD700;">
+    🎆🎉✨ THIS BOSS OF LUXURY BRANDS AUCTION HAS CLOSED ✨🎉🎆
+  </div>
+
+  <br>
+
+  <div style="font-weight:bold;">🏆 THE WINNING BID IS</div>
+  <div id="winnerLine"></div>
+
+  <br>
+
+  <div style="font-weight:bold;">🥈 THE RUNNER-UP BID IS</div>
+  <div id="runnerUpLine"></div>
+
+  <br>
+
+  <div>The Winner is now being contacted.</div>
+
+  <br>
+
+  <div>If payment for the winning bid is not completed in the required time, as set out in the Auction Rules, the Runner-up Bidder may be contacted.</div>
+
+  <br>
+
+  <div>✨ Big up to everybody who joined the Luxury Auction.</div>
+
+  <br>
+
+  <div style="font-weight:bold; color:#FFD700;">Better luck in the next Boss of Luxury Brands Auction! </div>
+
+  <div id="winnerPrivateMessage" style="display:none; margin-top:14px; background:white; color:#111; border-radius:12px; padding:12px;">
+    <b>🎉 CONGRATULATIONS — YOU WON! 🎉</b><br><br>
+    The Boss of Luxury Brands will endeavour to contact you at the telephone number that you entered when you bid.<br><br>
+    If you do not receive that call within 20 minutes, please contact The Boss of Luxury Brands by WhatsApp.<br><br>
+    <a id="winnerWhatsAppButton" href="#" target="_blank" style="display:block; background:#25D366; color:white; text-decoration:none; padding:12px; border-radius:10px; font-weight:bold;">
+      💬 WhatsApp The Boss of Luxury Brands
+    </a>
+  </div>
+
+  <div id="runnerUpPrivateMessage" style="display:none; margin-top:14px; background:white; color:#111; border-radius:12px; padding:12px;">
+    <b>🥈 YOU ARE THE RUNNER-UP BIDDER</b><br><br>
+    Please stay available.<br><br>
+    If the Winner does not complete payment in accordance with the Auction Rules, you may be contacted.
+  </div>
+</div>
+  
+<div class="rules" id="auctionRulesBox" style="display:none;">
+<b>Bidder identities are private</b> and are shown publicly only as anonymous Bidder IDs. Bidder IDs are assigned <b>separately for each auction</b> and are used solely for bidder identification.<br>
+
+Bidder IDs are <b>sequentially assigned based on the first valid bid by each telephone number</b> in a particular auction. The same Bidder ID will be used throughout that auction whenever the same telephone number is used to place additional bids. <b>Bidder IDs are not carried over from one auction to another.</b><br>
+
+The scheduled <b>Auction Closing Time</b> will normally be between 10:00 am and 2:00 pm, Monday to Friday, in Jamaica. <b>If a valid bid is accepted during the last 60 seconds before the then-current closing time, the auction closing time will be automatically extended by 60 seconds.</b> This can happen more than once if further valid bids are accepted during the last 60 seconds before the then-current closing time.<br>
+
+<b>All valid bids are time-stamped and displayed. The highest valid bid at FINAL auction closing wins.</b><br>
+
+<b id="deliveryPolicyDisplay"></b><br>
+
+When an auction closes, <b>the Winner will be contacted at the telephone number provided with the winning bid</b>. The delivery address, delivery cost, total amount to be paid <i>(bid amount plus delivery cost)</i>, and Bank Transfer information will then be agreed or confirmed.<br>
+
+<b>The Winner will then have <span class="paymentDeadlineDisplay"></span> to pay the agreed total amount by online Bank-to-Same-Bank Transfer ONLY</b> — e.g. from your NCB account to the account of The Boss of Luxury Brands at NCB, or from your Scotiabank account to the account of The Boss of Luxury Brands at Scotiabank, etc.<br>
+
+<i>Payments cannot be made on delivery by credit card or by cash.</i><br>
+
+<b>If the Winner cannot be personally contacted within <span class="paymentDeadlineDisplay"></span> of the auction close OR does NOT make the Bank-to-Bank Transfer in the agreed amount within <span class="paymentDeadlineDisplay"></span> of being contacted, the item may be offered to the next highest bidder.</b><br>
+
+False bids, fake details, or failure to pay may result in being blocked from future auctions.<br>
+
+<div style="text-align:center; font-weight:bold;">
+  <span style="color:red;">NEED HELP?</span> Call/WhatsApp<br>
+  The Boss of Luxury Brands at 876-366-5650
+</div>
+</div>
+
+<button id="showRulesButton" type="button" style="display:block; background:#111; color:#FFD700; margin-top:6px; margin-bottom:6px;">
+  Please review and agree to the Auction Rules, payment deadline, and delivery terms.
+</button>
+
+<div id="agreementStatusBox" style="display:none; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px; border:1px solid #ccc; border-radius:10px; padding:10px; margin:6px 0; font-size:16px; background:white; box-sizing:border-box; width:100%; overflow:hidden;">
+  <span id="agreeText" style="font-weight:bold; font-size:14px; flex:1 1 220px; min-width:0;">
+    Please review and agree to the Auction Rules, payment deadline, and delivery terms.
+  </span>
+  <input type="checkbox" id="agree" style="position:absolute; opacity:0; pointer-events:none;" tabindex="-1" aria-hidden="true">
+<span id="agreeVisualTick" style="width:28px; height:28px; border:2px solid #0a9f3d; border-radius:6px; display:none; align-items:center; justify-content:center; color:#0a9f3d; font-size:28px; font-weight:bold; line-height:1; flex-shrink:0;"></span>
+</div>
+
+<div id="bidderDetailsSection" style="display:none;">
+<h3 id="bidFormTitle">Thank you for agreeing to the Auction Rules. Please now complete your bidder details below.</h3>
+<label class="form-label" for="phone">Telephone Number</label>
+<div class="input-with-tick">
+  <input id="phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Phone number e.g. 8761234567">
+  <span id="phoneTick" class="completion-tick">✓</span>
+</div>
+<div id="phoneHint" class="field-hint"></div>
+
+<label class="form-label" for="firstName">First Name</label>
+<div class="input-with-tick">
+  <input id="firstName" placeholder="First Name">
+  <span id="firstNameTick" class="completion-tick">✓</span>
+</div>
+<div id="firstNameHint" class="field-hint"></div>
+
+<label class="form-label" for="surnameInitial">Surname Initial</label>
+<div class="input-with-tick">
+  <input id="surnameInitial" placeholder="Surname Initial">
+  <span id="surnameInitialTick" class="completion-tick">✓</span>
+</div>
+<div id="surnameInitialHint" class="field-hint"></div>
+
+<label class="form-label" for="transferMethod">Select Bank</label>
+<div class="input-with-tick">
+  <select id="transferMethod" style="width:100%; max-width:100%; box-sizing:border-box; white-space:normal; overflow-wrap:break-word; height:auto; padding:10px 48px 10px 10px; font-size:16px; font-weight:normal; color:#666; background:white;">
+    <option id="transferMethodPlaceholder" value="" disabled selected style="font-size:14px; font-weight:bold; white-space:normal; height:auto;">
+      Select Your Bank (to pay when you win!)
+    </option>
+    <option value="(CIBC FCIB) FirstCaribbean">(CIBC FCIB) FirstCaribbean</option>
+    <option value="(FGB) First Global Bank">(FGB) First Global Bank</option>
+    <option value="(JN) Jamaica National">(JN) Jamaica National</option>
+    <option value="(JMMB) Jamaica Money Market Brokers">(JMMB) Jamaica Money Market Brokers</option>
+    <option value="(NCB) National Commercial Bank">(NCB) National Commercial Bank</option>
+    <option value="Sagicor Bank">Sagicor Bank</option>
+    <option value="(BNS) Scotiabank">(BNS) Scotiabank</option>
+    <option value="(VMBS) Victoria Mutual">(VMBS) Victoria Mutual</option>
+  </select>
+  <span id="transferMethodTick" class="completion-tick">✓</span>
+</div>
+<div id="transferMethodHint" class="field-hint"></div>
+<div id="bidEntryStatus" class="bid-entry-status"></div>
+<button id="clearDetailsButton" type="button" style="display:none;">
+  Please clear my details but let me watch the auction
+</button>
+</div>
+<div id="biddingSection" style="display:none;">
+ <div id="liveCountdownBottom" style="text-align:center; font-weight:bold; color:#cc0000; margin-top:8px; margin-bottom:8px;"></div>
+
+<div id="lastUpdatedStatus" role="status" aria-live="polite">Waiting for the latest auction update…</div>
+<div class="auction-live-tools" id="auctionLiveTools">
+  <button id="refreshBidsButton" type="button">Refresh bids now</button>
+</div>
+
+<h3 id="bidsTitle" style="font-size:16px; font-weight:bold; margin-bottom:6px; text-align:center; width:100%;">Current Highest Three (3) Bids</h3>
+
+<div id="bids"></div>
+
+<div style="text-align:center; margin-top:6px;">
+  <button id="viewAllBidsButton"
+    type="button">
+    View All Bids
+  </button>
+</div>
+
+<input id="bidAmount" type="text" inputmode="numeric" placeholder="ENTER YOUR BID" disabled>
+<div id="bidAmountHint" class="field-hint"></div>
+
+<button id="submitBidButton" onclick="sendBid()" disabled>Submit Bid</button>
+</div>
+</div>
+
+<script>
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGHc2sRpDOlGxbnw9W0Zlo2DbQ91a_na955pTdsd8raHpyNis65t-bKt4UbkETmQiY/exec";
+const JAMAICA_TIME_ZONE = "America/Jamaica";
+const DEFAULT_BANNER_IMAGE_URL = "https://i.postimg.cc/65q01fW7/BOLB-Banner.png";
+
+let auction = null;
+let allAuctionBids = [];
+let displayedAuctionId = "";
+let auctionLoadInFlight = null;
+let successfulAuctionLoad = false;
+let hasInitialBidSnapshot = false;
+let lastSeenHighestBidKey = "";
+let suppressNextBidAlert = false;
+let bidAlertsEnabled = false;
+let bidAlertAudioContext = null;
+let refreshResumeTimer = null;
+let currentBidderId = "";
+const ORIGINAL_DOCUMENT_TITLE = document.title;
+
+function addCacheBuster(url) {
+  const separator = String(url || "").includes("?") ? "&" : "?";
+  return String(url || "") + separator + "_bolb=" + Date.now();
+}
+
+function formatJamaicaClock(dateValue) {
+  const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toLocaleTimeString([], {
+    hour:"numeric",
+    minute:"2-digit",
+    second:"2-digit",
+    hour12:true,
+    timeZone:JAMAICA_TIME_ZONE
+  });
+}
+
+function setManualRefreshVisibility(visible) {
+  const toolsBox = document.getElementById("auctionLiveTools");
+  if (toolsBox) toolsBox.style.display = visible ? "flex" : "none";
+}
+
+function bidderSessionStorageKey(auctionId) {
+  return "bolb-current-bidder:" + String(auctionId || "");
+}
+
+function restoreCurrentBidderId(auctionId) {
+  currentBidderId = "";
+
+  try {
+    currentBidderId = sessionStorage.getItem(bidderSessionStorageKey(auctionId)) || "";
+  } catch (error) {
+    console.log("Bidder display label could not be restored:", error);
+  }
+}
+
+function rememberCurrentBidderId(auctionId, bidderId) {
+  currentBidderId = String(bidderId || "");
+  if (!currentBidderId) return;
+
+  try {
+    sessionStorage.setItem(bidderSessionStorageKey(auctionId), currentBidderId);
+  } catch (error) {
+    console.log("Bidder display label could not be saved:", error);
+  }
+}
+
+function bidderDisplayLabel(bidderId) {
+  const value = String(bidderId || "");
+  return currentBidderId && value === currentBidderId ? "ME" : value;
+}
+
+function setConnectionStatus(message) {
+  const box = document.getElementById("connectionStatus");
+  if (!box) return;
+
+  if (message) {
+    box.textContent = message;
+    box.style.display = "block";
+    setManualRefreshVisibility(successfulAuctionLoad);
+  } else {
+    box.textContent = "";
+    box.style.display = "none";
+    setManualRefreshVisibility(false);
+  }
+}
+
+function updateLastUpdatedStatus() {
+  const box = document.getElementById("lastUpdatedStatus");
+  if (!box) return;
+  box.textContent = "Live updates on — last checked at " +
+    formatJamaicaClock(new Date()) + " Jamaica time";
+  setManualRefreshVisibility(false);
+}
+
+function getHighestBidKey(bids) {
+  const highestBid = Array.isArray(bids) && bids.length ? bids[0] : null;
+  if (!highestBid) return "";
+
+  return [
+    String(highestBid.bidderId || ""),
+    String(highestBid.bidAmount || ""),
+    String(highestBid.timestamp || "")
+  ].join("|");
+}
+
+function dismissNewBidAlert() {
+  const alertBox = document.getElementById("newBidAlert");
+  if (alertBox) alertBox.style.display = "none";
+  document.title = ORIGINAL_DOCUMENT_TITLE;
+}
+
+function playBidAlertChime() {
+  if (!bidAlertsEnabled || !bidAlertAudioContext) return;
+
+  const context = bidAlertAudioContext;
+  const startTime = context.currentTime;
+
+  [659, 784, 988, 784, 988, 1175].forEach((frequency, index) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const noteStart = startTime + (index * 0.46);
+    const noteEnd = noteStart + 0.40;
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, noteStart);
+    gain.gain.setValueAtTime(0.0001, noteStart);
+    gain.gain.exponentialRampToValueAtTime(0.24, noteStart + 0.035);
+    gain.gain.exponentialRampToValueAtTime(0.0001, noteEnd);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(noteStart);
+    oscillator.stop(noteEnd);
+  });
+}
+
+function showNewBidAlert(highestBid) {
+  if (!highestBid || isAuctionClosedForDisplay()) return;
+
+  const alertBox = document.getElementById("newBidAlert");
+  const messageBox = document.getElementById("newBidAlertMessage");
+
+  if (messageBox) {
+    messageBox.textContent =
+      "New highest bid: " + money(highestBid.bidAmount) +
+      (highestBid.bidderId ? " by " + String(highestBid.bidderId) : "") + ".";
+  }
+
+  if (alertBox) alertBox.style.display = "block";
+  document.title = "🔔 NEW BID – " + ORIGINAL_DOCUMENT_TITLE;
+  playBidAlertChime();
+}
+
+async function enableBidAlerts() {
+  if (bidAlertsEnabled) return;
+
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+  if (!AudioContextClass) {
+    await showBolbAlert(
+      "This browser cannot play automatic bid-alert sounds. The on-screen new-bid alert will still work.",
+      "Bid Alerts"
+    );
+    return;
+  }
+
+  try {
+    bidAlertAudioContext = bidAlertAudioContext || new AudioContextClass();
+    if (bidAlertAudioContext.state === "suspended") {
+      await bidAlertAudioContext.resume();
+    }
+    bidAlertsEnabled = true;
+    playBidAlertChime();
+  } catch (error) {
+    console.log("Bid alert audio could not be enabled:", error);
+    await showBolbAlert(
+      "Sound could not be enabled on this device. The on-screen new-bid alert will still work.",
+      "Bid Alerts"
+    );
+  }
+}
+
+function driveFileIdFromUrl(url) {
+  const value = String(url || "").trim();
+  const pathMatch = value.match(/drive\.google\.com\/file\/d\/([^/?#]+)/i);
+  const queryMatch = value.match(/[?&]id=([^&#]+)/i);
+  return pathMatch ? pathMatch[1] : queryMatch ? queryMatch[1] : "";
+}
+
+function toDrivePreviewUrl(url) {
+  const fileId = driveFileIdFromUrl(url);
+  return fileId ? "https://drive.google.com/file/d/" + fileId + "/preview" : "";
+}
+
+function money(v) {
+  return "J$" + Number(v || 0).toLocaleString();
+}
+
+function showFieldHint(id, message) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  if (message) {
+    el.innerText = message;
+    el.style.display = "block";
+  } else {
+    el.innerText = "";
+    el.style.display = "none";
+  }
+}
+
+function cleanBidValue(value) {
+  return String(value || "").replace(/J\$/gi, "").replace(/,/g, "").replace(/\s+/g, "").trim();
+}
+
+function normalizeFirstName(value) {
+  const trimmedValue = String(value || "").trim();
+  return typeof trimmedValue.normalize === "function"
+    ? trimmedValue.normalize("NFC")
+    : trimmedValue;
+}
+
+function isValidFirstName(value) {
+  const normalizedValue = normalizeFirstName(value);
+  const letters = normalizedValue.match(/\p{L}/gu) || [];
+
+  return letters.length >= 2 &&
+    /^(?:\p{L}\p{M}*)+(?:[ '\u2019-](?:\p{L}\p{M}*)+)*$/u.test(normalizedValue);
+}
+
+function normalizeFirstNameForFilter(value) {
+  return String(value || "").toLowerCase().replace(/[^a-z]/g, "");
+}
+
+function containsBlockedFirstNameWord(value) {
+  const cleanValue = normalizeFirstNameForFilter(value);
+
+  if (!cleanValue) {
+    return false;
+  }
+
+  const blockedNames = [
+    "fuck", "fcuk", "rass", "rassclot", "bomboclaat", "bombaclaat",
+    "bombaclay", "bumboclaat", "bumbaclaat", "bloodclaat", "bloodclot",
+    "pussy", "pussyclaat", "sucku", "suckyuhmada", "suckumudda",
+    "suckymudda", "suckuhmudda", "suckyuhmudda", "bitch", "shit",
+    "asshole", "battybwoy", "battygyal", "fassyhole", "rasshole",
+    "kakaclaat", "kaka", "wutliss", "bwoy", "bwoii", "gyal", "bomba",
+    "bumba", "blood", "claat", "clot", "raas", "batty", "bugga",
+    "cunt", "cunts"
+  ];
+
+  return blockedNames.includes(cleanValue);
+}
+
+function formatJMD(value) {
+  return "J$" + Number(value || 0).toLocaleString();
+}
+
+function updateBannerImage(customBannerUrl) {
+  const banner = document.getElementById("bannerImage");
+  const requestedUrl = String(customBannerUrl || "").trim();
+
+  banner.onerror = () => {
+    banner.onerror = null;
+    banner.src = DEFAULT_BANNER_IMAGE_URL;
+  };
+  banner.src = requestedUrl || DEFAULT_BANNER_IMAGE_URL;
+}
+
+function updateProductImage(productImageUrl) {
+  const image = document.getElementById("productImage");
+  const requestedUrl = String(productImageUrl || "").trim();
+
+  image.onload = null;
+  image.onerror = null;
+  image.removeAttribute("src");
+  image.removeAttribute("role");
+  image.removeAttribute("tabindex");
+  image.removeAttribute("title");
+  image.onclick = null;
+  image.onkeydown = null;
+  image.style.opacity = "1";
+  image.style.cursor = "default";
+
+  if (!requestedUrl) {
+    image.style.display = "none";
+    return;
+  }
+
+  image.style.display = "block";
+  image.style.opacity = "0.3";
+  image.onload = () => {
+    image.style.opacity = "1";
+  };
+  image.onerror = () => {
+    image.style.display = "none";
+    image.removeAttribute("src");
+  };
+  image.src = requestedUrl;
+  image.style.cursor = "zoom-in";
+  image.setAttribute("role", "button");
+  image.setAttribute("tabindex", "0");
+  image.title = "Open the product picture full-size";
+  image.onclick = () => window.open(requestedUrl, "_blank", "noopener,noreferrer");
+  image.onkeydown = event => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      image.click();
+    }
+  };
+}
+
+
+function closeOpenAuctionMediaPopup() {
+  const backdrop = document.getElementById("bolbModalBackdrop");
+  const modal = backdrop ? backdrop.querySelector(".bolb-modal") : null;
+  const messageBox = document.getElementById("bolbModalMessage");
+
+  if (!modal || !modal.classList.contains("auction-media-modal")) {
+    return;
+  }
+
+  const video = messageBox ? messageBox.querySelector("video") : null;
+  const videoFrame = messageBox ? messageBox.querySelector("iframe") : null;
+
+  if (video) {
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+  }
+
+  if (videoFrame) {
+    videoFrame.removeAttribute("src");
+  }
+
+  if (messageBox) {
+    messageBox.textContent = "";
+  }
+
+  backdrop.style.display = "none";
+  modal.classList.remove("auction-media-modal");
+}
+
+function updateAuctionRulesConfig(auctionData) {
+  const deadlineMinutes = Number(auctionData && auctionData.paymentDeadlineMinutes);
+  const deliveryPolicy = String(auctionData && auctionData.deliveryPolicy || "").trim();
+
+  if (!Number.isSafeInteger(deadlineMinutes) || deadlineMinutes <= 0 || !deliveryPolicy) {
+    throw new Error("Auction rules configuration is missing or invalid.");
+  }
+
+  document.querySelectorAll(".paymentDeadlineDisplay").forEach(element => {
+    element.textContent = deadlineMinutes + " minutes";
+  });
+  document.getElementById("deliveryPolicyDisplay").textContent = deliveryPolicy;
+}
+function loadAuction() {
+  if (auctionLoadInFlight) {
+    return auctionLoadInFlight;
+  }
+
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  const timeoutId = controller
+    ? setTimeout(() => controller.abort(), 12000)
+    : null;
+  const requestOptions = {
+    cache:"no-store"
+  };
+
+  if (controller) requestOptions.signal = controller.signal;
+
+  auctionLoadInFlight = fetch(addCacheBuster(WEB_APP_URL), requestOptions)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Auction service returned " + response.status + ".");
+      }
+      return response.json();
+    })
+    .then(d => {
+      if (!d || d.success === false || !d.auction) {
+        const message = d && d.message
+          ? String(d.message)
+          : "There is currently no OPEN auction.";
+
+        if (successfulAuctionLoad && auction) {
+          setConnectionStatus(message + " The last confirmed auction information remains on screen while the app retries.");
+          return false;
+        }
+
+        auction = null;
+        allAuctionBids = [];
+
+        const loadingScreen = document.getElementById("loadingScreen");
+        const auctionCard = document.getElementById("auctionCard");
+        loadingScreen.innerHTML =
+          "<b>Boss of Luxury Brands Auction</b><br><br>" +
+          escapeHtml(message) +
+          '<br><button id="initialRetryButton" type="button">Try Again</button>';
+        loadingScreen.style.display = "block";
+        auctionCard.style.display = "none";
+
+        const retryButton = document.getElementById("initialRetryButton");
+        if (retryButton) retryButton.onclick = () => refreshAuctionNow("manual");
+        return false;
+      }
+
+      const nextAuctionId = String(d.auction.id || "");
+      const auctionChanged = !!displayedAuctionId && displayedAuctionId !== nextAuctionId;
+
+      if (auctionChanged) {
+        closeOpenAuctionMediaPopup();
+        dismissNewBidAlert();
+        hasInitialBidSnapshot = false;
+        lastSeenHighestBidKey = "";
+      }
+
+      auction = d.auction;
+      displayedAuctionId = nextAuctionId;
+      restoreCurrentBidderId(displayedAuctionId);
+      updateAuctionRulesConfig(auction);
+
+      document.getElementById("itemDescription").innerText =
+        auction.itemDescription || auction.productName || "";
+      document.getElementById("start").innerText = money(auction.startingBid);
+      document.getElementById("min").innerText = money(auction.minimumIncrease);
+
+      const hasExistingBids = Array.isArray(d.bids) && d.bids.length > 0;
+      const nextBid = hasExistingBids
+        ? Number(d.highestBid || 0) + Number(auction.minimumIncrease || 0)
+        : Number(auction.startingBid || 0);
+      const bidInput = document.getElementById("bidAmount");
+      bidInput.min = nextBid;
+      bidInput.step = Number(auction.minimumIncrease || 500);
+
+      if (hasExistingBids) {
+        document.getElementById("highestBidRow").style.display = "flex";
+        document.getElementById("high").innerText = money(d.highestBid);
+      } else {
+        document.getElementById("highestBidRow").style.display = "none";
+        document.getElementById("high").innerText = "";
+      }
+
+      const closeDate = new Date(auction.closingTime);
+      document.getElementById("close").innerText =
+        closeDate.toLocaleDateString("en-GB", {
+          day:"numeric",
+          month:"short",
+          year:"numeric",
+          timeZone:JAMAICA_TIME_ZONE
+        }) +
+        " " +
+        closeDate.toLocaleTimeString([], {
+          hour:"numeric",
+          minute:"2-digit",
+          timeZone:JAMAICA_TIME_ZONE,
+          hour12:true
+        });
+
+      updateBannerImage(auction.bannerImageLink);
+      updateProductImage(auction.productPhotoLink);
+
+      const morePicturesButton = document.getElementById("morePicturesButton");
+      const hasExtraPictures =
+        Array.isArray(auction.extraPictureLinks) && auction.extraPictureLinks.length > 0;
+      const hasAuctionVideo = !!String(auction.auctionVideoLink || "").trim();
+
+      if (hasExtraPictures || hasAuctionVideo) {
+        morePicturesButton.textContent = hasExtraPictures && hasAuctionVideo
+          ? "View Auction Video and Pictures"
+          : hasExtraPictures
+            ? "View Auction Pictures"
+            : "View Auction Video";
+        morePicturesButton.style.display = "block";
+      } else {
+        morePicturesButton.style.display = "none";
+      }
+
+      allAuctionBids = Array.isArray(d.bids) ? d.bids : [];
+      const currentHighestBidKey = getHighestBidKey(allAuctionBids);
+      const highestBidChanged =
+        hasInitialBidSnapshot &&
+        currentHighestBidKey !== lastSeenHighestBidKey &&
+        !!currentHighestBidKey;
+
+      showBids(allAuctionBids);
+      successfulAuctionLoad = true;
+      setConnectionStatus("");
+      updateLastUpdatedStatus();
+      updateCountdown();
+
+      if (highestBidChanged) {
+        if (suppressNextBidAlert) {
+          suppressNextBidAlert = false;
+        } else {
+          showNewBidAlert(allAuctionBids[0]);
+        }
+      } else if (suppressNextBidAlert) {
+        /* An accepted bid refresh completed without a changed snapshot. */
+        suppressNextBidAlert = false;
+      }
+
+      lastSeenHighestBidKey = currentHighestBidKey;
+      hasInitialBidSnapshot = true;
+
+      if (typeof window.updateBidEntryState === "function") {
+        window.updateBidEntryState();
+      }
+
+      document.getElementById("loadingScreen").style.display = "none";
+      document.getElementById("auctionCard").style.display = "block";
+      return true;
+    })
+    .catch(err => {
+      console.log("Auction refresh error:", err);
+
+      const timedOut = err && err.name === "AbortError";
+      const message = timedOut
+        ? "The latest update is taking too long. Retrying automatically."
+        : "Connection interrupted. Retrying automatically.";
+
+      setConnectionStatus(message);
+
+      if (!successfulAuctionLoad) {
+        const loadingScreen = document.getElementById("loadingScreen");
+        loadingScreen.innerHTML =
+          "<b>Unable to load auction details.</b><br><br>" +
+          escapeHtml(message) +
+          '<br><button id="initialRetryButton" type="button">Try Again</button>';
+        loadingScreen.style.display = "block";
+        document.getElementById("auctionCard").style.display = "none";
+
+        const retryButton = document.getElementById("initialRetryButton");
+        if (retryButton) retryButton.onclick = () => refreshAuctionNow("manual");
+      }
+
+      return false;
+    })
+    .finally(() => {
+      if (timeoutId) clearTimeout(timeoutId);
+      auctionLoadInFlight = null;
+    });
+
+  return auctionLoadInFlight;
+}
+
+function showBids(bids) {
+  const div = document.getElementById("bids");
+  div.textContent = "";
+
+  if (!bids.length) {
+    const noBidsMessage = document.createElement("p");
+    noBidsMessage.className = "small";
+    noBidsMessage.textContent = "No bids yet.";
+    div.appendChild(noBidsMessage);
+    return;
+  }
+
+  bids.slice(0, 3).forEach(bid => {
+    const row = document.createElement("div");
+    row.className = "bid-row";
+
+    const bidDate = new Date(bid.timestamp);
+    const bidTime =
+      bidDate.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        timeZone: JAMAICA_TIME_ZONE
+      }) +
+      " " +
+      bidDate.toLocaleTimeString([], {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        timeZone: JAMAICA_TIME_ZONE,
+        hour12: true
+      });
+
+    const bidderCell = document.createElement("span");
+    bidderCell.textContent = bidderDisplayLabel(bid.bidderId);
+
+    const amountCell = document.createElement("b");
+    amountCell.textContent = money(bid.bidAmount);
+
+    const timeCell = document.createElement("span");
+    timeCell.textContent = bidTime;
+
+    row.appendChild(bidderCell);
+    row.appendChild(amountCell);
+    row.appendChild(timeCell);
+    div.appendChild(row);
+  });
+}
+
+function updateClosedAuctionResults() {
+  const winnerLine = document.getElementById("winnerLine");
+  const runnerUpLine = document.getElementById("runnerUpLine");
+  const bids = Array.isArray(allAuctionBids) ? allAuctionBids : [];
+
+  if (!winnerLine || !runnerUpLine) {
+    return;
+  }
+
+  if (!bids.length) {
+    winnerLine.textContent = "No valid bids were placed.";
+    runnerUpLine.textContent = "There is no separate runner-up bidder.";
+    return;
+  }
+
+  function renderBidResultLine(container, bid) {
+    container.textContent = "";
+
+    const bidderId = document.createElement("b");
+    bidderId.textContent = String(bid.bidderId || "");
+
+    container.appendChild(bidderId);
+    container.appendChild(document.createElement("br"));
+    container.appendChild(document.createTextNode(money(bid.bidAmount)));
+  }
+
+  const winningBid = bids[0];
+  const runnerUpBid = bids.find(bid => bid.bidderId !== winningBid.bidderId);
+
+  renderBidResultLine(winnerLine, winningBid);
+
+  if (runnerUpBid) {
+    renderBidResultLine(runnerUpLine, runnerUpBid);
+  } else {
+    runnerUpLine.textContent = "There is no separate runner-up bidder.";
+  }
+}
+
+function isAuctionClosedForDisplay() {
+  if (!auction || !auction.closingTime) {
+    return false;
+  }
+
+  const closingTime = new Date(auction.closingTime).getTime();
+
+  if (!Number.isFinite(closingTime)) {
+    return false;
+  }
+
+  return Date.now() >= closingTime || String(auction.status || "").toUpperCase() !== "OPEN";
+}
+
+function hideById(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.display = "none";
+  }
+}
+
+function showById(id, displayValue = "block") {
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.display = displayValue;
+  }
+}
+
+function applyClosedAuctionUi() {
+  hideById("topCountdown");
+  showById("closedPanel", "block");
+  hideById("priceBox");
+  closeRulesModal();
+  const bidsTitle = document.getElementById("bidsTitle");
+  if (bidsTitle) {
+    bidsTitle.innerText = "Bidding History";
+  }
+
+  hideById("auctionRulesBox");
+  hideById("showRulesButton");
+  hideById("bidderDetailsSection");
+  hideById("bidFormTitle");
+
+  const agree = document.getElementById("agree");
+  if (agree && agree.parentElement) {
+    agree.parentElement.style.display = "none";
+  }
+
+  showById("biddingSection", "block");
+
+  hideById("liveCountdownBottom");
+  hideById("bidEntryStatus");
+
+  hideById("phoneHint");
+  hideById("firstNameHint");
+  hideById("surnameInitialHint");
+  hideById("transferMethodHint");
+  hideById("bidAmountHint");
+
+  hideById("bidAmount");
+  hideById("clearDetailsButton");
+
+  const submitBidButton = document.getElementById("submitBidButton");
+  if (submitBidButton) {
+    submitBidButton.style.display = "none";
+    submitBidButton.disabled = true;
+  }
+
+  const submitButtonByOnclick = document.querySelector('button[onclick="sendBid()"]');
+  if (submitButtonByOnclick) {
+    submitButtonByOnclick.style.display = "none";
+    submitButtonByOnclick.disabled = true;
+  }
+}
+
+function updateCountdown() {
+  if (!auction || !auction.closingTime) return;
+
+  const close = new Date(auction.closingTime);
+  const now = new Date();
+  const diff = close - now;
+
+  if (diff <= 0 || auction.status !== "OPEN") {
+    stopAuctionRefresh();
+    applyClosedAuctionUi();
+    updateClosedAuctionResults();
+    return;
+  }
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((diff / (1000 * 60)) % 60);
+  const seconds = Math.floor((diff / 1000) % 60);
+
+  function timePart(value, singular, plural) {
+    return value + " " + (value === 1 ? singular : plural);
+  }
+
+  let text = "";
+
+  if (days > 0) {
+    text =
+      "Time left to Bid: " +
+      timePart(days, "Day", "Days") + " " +
+      timePart(hours, "Hour", "Hours") + " " +
+      timePart(minutes, "Minute", "Minutes");
+  } else {
+    text =
+      "Time left: " +
+      timePart(hours, "Hour", "Hours") + " " +
+      timePart(minutes, "Minute", "Minutes") + " " +
+      timePart(seconds, "Second", "Seconds");
+  }
+
+  document.getElementById("topCountdown").innerText = text;
+  document.getElementById("liveCountdownBottom").innerText = text
+    .replace("Time left to Bid:", "Reminder – the Auction closes in:")
+    .replace("Time left:", "Reminder – the Auction closes in:");
+}
+
+function numberToWords(num) {
+
+  const ones = [
+    "", "One", "Two", "Three", "Four", "Five",
+    "Six", "Seven", "Eight", "Nine", "Ten",
+    "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+    "Sixteen", "Seventeen", "Eighteen", "Nineteen"
+  ];
+
+  const tens = [
+    "", "", "Twenty", "Thirty", "Forty",
+    "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+  ];
+
+  function convertHundreds(n) {
+
+    let result = "";
+
+    if (n > 99) {
+      result += ones[Math.floor(n / 100)] + " Hundred ";
+      n %= 100;
+    }
+
+    if (n > 19) {
+      result += tens[Math.floor(n / 10)] + " ";
+      n %= 10;
+    }
+
+    if (n > 0) {
+      result += ones[n] + " ";
+    }
+
+    return result.trim();
+  }
+
+  if (num === 0) {
+    return "Zero";
+  }
+
+  let words = "";
+
+  if (num >= 1000000) {
+    words += convertHundreds(Math.floor(num / 1000000)) + " Million ";
+    num %= 1000000;
+  }
+
+  if (num >= 1000) {
+    words += convertHundreds(Math.floor(num / 1000)) + " Thousand ";
+    num %= 1000;
+  }
+
+  if (num > 0) {
+    words += convertHundreds(num);
+  }
+
+  return words.trim();
+
+}
+ async function sendBid() {
+  if (!auction) {
+    await showBolbAlert("Auction is still loading. Please wait a moment and try again.");
+    return;
+  }
+
+  const firstNameInput = document.getElementById("firstName");
+  const firstName = normalizeFirstName(firstNameInput.value);
+  firstNameInput.value = firstName;
+  const surnameInitial = document.getElementById("surnameInitial").value.trim();
+  const phone = document.getElementById("phone").value;
+  const transferMethod = document.getElementById("transferMethod").value.trim();
+  const bidInput = document.getElementById("bidAmount");
+  const rawBid = bidInput.value.trim();
+  const cleanedBid = cleanBidValue(rawBid);
+  const bidAmount = Number(cleanedBid);
+  const agree = document.getElementById("agree").checked;
+  const submitButton = document.querySelector('button[onclick="sendBid()"]');
+
+  const highestBid = Number(document.getElementById("high").innerText.replace(/[^0-9]/g, "")) || 0;
+  const minimum = Number(document.getElementById("min").innerText.replace(/[^0-9]/g, "")) || Number(auction.minimumIncrease || 500);
+  const startBid = Number(document.getElementById("start").innerText.replace(/[^0-9]/g, "")) || Number(auction.startingBid || 0);
+  const minRequired = highestBid ? highestBid + minimum : startBid;
+
+  function clearBidBox() {
+    bidInput.value = "";
+    bidInput.placeholder = "ENTER YOUR BID e.g. J$" + minRequired.toLocaleString();
+  }
+
+showFieldHint("firstNameHint", "");
+showFieldHint("surnameInitialHint", "");
+showFieldHint("phoneHint", "");
+showFieldHint("bidAmountHint", "");
+showFieldHint("transferMethodHint", "");
+
+let hasError = false;
+
+if (!firstName) {
+  showFieldHint("firstNameHint", "Enter first name");
+  hasError = true;
+}
+
+if (!surnameInitial) {
+  showFieldHint("surnameInitialHint", "Enter surname initial");
+  hasError = true;
+}
+
+if (!phone) {
+  showFieldHint("phoneHint", "Enter Jamaica phone number");
+  hasError = true;
+}
+
+if (!rawBid) {
+  showFieldHint("bidAmountHint", "Enter bid amount");
+  hasError = true;
+}
+
+if (!transferMethod) {
+  showFieldHint("transferMethodHint", "Please select your bank for Bank-to-Bank Transfer");
+  hasError = true;
+}
+
+if (hasError) {
+  return;
+}
+
+showFieldHint("firstNameHint", "");
+showFieldHint("surnameInitialHint", "");
+showFieldHint("phoneHint", "");
+showFieldHint("bidAmountHint", "");
+
+  if (!isValidFirstName(firstName)) {
+    await showBolbAlert("Enter a valid first name using at least 2 letters. Single internal spaces, hyphens and apostrophes are allowed.");
+    return;
+  }
+
+  if (containsBlockedFirstNameWord(firstName)) {
+    await showBolbAlert("Please enter your real first name.");
+    return;
+  }
+
+  if (!/^[A-Za-z]$/.test(surnameInitial)) {
+    await showBolbAlert("Enter a valid surname initial using one letter only.");
+    return;
+  }
+
+  if (!/^\d+$/.test(phone)) {
+    await showBolbAlert("Use numbers only for your Jamaica phone number.\n\nDo not use letters, spaces, punctuation, or special characters.");
+    return;
+  }
+
+  if (!/^(876|658)\d{7}$/.test(phone)) {
+    await showBolbAlert("Enter a valid 10-number Jamaica phone number starting with 876 or 658.");
+    return;
+  }
+
+  if (!agree) {
+    await showBolbAlert("You must agree to the auction rules.");
+    return;
+  }
+
+  if (!/^\d+$/.test(cleanedBid)) {
+    clearBidBox();
+    await showBolbAlert("Please enter the bid using numbers only.\n\nExample: " + minRequired.toLocaleString());
+    return;
+  }
+
+  if (!Number.isInteger(bidAmount) || bidAmount <= 0) {
+    clearBidBox();
+    await showBolbAlert("Enter a valid bid amount.");
+    return;
+  }
+
+  if (bidAmount < minRequired) {
+    clearBidBox();
+    await showBolbAlert("Bid too low.\n\nYour bid must be at least J$" + minRequired.toLocaleString() + ".");
+    return;
+  }
+
+  if ((bidAmount - minRequired) % minimum !== 0) {
+    clearBidBox();
+    await showBolbAlert(
+      "Your bid must go up in J$" + minimum.toLocaleString() + " amounts.\n\n" +
+      "Example:\n" +
+      "If the next required bid is J$" + minRequired.toLocaleString() + ", you may bid J$" +
+      minRequired.toLocaleString() + ", J$" +
+      (minRequired + minimum).toLocaleString() + ", J$" +
+      (minRequired + minimum + minimum).toLocaleString() + ", etc."
+    );
+    return;
+  }
+
+  if (bidAmount > minRequired) {
+
+  if (bidAmount >= (minRequired * 3)) {
+    clearBidBox();
+
+    await showBolbAlert(
+      "J$" + bidAmount.toLocaleString() +
+      "\n\nTHIS APPEARS TO BE A MISTAKE, SO PLEASE ENTER THE REAL BID YOU WISH TO MAKE.",
+      "YOU ENTERED A VERY LARGE BID",
+      "CANCEL AND CORRECT BID"
+    );
+
+    return;
+  }
+
+  const extraAmount = bidAmount - minRequired;
+
+  let confirmMessage =
+    "You are about to place a bid of J$" + bidAmount.toLocaleString() +
+    "\n\nMinimum required bid: J$" + minRequired.toLocaleString() +
+    "\n\nYou are bidding J$" + extraAmount.toLocaleString() +
+    " more than required." +
+    "\n\nDo you want to proceed?";
+
+  const confirmed = await showBolbConfirm(
+    confirmMessage,
+    "Confirm Your Bid"
+  );
+
+  if (!confirmed) {
+    clearBidBox();
+    return;
+  }
+}
+
+  stopAuctionRefresh();
+  if (submitButton) {
+  submitButton.disabled = true;
+  submitButton.innerText = "Checking Bid...";
+}
+
+  let bidOutcomeUnconfirmed = false;
+  let bidAcceptedByService = false;
+
+  try {
+  const bidPayload = {
+    auctionId: auction.id,
+    firstName: firstName,
+    surnameInitial: surnameInitial.toUpperCase(),
+    phone: phone,
+    transferMethod: transferMethod,
+    bidAmount: cleanedBid,
+    acceptedRules: agree
+  };
+
+  let d = await postBidPayloadWithRecovery(bidPayload, submitButton);
+
+  if (!d.success && d.requiresIdentityConfirmation) {
+    const issue = d.identityIssue || {};
+    const changedFields = [];
+
+    if (issue.firstNameChanged) changedFields.push("First name");
+    if (issue.initialChanged) changedFields.push("Surname initial");
+    if (issue.bankChanged) changedFields.push("Bank selected for Bank-to-Bank Transfer");
+    if (changedFields.length === 0) changedFields.push("Bidder details");
+
+    const identityMessage =
+      "This telephone number is already linked to a Bidder ID for this auction.\n\n" +
+      "The following details differ from the reference details first accepted for this telephone number:\n" +
+      changedFields.map(field => "- " + field).join("\n") +
+      "\n\nYou have now entered:\n" +
+      "First name: " + firstName + "\n" +
+      "Surname initial: " + surnameInitial.toUpperCase() + "\n" +
+      "Bank: " + transferMethod +
+      "\n\nIf you proceed, this bid will be registered under the same Bidder ID already assigned to this telephone number." +
+      "\n\nOnly proceed if you are authorised to use this telephone number to place this bid. By pressing Confirm & Proceed, you confirm that authorisation." +
+      "\n\nThe Boss of Luxury Brands may contact this telephone number after bidding to verify the changed details before finalizing the auction result, confirming delivery address or accepting payment." +
+      "\n\nThe Boss of Luxury Brands will also be alerted that different bidder details were entered for this telephone number.";
+
+    if (submitButton) {
+      submitButton.innerText = "Confirm Details...";
+    }
+
+    const confirmedIdentity = await showIdentityChangeConfirm(identityMessage);
+
+    if (!confirmedIdentity) {
+      return;
+    }
+
+    bidPayload.confirmIdentityChange = true;
+    bidPayload.confirmIdentityAuthorization = true;
+
+    if (submitButton) {
+      submitButton.innerText = "Submitting Bid...";
+    }
+
+    d = await postBidPayloadWithRecovery(bidPayload, submitButton);
+  }
+
+  if (!d.success && d.requiresHighestBidderConfirmation) {
+    if (submitButton) {
+      submitButton.innerText = "Confirm Highest Bidder...";
+    }
+
+    const confirmedHighestBidder = await showHighestBidderConfirm();
+
+    if (!confirmedHighestBidder) {
+      return;
+    }
+
+    bidPayload.confirmHighestBidderProceed = true;
+
+    if (submitButton) {
+      submitButton.innerText = "Submitting Bid...";
+    }
+
+    d = await postBidPayloadWithRecovery(bidPayload, submitButton);
+  }
+
+    
+  bidAcceptedByService = d.success === true;
+  clearBidBox();
+
+  if (d.success) {
+
+    suppressNextBidAlert = true;
+
+    if (d.auctionExtended === true && d.newClosingTime) {
+      const extendedCloseDate = new Date(d.newClosingTime);
+
+      if (!Number.isNaN(extendedCloseDate.getTime())) {
+        auction.closingTime = d.newClosingTime;
+        auction.status = "OPEN";
+
+        const closeBox = document.getElementById("close");
+        if (closeBox) {
+          closeBox.innerText =
+            extendedCloseDate.toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              timeZone: JAMAICA_TIME_ZONE
+            }) +
+            " " +
+            extendedCloseDate.toLocaleTimeString([], {
+              hour: 'numeric',
+              minute: '2-digit',
+              timeZone: JAMAICA_TIME_ZONE,
+              hour12: true
+            });
+        }
+
+        updateCountdown();
+      }
+    }
+
+    const acceptedBidderId = d.bidderId || "your assigned Bidder ID";
+    if (d.bidderId) {
+      rememberCurrentBidderId(auction.id, d.bidderId);
+    }
+
+    const acceptedMessage = d.isFirstBidByThisPhone === true
+      ? "Your bid has been accepted.\n\nYour Bidder ID for this auction is: " + acceptedBidderId + ".\n\nPlease write down or remember this Bidder ID so that you can track your bids throughout the auction.\n\nYou are currently the Highest Bidder."
+      : "Your further bid has been accepted.\n\nYour Bidder ID remains: " + acceptedBidderId + ".\n\nYou are currently the Highest Bidder.";
+
+    await showBolbAlert(
+      acceptedMessage,
+      "BID ACCEPTED"
+    );
+
+    await loadAuction();
+
+  } else {
+    await showBolbAlert(d.message || "Bid could not be submitted.");
+
+    if (d.code === "AUCTION_CHANGED") {
+      window.location.reload();
+      return;
+    }
+  }
+
+  } catch (err) {
+    console.log("Bid submission error:", err);
+    bidOutcomeUnconfirmed = err && err.code === "BID_OUTCOME_UNCONFIRMED";
+
+    if (bidAcceptedByService) {
+      suppressNextBidAlert = true;
+      await showBolbAlert(
+        "Your bid was accepted, but the auction display could not finish updating. Do not submit the same bid again. Please refresh the auction.",
+        "BID ACCEPTED"
+      );
+    } else if (bidOutcomeUnconfirmed) {
+      await showBolbAlert(
+        "The auction service has not yet confirmed whether your bid was recorded.\n\nDo not submit this bid again. Please contact The Boss of Luxury Brands so the bid can be checked.",
+        "BID CONFIRMATION PENDING"
+      );
+    } else {
+      await showBolbAlert(
+        "Your bid was not submitted because the auction service returned an unexpected error. Please refresh the auction before trying again."
+      );
+    }
+  } finally {
+    if (submitButton) {
+  submitButton.disabled = bidOutcomeUnconfirmed;
+  submitButton.innerText = bidOutcomeUnconfirmed
+    ? "Bid Confirmation Pending"
+    : "Submit Bid";
+}
+
+
+    startAuctionRefresh();  }
+}
+
+const BID_SUBMISSION_TIMEOUT_MS = 20000;
+const BID_RECOVERY_RETRY_DELAYS_MS = [1500, 3000];
+
+function waitForBidRecovery(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+async function postBidPayloadOnce(bidPayload) {
+  const controller = typeof AbortController === "function" ? new AbortController() : null;
+  const timeoutId = controller
+    ? setTimeout(() => controller.abort(), BID_SUBMISSION_TIMEOUT_MS)
+    : null;
+  const requestOptions = {
+    method: "POST",
+    body: JSON.stringify(bidPayload)
+  };
+
+  if (controller) requestOptions.signal = controller.signal;
+
+  try {
+    const response = await fetch(WEB_APP_URL, requestOptions);
+
+    if (!response.ok) {
+      throw new Error("Auction service returned " + response.status + ".");
+    }
+
+    const result = await response.json();
+
+    if (!result || typeof result.success !== "boolean") {
+      throw new Error("Auction service returned an invalid response.");
+    }
+
+    return result;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+}
+
+async function postBidPayloadWithRecovery(bidPayload, submitButton) {
+  let lastError = null;
+  let recoveryRequired = false;
+
+  for (let attempt = 0; attempt <= BID_RECOVERY_RETRY_DELAYS_MS.length; attempt++) {
+    if (attempt > 0) {
+      recoveryRequired = true;
+
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.innerText = "Confirming Bid...";
+      }
+
+      await waitForBidRecovery(BID_RECOVERY_RETRY_DELAYS_MS[attempt - 1]);
+    }
+
+    try {
+      const result = await postBidPayloadOnce(bidPayload);
+
+      if (
+        recoveryRequired &&
+        result &&
+        result.success === false &&
+        result.code === "BID_SYSTEM_BUSY" &&
+        attempt < BID_RECOVERY_RETRY_DELAYS_MS.length
+      ) {
+        continue;
+      }
+
+      return result;
+    } catch (error) {
+      lastError = error;
+      recoveryRequired = true;
+      console.log("Bid confirmation attempt failed:", error);
+    }
+  }
+
+  const outcomeError = new Error(
+    "The auction service did not confirm the final bid outcome after automatic recovery attempts."
+  );
+  outcomeError.code = "BID_OUTCOME_UNCONFIRMED";
+  outcomeError.cause = lastError;
+  throw outcomeError;
+}
+
+let auctionRefreshTimer = null;
+let auctionRefreshPaused = false;
+
+loadAuction().finally(() => {
+  startAuctionRefresh();
+});
+
+setInterval(updateCountdown, 1000);
+function showBolbAlert(message, title = "Boss of Luxury Brands", buttonText = "OK") {
+  return new Promise(resolve => {
+
+    const backdrop = document.getElementById("bolbModalBackdrop");
+    const modal = backdrop.querySelector(".bolb-modal");
+    const titleBox = document.getElementById("bolbModalTitle");
+    const messageBox = document.getElementById("bolbModalMessage");
+    const buttonsBox = document.getElementById("bolbModalButtons");
+
+    titleBox.innerText = title;
+    messageBox.innerText = message;
+
+    buttonsBox.innerHTML = `
+      <button id="bolbModalOk">${buttonText}</button>
+    `;
+
+    backdrop.style.display = "flex";
+
+document.getElementById("bolbModalOk").onclick = () => {
+  backdrop.style.display = "none";
+  modal.classList.remove("all-bids-modal");
+  resolve();
+};
+
+  });
+}
+
+function showBolbConfirm(message, title = "Confirm Bid") {
+  return new Promise(resolve => {
+
+    const backdrop = document.getElementById("bolbModalBackdrop");
+    const titleBox = document.getElementById("bolbModalTitle");
+    const messageBox = document.getElementById("bolbModalMessage");
+    const buttonsBox = document.getElementById("bolbModalButtons");
+
+    titleBox.innerText = title;
+    messageBox.innerText = message;
+
+    buttonsBox.innerHTML = `
+      <button id="bolbModalCancel">Cancel</button>
+      <button id="bolbModalProceed">Proceed</button>
+    `;
+
+    backdrop.style.display = "flex";
+
+    document.getElementById("bolbModalCancel").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(false);
+    };
+
+    document.getElementById("bolbModalProceed").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(true);
+    };
+
+  });
+}
+
+function showIdentityChangeConfirm(message) {
+  return new Promise(resolve => {
+    const backdrop = document.getElementById("bolbModalBackdrop");
+    const modal = backdrop.querySelector(".bolb-modal");
+    const titleBox = document.getElementById("bolbModalTitle");
+    const messageBox = document.getElementById("bolbModalMessage");
+    const buttonsBox = document.getElementById("bolbModalButtons");
+
+    if (modal) {
+      modal.classList.remove("all-bids-modal");
+    }
+
+    titleBox.innerText = "Confirm Changed Bidder Details";
+    messageBox.innerText = message;
+    messageBox.scrollTop = 0;
+
+    buttonsBox.innerHTML = `
+      <button id="bolbModalCancel">Cancel Bid</button>
+      <button id="bolbModalProceed">Confirm &amp; Proceed</button>
+    `;
+
+    backdrop.style.display = "flex";
+
+    document.getElementById("bolbModalCancel").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(false);
+    };
+
+    document.getElementById("bolbModalProceed").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(true);
+    };
+  });
+}
+
+function showHighestBidderConfirm() {
+  return new Promise(resolve => {
+
+    const backdrop = document.getElementById("bolbModalBackdrop");
+    const modal = backdrop.querySelector(".bolb-modal");
+    const titleBox = document.getElementById("bolbModalTitle");
+    const messageBox = document.getElementById("bolbModalMessage");
+    const buttonsBox = document.getElementById("bolbModalButtons");
+
+    if (modal) {
+      modal.classList.remove("all-bids-modal");
+    }
+
+    titleBox.innerText = "YOU ARE ALREADY THE HIGHEST BIDDER";
+    messageBox.innerHTML = "";
+
+    const boldText = document.createElement("b");
+    boldText.innerText = "A further bid is NOT required";
+
+    messageBox.appendChild(boldText);
+    messageBox.appendChild(document.createTextNode(" unless another bidder places a higher bid. Do you still wish to place this higher bid?"));
+
+    buttonsBox.innerHTML = `
+      <button id="bolbModalCancel">CANCEL</button>
+      <button id="bolbModalProceed">PROCEED</button>
+    `;
+
+    backdrop.style.display = "flex";
+
+    document.getElementById("bolbModalCancel").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(false);
+    };
+
+    document.getElementById("bolbModalProceed").onclick = () => {
+      backdrop.style.display = "none";
+      resolve(true);
+    };
+
+  });
+}
+
+
+const agreeCheckbox = document.getElementById("agree");
+const auctionRulesBox = document.getElementById("auctionRulesBox");
+const showRulesButton = document.getElementById("showRulesButton");
+
+function escapeHtml(value) {
+  return String(value || "").replace(/[&<>"']/g, character => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  }[character]));
+}
+
+function getAuctionRulesModalHtml() {
+  if (!auctionRulesBox) {
+    return "Auction Rules are unavailable. Please refresh the page and try again.";
+  }
+
+  const rulesClone = auctionRulesBox.cloneNode(true);
+  rulesClone.removeAttribute("id");
+  rulesClone.style.display = "block";
+
+  return rulesClone.outerHTML;
+}
+
+function setRulesAgreementState(agreed) {
+  const agreementStatusBox = document.getElementById("agreementStatusBox");
+  const agreeText = document.getElementById("agreeText");
+  const agreeVisualTick = document.getElementById("agreeVisualTick");
+  const bidderDetailsSection = document.getElementById("bidderDetailsSection");
+  const biddingSection = document.getElementById("biddingSection");
+
+  if (isAuctionClosedForDisplay()) {
+    applyClosedAuctionUi();
+    return;
+  }
+
+  if (agreeCheckbox) {
+    agreeCheckbox.checked = agreed === true;
+  }
+
+  if (auctionRulesBox) {
+    auctionRulesBox.style.display = "none";
+  }
+
+  if (agreed) {
+    if (agreementStatusBox) {
+      agreementStatusBox.style.display = "flex";
+    }
+
+    if (agreeText) {
+      agreeText.innerText = "I agree to the Auction Rules, payment deadline, and delivery terms.";
+    }
+
+    if (agreeVisualTick) {
+      agreeVisualTick.innerText = "✓";
+      agreeVisualTick.style.display = "flex";
+    }
+
+    if (showRulesButton) {
+      showRulesButton.innerText = "View Auction Rules";
+      showRulesButton.style.display = "block";
+    }
+
+    if (bidderDetailsSection) {
+      bidderDetailsSection.style.display = "block";
+    }
+
+    if (biddingSection) {
+      biddingSection.style.display = "block";
+    }
+  } else {
+    if (agreementStatusBox) {
+      agreementStatusBox.style.display = "none";
+    }
+
+    if (agreeText) {
+      agreeText.innerText = "";
+    }
+
+    if (agreeVisualTick) {
+      agreeVisualTick.innerText = "";
+      agreeVisualTick.style.display = "none";
+    }
+
+    if (showRulesButton) {
+      showRulesButton.innerText = "Please review and agree to the Auction Rules, payment deadline, and delivery terms.";
+      showRulesButton.style.display = "block";
+    }
+
+    if (bidderDetailsSection) {
+      bidderDetailsSection.style.display = "none";
+    }
+
+    if (biddingSection) {
+      biddingSection.style.display = "none";
+    }
+  }
+
+  if (typeof window.updateBidEntryState === "function") {
+    window.updateBidEntryState();
+  }
+}
+let rulesScrollGateCleanup = null;
+
+function openRulesModal(allowAgreement) {
+  if (isAuctionClosedForDisplay()) {
+    applyClosedAuctionUi();
+    return;
+  }
+
+  const backdrop = document.getElementById("rulesModalBackdrop");
+  const content = document.getElementById("rulesModalContent");
+  const closeButton = document.getElementById("rulesModalCloseButton");
+  const agreeButton = document.getElementById("rulesModalAgreeButton");
+  const scrollInstruction = document.getElementById("rulesScrollInstruction");
+
+  if (!backdrop || !content || !closeButton || !agreeButton || !scrollInstruction) {
+    return;
+  }
+
+  if (typeof rulesScrollGateCleanup === "function") {
+    rulesScrollGateCleanup();
+    rulesScrollGateCleanup = null;
+  }
+
+  content.innerHTML = getAuctionRulesModalHtml();
+  content.scrollTop = 0;
+
+  agreeButton.style.display = allowAgreement ? "block" : "none";
+  agreeButton.disabled = true;
+  agreeButton.setAttribute("aria-disabled", "true");
+  scrollInstruction.style.display = allowAgreement ? "block" : "none";
+
+  let scrollGateSatisfied = false;
+  const bottomTolerance = 3;
+
+  const checkScrollGate = () => {
+    if (!allowAgreement || scrollGateSatisfied) {
+      return;
+    }
+
+    const rulesFitWithoutScrolling =
+      content.scrollHeight <= content.clientHeight + bottomTolerance;
+
+    const rulesScrolledToBottom =
+      content.scrollTop + content.clientHeight >=
+      content.scrollHeight - bottomTolerance;
+
+    if (rulesFitWithoutScrolling || rulesScrolledToBottom) {
+      scrollGateSatisfied = true;
+      agreeButton.disabled = false;
+      agreeButton.setAttribute("aria-disabled", "false");
+      scrollInstruction.style.display = "none";
+    }
+  };
+
+  if (allowAgreement) {
+    content.addEventListener("scroll", checkScrollGate, { passive: true });
+    window.addEventListener("resize", checkScrollGate);
+
+    rulesScrollGateCleanup = () => {
+      content.removeEventListener("scroll", checkScrollGate);
+      window.removeEventListener("resize", checkScrollGate);
+    };
+  }
+
+closeButton.onclick = () => {
+  if (allowAgreement && !agreeCheckbox.checked) {
+    content.scrollTop = 0;
+    agreeButton.disabled = true;
+    agreeButton.setAttribute("aria-disabled", "true");
+    scrollInstruction.style.display = "block";
+  }
+
+  closeRulesModal();
+  setRulesAgreementState(agreeCheckbox.checked);
+};
+  agreeButton.onclick = async () => {
+    if (!allowAgreement || agreeButton.disabled || !scrollGateSatisfied) {
+      return;
+    }
+
+    closeRulesModal();
+    setRulesAgreementState(true);
+    const bidAlertActivation = enableBidAlerts();
+    await refreshAuctionNow("rules-agreement");
+    await bidAlertActivation;
+  };
+
+backdrop.style.display = "flex";
+
+if (allowAgreement) {
+  window.requestAnimationFrame(() => {
+    content.scrollTop = 0;
+
+    window.requestAnimationFrame(() => {
+      content.scrollTop = 0;
+      checkScrollGate();
+    });
+  });
+}
+}
+
+function closeRulesModal() {
+  if (typeof rulesScrollGateCleanup === "function") {
+    rulesScrollGateCleanup();
+    rulesScrollGateCleanup = null;
+  }
+
+  const backdrop = document.getElementById("rulesModalBackdrop");
+  if (backdrop) {
+    backdrop.style.display = "none";
+  }
+}
+showRulesButton.addEventListener("click", () => {
+  openRulesModal(!agreeCheckbox.checked);
+});
+
+setRulesAgreementState(agreeCheckbox.checked);
+
+function resetAgreementIfBrowserRestoredEmptyBidderDetails() {
+  const phoneInput = document.getElementById("phone");
+  const firstNameInput = document.getElementById("firstName");
+  const surnameInitialInput = document.getElementById("surnameInitial");
+  const transferMethodInput = document.getElementById("transferMethod");
+  const bidAmountInput = document.getElementById("bidAmount");
+  const submitBidButton = document.getElementById("submitBidButton");
+  const bidderDetailsSection = document.getElementById("bidderDetailsSection");
+  const biddingSection = document.getElementById("biddingSection");
+  const agreeVisualTick = document.getElementById("agreeVisualTick");
+  const bidEntryStatus = document.getElementById("bidEntryStatus");
+
+  if (!phoneInput || !firstNameInput || !surnameInitialInput || !transferMethodInput || !agreeCheckbox) {
+    return;
+  }
+
+  const bidderDetailsAreEmpty =
+    !phoneInput.value.trim() &&
+    !firstNameInput.value.trim() &&
+    !surnameInitialInput.value.trim() &&
+    !transferMethodInput.value.trim();
+
+  const agreementLooksRestored =
+    agreeCheckbox.checked ||
+    (agreeVisualTick && agreeVisualTick.innerText.trim() === "✓") ||
+    (bidderDetailsSection && bidderDetailsSection.style.display !== "none") ||
+    (biddingSection && biddingSection.style.display !== "none");
+
+  if (!bidderDetailsAreEmpty || !agreementLooksRestored) {
+    return;
+  }
+
+  agreeCheckbox.checked = false;
+  setRulesAgreementState(false);
+
+  ["phoneTick", "firstNameTick", "surnameInitialTick", "transferMethodTick"].forEach(id => {
+    const tick = document.getElementById(id);
+    if (tick) tick.style.display = "none";
+  });
+
+  ["phoneHint", "firstNameHint", "surnameInitialHint", "transferMethodHint", "bidAmountHint"].forEach(id => {
+    showFieldHint(id, "");
+  });
+
+  if (bidEntryStatus) {
+    bidEntryStatus.innerText = "";
+    bidEntryStatus.style.display = "none";
+  }
+
+  if (bidAmountInput) {
+    bidAmountInput.value = "";
+    bidAmountInput.disabled = true;
+    bidAmountInput.style.display = "none";
+    bidAmountInput.placeholder = "ENTER YOUR BID";
+  }
+
+  if (submitBidButton) {
+    submitBidButton.disabled = true;
+    submitBidButton.style.display = "none";
+    submitBidButton.innerText = "Submit Bid";
+  }
+
+  if (typeof window.updateBidEntryState === "function") {
+    window.updateBidEntryState();
+  }
+}
+
+function showAllBidsPopup() {
+  if (!allAuctionBids.length) {
+    showBolbAlert("No bids have been placed yet.", "All Bids", "Close");
+    return;
+  }
+
+  const backdrop = document.getElementById("bolbModalBackdrop");
+  const modal = backdrop.querySelector(".bolb-modal");
+  const titleBox = document.getElementById("bolbModalTitle");
+  const messageBox = document.getElementById("bolbModalMessage");
+  const buttonsBox = document.getElementById("bolbModalButtons");
+
+  modal.classList.add("all-bids-modal");
+  titleBox.textContent = "All Bids";
+  messageBox.textContent = "";
+
+  const tableWrap = document.createElement("div");
+  tableWrap.className = "all-bids-table-wrap";
+
+  const table = document.createElement("table");
+  table.className = "all-bids-table";
+
+  const colgroup = document.createElement("colgroup");
+  ["bidder-col", "amount-col", "date-col", "time-col"].forEach(className => {
+    const col = document.createElement("col");
+    col.className = className;
+    colgroup.appendChild(col);
+  });
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+
+  ["Bidder", "Amount", "Date", "Time"].forEach(label => {
+    const th = document.createElement("th");
+    th.textContent = label;
+    headerRow.appendChild(th);
+  });
+
+  thead.appendChild(headerRow);
+
+  const tbody = document.createElement("tbody");
+
+  allAuctionBids.forEach(bid => {
+    const bidDate = new Date(bid.timestamp);
+    const bidDay = bidDate.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      timeZone: JAMAICA_TIME_ZONE
+    });
+    const bidTime = bidDate.toLocaleTimeString([], {
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: JAMAICA_TIME_ZONE,
+      hour12: true
+    });
+
+    const row = document.createElement("tr");
+    const values = [
+      bidderDisplayLabel(bid.bidderId),
+      money(bid.bidAmount),
+      bidDay,
+      bidTime
+    ];
+
+    values.forEach(value => {
+      const cell = document.createElement("td");
+      cell.textContent = value;
+      row.appendChild(cell);
+    });
+
+    tbody.appendChild(row);
+  });
+
+  table.appendChild(colgroup);
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  tableWrap.appendChild(table);
+  messageBox.appendChild(tableWrap);
+
+  buttonsBox.innerHTML = `<button id="bolbModalOk">Close</button>`;
+  backdrop.style.display = "flex";
+
+  document.getElementById("bolbModalOk").onclick = () => {
+    backdrop.style.display = "none";
+    modal.classList.remove("all-bids-modal");
+  };
+}
+
+document.getElementById("viewAllBidsButton").addEventListener("click", showAllBidsPopup);
+
+function showAuctionMediaPopup() {
+  const pictureLinks = auction && Array.isArray(auction.extraPictureLinks)
+    ? auction.extraPictureLinks.filter(Boolean)
+    : [];
+  const videoLink = auction ? String(auction.auctionVideoLink || "").trim() : "";
+
+  if (!pictureLinks.length && !videoLink) {
+    return;
+  }
+
+  const backdrop = document.getElementById("bolbModalBackdrop");
+  const modal = backdrop.querySelector(".bolb-modal");
+  const titleBox = document.getElementById("bolbModalTitle");
+  const messageBox = document.getElementById("bolbModalMessage");
+  const buttonsBox = document.getElementById("bolbModalButtons");
+
+  modal.classList.remove("all-bids-modal");
+  modal.classList.add("auction-media-modal");
+  titleBox.textContent = pictureLinks.length && videoLink
+    ? "Auction Video and Pictures"
+    : pictureLinks.length
+      ? "Auction Pictures"
+      : "Auction Video";
+  messageBox.textContent = "";
+
+  if (videoLink) {
+    const drivePreviewUrl = toDrivePreviewUrl(videoLink);
+
+    if (drivePreviewUrl) {
+      const videoFrame = document.createElement("iframe");
+      videoFrame.className = "auction-media-video-frame";
+      videoFrame.title = "Auction video";
+      videoFrame.loading = "eager";
+      videoFrame.allow = "autoplay; fullscreen";
+      videoFrame.allowFullscreen = true;
+      videoFrame.src = drivePreviewUrl;
+      messageBox.appendChild(videoFrame);
+    } else {
+      const video = document.createElement("video");
+      video.className = "auction-media-video";
+      video.controls = true;
+      video.autoplay = false;
+      video.preload = "metadata";
+      video.playsInline = true;
+      video.src = videoLink;
+      messageBox.appendChild(video);
+    }
+  }
+
+  if (pictureLinks.length) {
+    const gallery = document.createElement("div");
+    gallery.className = "auction-picture-gallery";
+
+    pictureLinks.forEach((pictureUrl, index) => {
+      const image = document.createElement("img");
+      image.loading = index === 0 ? "eager" : "lazy";
+      image.decoding = "async";
+      image.src = String(pictureUrl || "");
+      image.alt = "Auction picture " + (index + 1);
+      gallery.appendChild(image);
+    });
+
+    messageBox.appendChild(gallery);
+  }
+
+  buttonsBox.innerHTML = `<button id="bolbModalOk">Close</button>`;
+  backdrop.style.display = "flex";
+
+  document.getElementById("bolbModalOk").onclick = () => {
+    const video = messageBox.querySelector("video");
+    if (video) {
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    }
+    const videoFrame = messageBox.querySelector("iframe");
+    if (videoFrame) {
+      videoFrame.removeAttribute("src");
+    }
+    messageBox.textContent = "";
+    backdrop.style.display = "none";
+    modal.classList.remove("auction-media-modal");
+  };
+}
+
+document.getElementById("morePicturesButton").addEventListener("click", showAuctionMediaPopup);
+
+function setupLiveFieldValidation() {
+  const phoneInput = document.getElementById("phone");
+  const firstNameInput = document.getElementById("firstName");
+  const surnameInitialInput = document.getElementById("surnameInitial");
+  const bidAmountInput = document.getElementById("bidAmount");
+  const transferMethodInput = document.getElementById("transferMethod");
+  const agreeInput = document.getElementById("agree");
+  const submitBidButton = document.getElementById("submitBidButton");
+  const clearDetailsButton = document.getElementById("clearDetailsButton");
+  let watchOnlyMode = false;
+
+  function isValidPhoneText(value) {
+    return /^(876|658)\d{7}$/.test(String(value || ""));
+  }
+
+  function isValidFirstNameText(value) {
+    const normalizedValue = normalizeFirstName(value);
+    return isValidFirstName(normalizedValue) && !containsBlockedFirstNameWord(normalizedValue);
+  }
+
+  function isReadyForBidEntry() {
+    return (
+      isValidPhoneText(phoneInput.value) &&
+      isValidFirstNameText(firstNameInput.value) &&
+      /^[A-Za-z]$/.test(surnameInitialInput.value.trim()) &&
+      agreeInput.checked &&
+      transferMethodInput.value.trim()
+    );
+  }
+
+  function updateBidEntryState() {
+    const bidEntryStatus = document.getElementById("bidEntryStatus");
+
+    if (isAuctionClosedForDisplay()) {
+      if (bidEntryStatus) {
+        bidEntryStatus.innerText = "";
+        bidEntryStatus.style.display = "none";
+      }
+
+      if (bidAmountInput) {
+        bidAmountInput.value = "";
+        bidAmountInput.disabled = true;
+        bidAmountInput.style.display = "none";
+      }
+
+      if (submitBidButton) {
+        submitBidButton.disabled = true;
+        submitBidButton.style.display = "none";
+      }
+
+      if (clearDetailsButton) {
+        clearDetailsButton.style.display = "none";
+      }
+
+      return;
+    }
+
+    const ready = isReadyForBidEntry();
+
+    function setCompletionTick(id, valid) {
+      const tick = document.getElementById(id);
+      if (tick) tick.style.display = valid ? "flex" : "none";
+    }
+
+    const missingItems = [];
+
+    if (!isValidPhoneText(phoneInput.value)) {
+      missingItems.push("your Jamaica phone number");
+    }
+
+    if (!isValidFirstNameText(firstNameInput.value)) {
+      if (isValidFirstName(firstNameInput.value) && containsBlockedFirstNameWord(firstNameInput.value)) {
+        missingItems.push("your real first name");
+      } else {
+        missingItems.push("your first name");
+      }
+    }
+
+    if (!/^[A-Za-z]$/.test(surnameInitialInput.value.trim())) {
+      missingItems.push("the first letter of your surname");
+    }
+
+    if (!agreeInput.checked) {
+      missingItems.push("agree to the auction rules");
+    }
+
+    if (!transferMethodInput.value.trim()) {
+      missingItems.push("Please select your bank for Bank-to-Bank Transfer");
+    }
+
+    setCompletionTick("phoneTick", isValidPhoneText(phoneInput.value));
+    setCompletionTick("firstNameTick", isValidFirstNameText(firstNameInput.value));
+    setCompletionTick("surnameInitialTick", /^[A-Za-z]$/.test(surnameInitialInput.value.trim()));
+    setCompletionTick("transferMethodTick", !!transferMethodInput.value.trim());
+
+    bidAmountInput.disabled = !ready;
+    submitBidButton.disabled = !ready;
+
+    const hasAnyBidderDetail =
+      phoneInput.value.trim() ||
+      firstNameInput.value.trim() ||
+      surnameInitialInput.value.trim() ||
+      transferMethodInput.value.trim();
+
+    clearDetailsButton.style.display =
+      agreeInput.checked && hasAnyBidderDetail ? "block" : "none";
+
+    if (ready) {
+      const nextRequiredBid = Number(bidAmountInput.min || 0);
+
+      bidEntryStatus.style.display = "none";
+      bidEntryStatus.style.color = "#cc0000";
+      bidEntryStatus.style.borderColor = "#cc0000";
+      bidEntryStatus.style.background = "#fff8f8";
+      bidEntryStatus.style.fontWeight = "bold";
+      bidAmountInput.style.display = "block";
+      submitBidButton.style.display = "block";
+
+      bidAmountInput.placeholder = nextRequiredBid
+        ? "ENTER YOUR BID e.g. J$" + nextRequiredBid.toLocaleString()
+        : "ENTER YOUR BID";
+    } else {
+      bidAmountInput.value = "";
+      bidAmountInput.style.display = "none";
+      submitBidButton.style.display = "none";
+
+      bidEntryStatus.style.color = "#0066cc";
+      bidEntryStatus.style.borderColor = "#0066cc";
+      bidEntryStatus.style.background = "#f5fbff";
+      bidEntryStatus.style.fontWeight = "normal";
+
+      if (agreeInput.checked && watchOnlyMode && missingItems.length > 0) {
+        bidEntryStatus.innerText =
+          "Your bidder details have been cleared. You can keep watching the auction. To bid again, please enter your bidder details again.";
+        bidEntryStatus.style.display = "block";
+      } else if (agreeInput.checked && missingItems.length > 0) {
+        bidEntryStatus.innerText =
+          "Five green ticks above are required for you to submit a bid.";
+        bidEntryStatus.style.display = "block";
+      } else {
+        bidEntryStatus.innerText = "";
+        bidEntryStatus.style.display = "none";
+      }
+    }
+  }
+
+  window.updateBidEntryState = updateBidEntryState;
+
+  clearDetailsButton.addEventListener("click", () => {
+    phoneInput.value = "";
+    firstNameInput.value = "";
+    surnameInitialInput.value = "";
+    transferMethodInput.value = "";
+
+    const placeholder = document.getElementById("transferMethodPlaceholder");
+    if (placeholder) {
+      placeholder.style.display = "block";
+    }
+
+    bidAmountInput.value = "";
+
+    showFieldHint("phoneHint", "");
+    showFieldHint("firstNameHint", "");
+    showFieldHint("surnameInitialHint", "");
+    showFieldHint("transferMethodHint", "");
+    showFieldHint("bidAmountHint", "");
+
+    watchOnlyMode = true;
+    updateBidEntryState();
+  });
+
+  transferMethodInput.addEventListener("change", () => {
+    const placeholder = document.getElementById("transferMethodPlaceholder");
+
+    if (placeholder && transferMethodInput.value.trim()) {
+      placeholder.style.display = "none";
+    }
+
+    watchOnlyMode = false;
+    updateBidEntryState();
+  });
+
+  phoneInput.addEventListener("input", () => {
+    const phoneValue = phoneInput.value;
+
+    watchOnlyMode = false;
+
+    if (!phoneValue) showFieldHint("phoneHint", "");
+    else if (/\D/.test(phoneValue)) showFieldHint("phoneHint", "Use numbers only. Do not use letters, spaces, punctuation, or special characters.");
+    else if (!/^(8|6)/.test(phoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    else if (phoneValue.length >= 2 && !/^(87|65)/.test(phoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    else if (phoneValue.length >= 3 && !/^(876|658)/.test(phoneValue)) showFieldHint("phoneHint", "Jamaica phone number must start with 876 or 658");
+    else if (phoneValue.length > 10) showFieldHint("phoneHint", "Use 10 numbers only");
+    else if (phoneValue.length < 10) showFieldHint("phoneHint", "Enter your full 10-number Jamaica phone number");
+    else showFieldHint("phoneHint", "");
+
+    updateBidEntryState();
+  });
+
+  firstNameInput.addEventListener("input", () => {
+    const value = normalizeFirstName(firstNameInput.value);
+
+    watchOnlyMode = false;
+
+    if (!value) showFieldHint("firstNameHint", "");
+    else if (!isValidFirstName(value)) showFieldHint("firstNameHint", "Use at least 2 letters. Single internal spaces, hyphens and apostrophes are allowed");
+    else if (containsBlockedFirstNameWord(value)) showFieldHint("firstNameHint", "Please enter your real first name");
+    else showFieldHint("firstNameHint", "");
+
+    updateBidEntryState();
+  });
+
+  surnameInitialInput.addEventListener("input", () => {
+    const value = surnameInitialInput.value.trim();
+
+    watchOnlyMode = false;
+
+    if (!value) showFieldHint("surnameInitialHint", "");
+    else if (!/^[A-Za-z]$/.test(value)) showFieldHint("surnameInitialHint", "Use one letter only");
+    else showFieldHint("surnameInitialHint", "");
+
+    updateBidEntryState();
+  });
+
+  agreeInput.addEventListener("change", updateBidEntryState);
+
+  bidAmountInput.addEventListener("input", () => {
+    const cleanedBid = cleanBidValue(bidAmountInput.value);
+
+    if (!cleanedBid) showFieldHint("bidAmountHint", "");
+    else if (!/^\d+$/.test(cleanedBid)) showFieldHint("bidAmountHint", "Use numbers only");
+    else showFieldHint("bidAmountHint", "");
+  });
+
+  updateBidEntryState();
+}
+setupLiveFieldValidation();
+resetAgreementIfBrowserRestoredEmptyBidderDetails();
+
+function getAuctionRefreshDelay() {
+  if (document.hidden) {
+    return 15000;
+  }
+
+  if (!auction || !auction.closingTime || auction.status !== "OPEN") {
+    return 15000;
+  }
+
+  const millisecondsRemaining = new Date(auction.closingTime).getTime() - Date.now();
+
+  if (!Number.isFinite(millisecondsRemaining) || millisecondsRemaining <= 0) {
+    return 15000;
+  }
+
+  if (millisecondsRemaining <= 60000) {
+    return 1000;
+  }
+
+  return 5000;
+}
+
+function clearAuctionRefreshTimer() {
+  if (auctionRefreshTimer) {
+    clearTimeout(auctionRefreshTimer);
+    clearInterval(auctionRefreshTimer);
+    auctionRefreshTimer = null;
+  }
+}
+
+function stopAuctionRefresh() {
+  auctionRefreshPaused = true;
+  clearAuctionRefreshTimer();
+}
+
+function startAuctionRefresh() {
+  auctionRefreshPaused = false;
+  clearAuctionRefreshTimer();
+
+  if (!auction) {
+    auctionRefreshTimer = setTimeout(() => {
+      auctionRefreshTimer = null;
+      loadAuction().finally(() => {
+        if (!auctionRefreshPaused) startAuctionRefresh();
+      });
+    }, getAuctionRefreshDelay());
+    return;
+  }
+
+  const closingTimeMs =
+    auction && auction.closingTime
+      ? new Date(auction.closingTime).getTime()
+      : NaN;
+
+  if (
+    !auction.closingTime ||
+    auction.status !== "OPEN" ||
+    !Number.isFinite(closingTimeMs) ||
+    closingTimeMs <= Date.now()
+  ) {
+    auctionRefreshPaused = true;
+    return;
+  }
+
+  auctionRefreshTimer = setTimeout(() => {
+    auctionRefreshTimer = null;
+
+    loadAuction()
+      .catch(err => {
+        console.log("Auction refresh scheduling error:", err);
+      })
+      .finally(() => {
+        if (!auctionRefreshPaused) {
+          startAuctionRefresh();
+        }
+      });
+  }, getAuctionRefreshDelay());
+}
+
+async function refreshAuctionNow(reason) {
+  const refreshButton = document.getElementById("refreshBidsButton");
+  clearAuctionRefreshTimer();
+
+  if (refreshButton && reason === "manual") {
+    refreshButton.disabled = true;
+    refreshButton.textContent = "Refreshing…";
+  }
+
+  try {
+    await loadAuction();
+  } finally {
+    if (refreshButton && reason === "manual") {
+      refreshButton.disabled = false;
+      refreshButton.textContent = "Refresh bids now";
+    }
+
+    if (!auctionRefreshPaused || !auction) {
+      startAuctionRefresh();
+    }
+  }
+}
+
+function queueImmediateAuctionRefresh(reason) {
+  if (document.hidden) return;
+  if (refreshResumeTimer) clearTimeout(refreshResumeTimer);
+
+  refreshResumeTimer = setTimeout(() => {
+    refreshResumeTimer = null;
+    refreshAuctionNow(reason);
+  }, 150);
+}
+
+document.getElementById("refreshBidsButton").addEventListener("click", () => {
+  refreshAuctionNow("manual");
+});
+document.getElementById("dismissBidAlertButton").addEventListener("click", dismissNewBidAlert);
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) queueImmediateAuctionRefresh("visible");
+});
+window.addEventListener("pageshow", () => queueImmediateAuctionRefresh("pageshow"));
+window.addEventListener("focus", () => queueImmediateAuctionRefresh("focus"));
+window.addEventListener("online", () => queueImmediateAuctionRefresh("online"));
+</script>
+
+<div id="rulesModalBackdrop">
+  <div id="rulesModalBox">
+<div id="rulesModalTitle">Auction Rules</div>
+<div id="rulesScrollInstruction" role="status" aria-live="polite">
+  Please scroll down inside the Auction Rules box to the end before agreeing. ↓
+</div>
+<div id="rulesModalContent"></div>
+<div id="rulesModalButtons">      <button id="rulesModalCloseButton" type="button">Close</button>
+      <button id="rulesModalAgreeButton" type="button">I agree to the Auction Rules, payment deadline, and delivery terms</button>
+    </div>
+  </div>
+</div><div id="bolbModalBackdrop" class="bolb-modal-backdrop">
+  <div class="bolb-modal">
+    
+    <div id="bolbModalTitle" class="bolb-modal-title">
+      Boss of Luxury Brands
+    </div>
+    <div id="bolbModalMessage" class="bolb-modal-message"></div>
+
+    <div id="bolbModalButtons" class="bolb-modal-buttons">
+      <button id="bolbModalOk">OK</button>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
